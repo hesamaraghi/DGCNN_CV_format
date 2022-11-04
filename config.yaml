@@ -1,0 +1,61 @@
+seed: 0
+optimize:
+  optimizer: Adam
+  lr: 0.001
+  lr_scheduler: ReduceLROnPlateau
+  mode: min 
+  factor: 0.5
+  patience: 50
+model:
+  name: DGCNN
+  k: 20
+  aggr: max
+train:
+  epochs: 500
+  batch_size: 32
+  profiler: simple
+dataset:
+  name: NCALTECH101
+  train_percentage: 0.75
+  validation_percentage: 0.10
+  num_samples_per_class: null
+  num_classes: null
+  dataset_path: null
+  num_workers: 4
+transform:
+  train:
+    transform: True
+    spatial_centering: True
+    temporal_scale: 1e-5
+    num_events_per_sample: 1024
+    random_flip: 0.5
+    scale_limits: [0.75,1.5]
+    degree_limit: 20 
+    thresh_quantile: 0.3
+    conv_vec_path: '/tudelft.net/staff-bulk/ewi/insy/VisionLab/maraghi/event-based-GNN/datasets/NCALTECH101/conv_scores'
+  validation:
+    transform: True
+    spatial_centering: True
+    temporal_scale: 1e-5
+    num_events_per_sample: 1024
+    random_flip: null
+    scale_limits: null
+    degree_limit: null
+    thresh_quantile: null
+    conv_vec_path: '/tudelft.net/staff-bulk/ewi/insy/VisionLab/maraghi/event-based-GNN/datasets/NCALTECH101/conv_scores'
+  test:
+    transform: True
+    spatial_centering: True
+    temporal_scale: 1e-5
+    num_events_per_sample: 1024
+    random_flip: null
+    scale_limits: null
+    degree_limit: null
+    thresh_quantile: null
+    conv_vec_path: '/tudelft.net/staff-bulk/ewi/insy/VisionLab/maraghi/event-based-GNN/datasets/NCALTECH101/conv_scores'  
+wandb:
+  log: true
+  dir: ./
+  experiment_name: 'Basic 2 KNN w/ 1024 sample. Witout epoch_ends and _step returns'
+  entity: 'haraghi'
+  project: 'DGCNN'

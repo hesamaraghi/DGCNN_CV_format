@@ -1,0 +1,6 @@
+/.ipynb_checkpoints
+/.vscode
+/DGCNN
+/__pycache__
+/cache
+/wandb
