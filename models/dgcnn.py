@@ -38,12 +38,3 @@ class Net(torch.nn.Module):
         # inters = {'x1': x1, 'x2': x2, 'out1': out1,'out2': out2, 'out': out}
         return F.log_softmax(out, dim=1) #, inters
 
-class DGCNN(Net):
-    def __init__(self, out_channels, k=20, aggr='max', path_model = None):
-        super().__init__(out_channels, k, aggr)
-        if path_model is None:
-            self.path_model = osp.join(osp.dirname(osp.realpath(__file__)),'models','model_params_beta_9e-6.pt')
-        else:
-            self.path_model = path_model
-        
-        self.load_state_dict(torch.load(self.path_model))
