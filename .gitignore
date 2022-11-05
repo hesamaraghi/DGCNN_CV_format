@@ -4,3 +4,13 @@
 /__pycache__
 /cache
 /wandb
+datasets/__pycache__/__init__.cpython-38.pyc
+datasets/__pycache__/event_transforms.cpython-38.pyc
+datasets/__pycache__/ncaltech101_.cpython-38.pyc
+datasets/__pycache__/nmnist_.cpython-38.pyc
+datasets/__pycache__/transform_factory.cpython-38.pyc
+models/__pycache__/__init__.cpython-38.pyc
+models/__pycache__/dgcnn.cpython-38.pyc
+models/__pycache__/dgcnn2.cpython-38.pyc
+.gitignore
+slurm*
