@@ -41,7 +41,7 @@ transform:
     random_flip: null
     scale_limits: null
     degree_limit: null
-    thresh_quantile: null
+    thresh_quantile: 0.3
     conv_vec_path: '/tudelft.net/staff-bulk/ewi/insy/VisionLab/maraghi/event-based-GNN/datasets/NCALTECH101/conv_scores'
   test:
     transform: True
@@ -51,7 +51,7 @@ transform:
     random_flip: null
     scale_limits: null
     degree_limit: null
-    thresh_quantile: null
+    thresh_quantile: 0.3
     conv_vec_path: '/tudelft.net/staff-bulk/ewi/insy/VisionLab/maraghi/event-based-GNN/datasets/NCALTECH101/conv_scores'  
 wandb:
   log: true
