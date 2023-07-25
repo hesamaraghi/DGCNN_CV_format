@@ -1,7 +1,7 @@
 from datasets.nmnist_ import nmnist_train_loader, nmnist_test_loader
 from datasets.ncaltech101_ import ncaltech101_train_loader, ncaltech101_validation_loader, ncaltech101_test_loader
-# from datasets.nasl_ import NASL
-
+from datasets.nasl_ import nasl_train_loader, nasl_validation_loader, nasl_test_loader
+from datasets.ncars_ import ncars_train_loader, ncars_validation_loader, ncars_test_loader
 
 def factory(cfg):
     """
@@ -18,5 +18,11 @@ def factory(cfg):
     if cfg.dataset.name == 'NCALTECH101':
         cfg.dataset.num_classes = ncaltech101_train_loader(cfg).dataset.num_classes
         return ncaltech101_train_loader(cfg), ncaltech101_validation_loader(cfg), ncaltech101_test_loader(cfg)
+    if cfg.dataset.name == 'NASL':
+        cfg.dataset.num_classes = nasl_train_loader(cfg).dataset.num_classes
+        return nasl_train_loader(cfg), nasl_validation_loader(cfg), nasl_test_loader(cfg)
+    if cfg.dataset.name == 'NCARS':
+        cfg.dataset.num_classes = ncars_train_loader(cfg).dataset.num_classes
+        return ncars_train_loader(cfg), ncars_validation_loader(cfg), ncars_test_loader(cfg)
     else:
         raise NotImplementedError(f"Dataset {cfg.dataset.name}")

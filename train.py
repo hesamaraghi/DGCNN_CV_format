@@ -5,10 +5,11 @@ Copyright (c) 2022 Robert-Jan Bruintjes, TU Delft.
 """
 # Package imports, from conda or pip
 import os
+import glob 
 import torch
 import torch.nn as nn
-from pytorch_lightning.callbacks import LearningRateMonitor
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
 from omegaconf import OmegaConf
 import torchmetrics
@@ -134,6 +135,8 @@ def main():
         entity=cfg.wandb.entity,
         config=OmegaConf.to_object(cfg),
     )
+    
+
 
     # Create datasets using factory pattern
     loaders = dataset_factory.factory(cfg)

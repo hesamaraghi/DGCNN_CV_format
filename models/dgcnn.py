@@ -22,15 +22,15 @@ class Net(torch.nn.Module):
     def forward(self, data):
         pos = data.pos
         p = data.x
+        x0 = torch.cat([pos,p],dim=1)
         if(data.batch is not None):
             batch = data.batch
-            x0 = torch.cat([pos,p],dim=1)
             x1 = self.conv1(x0, batch)
             x2 = self.conv2(x1, batch)
             out1 = self.lin1(torch.cat([x1, x2], dim=1))
             out2 = global_max_pool(out1, batch)
-        else:
-            x1 = self.conv1(pos)
+        else:       
+            x1 = self.conv1(x0)
             x2 = self.conv2(x1)
             out1 = self.lin1(torch.cat([x1, x2], dim=1))
             out2 = out1.sum(dim=-2, keepdim=out1.dim() == 2)
