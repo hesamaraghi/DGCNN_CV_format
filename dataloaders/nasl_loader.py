@@ -1,19 +1,9 @@
 from torch_geometric.loader import DataLoader
 import os.path as osp
-import sys
-from datasets.transform_factory import factory as transforms
+from transform_factory import factory as transforms
+from datasets.nasl import NASL
 
-dir_path = osp.dirname(osp.realpath(__file__))
-parent_dir_path = osp.dirname(dir_path)
-parent_dir_path = osp.dirname(parent_dir_path)
-datasets_path = osp.join(parent_dir_path,'datasets')
-sys.path.append(datasets_path)
-
-from nasl import NASL
-
-# def transforms(cfg):
-#     return None
-
+datasets_path = 'datasets'
 
 def nasl_train_loader(cfg):
     if cfg.dataset.dataset_path is None:

@@ -1,28 +1,18 @@
 from torch_geometric.loader import DataLoader
 import os.path as osp
-import sys
-from datasets.transform_factory import factory as transforms
+from transform_factory import factory as transforms
+from datasets.ncars import NCARS
 
-dir_path = osp.dirname(osp.realpath(__file__))
-parent_dir_path = osp.dirname(dir_path)
-parent_dir_path = osp.dirname(parent_dir_path)
-datasets_path = osp.join(parent_dir_path,'datasets')
-sys.path.append(datasets_path)
+datasets_path = 'datasets'
 
-from ncaltech101 import NCALTECH101
-
-# def transforms(cfg):
-#     return None
-
-
-def ncaltech101_train_loader(cfg):
+def ncars_train_loader(cfg):
     if cfg.dataset.dataset_path is None:
         dataset_path = osp.join(datasets_path, cfg.dataset.name, 'data')
     else:
         dataset_path = cfg.dataset.dataset_path
         
     return DataLoader(
-        NCALTECH101(
+        NCARS(
             dataset_path,
             name = 'training',
             transform = transforms(cfg.transform.train)
@@ -33,14 +23,14 @@ def ncaltech101_train_loader(cfg):
     )
 
 
-def ncaltech101_validation_loader(cfg):
+def ncars_validation_loader(cfg):
     if cfg.dataset.dataset_path is None:
         dataset_path = osp.join(datasets_path, cfg.dataset.name, 'data')
     else:
         dataset_path = cfg.dataset.dataset_path
         
     return DataLoader(
-        NCALTECH101(
+        NCARS(
             dataset_path,
             name = 'validation',
             transform = transforms(cfg.transform.validation),
@@ -51,14 +41,14 @@ def ncaltech101_validation_loader(cfg):
     )
 
 
-def ncaltech101_test_loader(cfg):
+def ncars_test_loader(cfg):
     if cfg.dataset.dataset_path is None:
         dataset_path = osp.join(datasets_path, cfg.dataset.name, 'data')
     else:
         dataset_path = cfg.dataset.dataset_path
         
     return DataLoader(
-        NCALTECH101(
+        NCARS(
             dataset_path,
             name = 'test',
             transform=transforms(cfg.transform.test),

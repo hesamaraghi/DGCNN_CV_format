@@ -1,7 +1,7 @@
-from datasets.nmnist_ import nmnist_train_loader, nmnist_test_loader
-from datasets.ncaltech101_ import ncaltech101_train_loader, ncaltech101_validation_loader, ncaltech101_test_loader
-from datasets.nasl_ import nasl_train_loader, nasl_validation_loader, nasl_test_loader
-from datasets.ncars_ import ncars_train_loader, ncars_validation_loader, ncars_test_loader
+from dataloaders.nmnist_loader import nmnist_train_loader, nmnist_test_loader
+from dataloaders.ncaltech101_loader import ncaltech101_train_loader, ncaltech101_validation_loader, ncaltech101_test_loader
+from dataloaders.nasl_loader import nasl_train_loader, nasl_validation_loader, nasl_test_loader
+from dataloaders.ncars_loader import ncars_train_loader, ncars_validation_loader, ncars_test_loader
 
 def factory(cfg):
     """

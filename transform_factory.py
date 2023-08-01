@@ -1,5 +1,5 @@
 import torch_geometric.transforms as T
-from datasets.event_transforms import TemporalScaling, RemoveOutliers, SpatialCentering, SpatialScaling
+from datatransforms.event_transforms import TemporalScaling, RemoveOutliers, SpatialCentering, SpatialScaling
 
 def factory(cfg):
       

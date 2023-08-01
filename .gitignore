@@ -6,4 +6,5 @@
 /cache
 /wandb
 slurm*
-run.sbatch
+/slurm*
+/sbatch_folder
