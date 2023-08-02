@@ -1,5 +1,5 @@
 import torch_geometric.transforms as T
-from datatransforms.event_transforms import TemporalScaling, RemoveOutliers, SpatialCentering, SpatialScaling
+from datatransforms.event_transforms import TemporalScaling, RemoveOutliers, SpatialCentering, SpatialScaling, AddEdgeAttr
 
 def factory(cfg):
       
@@ -19,6 +19,10 @@ def factory(cfg):
                   transform_list.append(SpatialScaling(cfg))
             if cfg.degree_limit is not None:
                   transform_list.append(T.RandomRotate(cfg.degree_limit, axis = 2))
+            if cfg.radius_graph.transform:
+                  transform_list.append(T.RadiusGraph(r = cfg.radius_graph.r,max_num_neighbors = cfg.radius_graph.max_num_neighbors))
+            if cfg.radius_graph.add_edge_attr.transform:
+                  transform_list.append(AddEdgeAttr(cfg.radius_graph.add_edge_attr))
             return T.Compose(transform_list)
       else:
             return None

@@ -111,3 +111,33 @@ class SpatialScaling(BaseTransform):
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.scales})'
+
+
+class AddEdgeAttr(BaseTransform):
+
+    def __init__(self, cfg):
+        # self.norm = norm
+        # self.max = max_value
+        self.cat = cfg.cat
+
+    def __call__(self, data):
+        (row, col), pos, pseudo = data.edge_index, data.pos[:, :2], data.edge_attr
+        data.pos = pos
+        cart = torch.abs(pos[row] - pos[col])
+        cart = cart.view(-1, 1) if cart.dim() == 1 else cart
+
+        # if self.norm and cart.numel() > 0:
+        #     max_value = cart.abs().max() if self.max is None else self.max
+        #     cart = cart / (2 * max_value) + 0.5
+
+        if pseudo is not None and self.cat:
+            pseudo = pseudo.view(-1, 1) if pseudo.dim() == 1 else pseudo
+            data.edge_attr = torch.cat([pseudo, cart.type_as(pseudo)], dim=-1)
+        else:
+            data.edge_attr = cart
+
+        return data
+
+    def __repr__(self) -> str:
+        return (f'{self.__class__.__name__}(norm={self.norm}, '
+                f'max_value={self.max})')
