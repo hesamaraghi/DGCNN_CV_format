@@ -24,7 +24,7 @@ class Runner(pl.LightningModule):
         super().__init__()
         self.cfg = cfg
         self.model = model
-        self.loss_fn = nn.NLLLoss()
+        self.loss_fn = eval(cfg.train.loss_fn)
 
         self.train_accuracy = torchmetrics.Accuracy()
         self.val_accuracy = torchmetrics.Accuracy()
@@ -64,7 +64,7 @@ class Runner(pl.LightningModule):
 
     def _step(self, batch):
         y = batch.y
-        y_hat = self.model(batch)
+        y_hat,_ = self.model(batch)
         loss = self.loss_fn(y_hat, y)
         return loss, y_hat
 
@@ -74,8 +74,8 @@ class Runner(pl.LightningModule):
         self.train_accuracy(preds, batch.y)
 
         # Log step-level loss & accuracy
-        self.log("train/loss_step", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log("train/acc_step", self.train_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log("train/loss_step", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
+        self.log("train/acc_step", self.train_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -84,8 +84,8 @@ class Runner(pl.LightningModule):
         self.val_accuracy(preds, batch.y)
 
         # Log step-level loss & accuracy
-        self.log("val/loss_step", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log("val/acc_step", self.val_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log("val/loss_step", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
+        self.log("val/acc_step", self.val_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -94,8 +94,8 @@ class Runner(pl.LightningModule):
         self.test_accuracy(preds, batch.y)
 
         # Log test loss
-        self.log("test/loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log('test/acc', self.test_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log("test/loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
+        self.log('test/acc', self.test_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
         return loss
 
     # def on_train_epoch_end(self):
@@ -111,8 +111,10 @@ class Runner(pl.LightningModule):
 
 def main():
     # Load defaults and overwrite by command-line arguments
-    cfg = OmegaConf.load("config.yaml")
+
     cmd_cfg = OmegaConf.from_cli()
+    cfg = OmegaConf.load(cmd_cfg.cfg_path)
+    
     cfg = OmegaConf.merge(cfg, cmd_cfg)
     print(OmegaConf.to_yaml(cfg))
 
