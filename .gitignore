@@ -7,4 +7,5 @@
 /wandb
 slurm*
 /slurm*
-/sbatch_folder
+sbatch*
+/datasets
