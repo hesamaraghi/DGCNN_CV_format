@@ -1,0 +1,93 @@
+description: " \
+Applying EST on NASL with subsampling 1024 and not pretrained resnet.
+Only the learning sceduler is slightly different."
+seed: 0
+optimize:
+  optimizer: Adam
+  lr: 1e-4
+  lr_scheduler: ReduceLROnPlateau
+  mode: min 
+  factor: 0.5
+  patience: 10
+model:
+  name: EST
+  k: null #20
+  aggr: "" #max
+  num_bins: 9
+  resnet_crop_dimension: [224, 224]  # dimension of crop before it goes into classifier
+  est_mlp_layers: [1, 30, 30, 1] # kernel layers for EST
+  est_activation: nn.LeakyReLU(negative_slope=0.1)
+  resnet_pretrained: False
+train:
+  epochs: 100
+  batch_size: 16
+  loss_fn: nn.CrossEntropyLoss()
+  profiler: simple
+  ckpt_path: null
+dataset:
+  name: NASL
+  train_percentage: 0.75 # not applicable
+  validation_percentage: 0.10 # not applicable
+  image_resolution: [180,240]  # dimension of spatial grid  (H x W)
+  num_samples_per_class: null
+  num_classes: null
+  dataset_path: null
+  num_workers: 4
+transform:
+  train:
+    transform: True
+    spatial_centering: null #True
+    temporal_scale: null #1e-5
+    num_events_per_sample: 1024
+    random_flip: null #0.5
+    scale_limits: null #[0.75,1.5]
+    degree_limit: null #10  #20
+    thresh_quantile: null #0.3
+    conv_vec_path: 'datasets/NCALTECH101/conv_scores'
+    radius_graph:
+      transform: null #True
+      r: 3
+      max_num_neighbors: 32
+      add_edge_attr:
+        transform: null #True
+        cat: nul #True
+  validation:
+    transform: True
+    spatial_centering: null #False #True
+    temporal_scale: null #1e-5
+    num_events_per_sample: 1024
+    random_flip: null
+    scale_limits: null
+    degree_limit: null
+    thresh_quantile: null #0.3
+    conv_vec_path: 'datasets/NCALTECH101/conv_scores'
+    radius_graph:
+      transform: null #True
+      r: 3
+      max_num_neighbors: 32
+      add_edge_attr:
+        transform: null #True
+        cat: nul #True         
+  test:
+    transform: True
+    spatial_centering: null #False #True
+    temporal_scale: null #1e-5
+    num_events_per_sample: 1024
+    random_flip: null
+    scale_limits: null
+    degree_limit: null
+    thresh_quantile: null #0.3
+    conv_vec_path: 'datasets/NCALTECH101/conv_scores'  
+    radius_graph:
+      transform: null #True
+      r: 3
+      max_num_neighbors: 32
+      add_edge_attr:
+        transform: null #True
+        cat: null #True
+wandb:
+  log: True
+  dir: ./
+  experiment_name: 'EST 1024 (not pretrained)'
+  entity: 'haraghi'
+  project: 'DGCNN'
