@@ -7,4 +7,5 @@ cache
 wandb
 slurm*
 sbatch*
-datasets
+datasets/*
+!datasets/*.py
