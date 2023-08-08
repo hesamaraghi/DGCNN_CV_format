@@ -26,9 +26,9 @@ class Runner(pl.LightningModule):
         self.model = model
         self.loss_fn = eval(cfg.train.loss_fn)
 
-        self.train_accuracy = torchmetrics.Accuracy()
-        self.val_accuracy = torchmetrics.Accuracy()
-        self.test_accuracy = torchmetrics.Accuracy()
+        self.train_accuracy = torchmetrics.Accuracy(task='multiclass', num_classes=cfg.dataset.num_classes)
+        self.val_accuracy = torchmetrics.Accuracy(task='multiclass', num_classes=cfg.dataset.num_classes)
+        self.test_accuracy = torchmetrics.Accuracy(task='multiclass', num_classes=cfg.dataset.num_classes)
 
     def forward(self, x):
         # Runner needs to redirect any model.forward() calls to the actual
@@ -160,7 +160,8 @@ def main():
         logger=wandb_logger,
         # Use DDP training by default, even for CPU training
         strategy="ddp_find_unused_parameters_false",
-        gpus=torch.cuda.device_count(),
+        devices=torch.cuda.device_count(),
+        accelerator="auto",
         callbacks=[lr_monitor],
         profiler=cfg.train.profiler,
     )
