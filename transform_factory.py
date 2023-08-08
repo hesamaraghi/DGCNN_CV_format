@@ -1,5 +1,5 @@
 import torch_geometric.transforms as T
-from datatransforms.event_transforms import TemporalScaling, RemoveOutliers, SpatialCentering, SpatialScaling, AddEdgeAttr
+from datatransforms.event_transforms import TemporalScaling, RemoveOutliers, SpatialCentering, SpatialScaling, AddEdgeAttr, ShiftAndFlip
 
 def factory(cfg):
       
@@ -23,6 +23,8 @@ def factory(cfg):
                   transform_list.append(T.RadiusGraph(r = cfg.radius_graph.r,max_num_neighbors = cfg.radius_graph.max_num_neighbors))
             if cfg.radius_graph.add_edge_attr.transform:
                   transform_list.append(AddEdgeAttr(cfg.radius_graph.add_edge_attr))
+            if cfg.shift_and_flip.transform:
+                  transform_list.append(ShiftAndFlip(cfg.shift_and_flip))
             return T.Compose(transform_list)
       else:
             return None

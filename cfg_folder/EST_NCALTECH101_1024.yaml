@@ -1,42 +1,45 @@
-description: ""
+description: " \
+Applying EST on NCALTECH101 with subsampling 1024 and pretrained resnet.
+Augmentation is the same as EST code (without removing outliers).
+Only the learning sceduler is slightly different."
 seed: 0
 optimize:
   optimizer: Adam
-  lr: null # 0.001
-  lr_scheduler: "" # ReduceLROnPlateau
+  lr: 1e-4
+  lr_scheduler: ReduceLROnPlateau
   mode: min 
-  factor: null #0.5
-  patience: null #20
+  factor: 0.5
+  patience: 20
 model:
-  name: "" #NVS2GRAPH
+  name: EST
   k: null #20
   aggr: "" #max
-  num_bins: null
-  resnet_crop_dimension: null #[224, 224]  # dimension of crop before it goes into classifier
-  est_mlp_layers: null #[1, 30, 30, 1] # kernel layers for EST
-  est_activation: "" #nn.LeakyReLU(negative_slope=0.1)
-  resnet_pretrained: null #True
+  num_bins: 9
+  resnet_crop_dimension: [224, 224]  # dimension of crop before it goes into classifier
+  est_mlp_layers: [1, 30, 30, 1] # kernel layers for EST
+  est_activation: nn.LeakyReLU(negative_slope=0.1)
+  resnet_pretrained: True
 train:
-  epochs: null #100
-  batch_size: null #32
-  loss_fn: "" #nn.NLLLoss()
+  epochs: 200
+  batch_size: 16
+  loss_fn: nn.CrossEntropyLoss()
   profiler: simple
   ckpt_path: null
 dataset:
-  name: null
+  name: NCALTECH101
   train_percentage: 0.75 # not applicable
   validation_percentage: 0.10 # not applicable
-  image_resolution: null # [180,240]  # dimension of spatial grid  (H x W)
+  image_resolution: [180,240]  # dimension of spatial grid  (H x W)
   num_samples_per_class: null
   num_classes: null
   dataset_path: null
   num_workers: 4
 transform:
   train:
-    transform: null #True
+    transform: True
     spatial_centering: null #True
     temporal_scale: null # 1e-5
-    num_events_per_sample: null #1024
+    num_events_per_sample: 1024
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
@@ -50,14 +53,14 @@ transform:
         transform: null #True
         cat: nul #True
     shift_and_flip:
-      transform: null #True
+      transform: True
       max_shift: 20
       p: 0.5
   validation:
-    transform: null #True
+    transform: True
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
-    num_events_per_sample: null #1024
+    num_events_per_sample: 1024
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -75,10 +78,10 @@ transform:
       max_shift: 20
       p: 0.5
   test:
-    transform: null #True
+    transform: True
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
-    num_events_per_sample: null #1024
+    num_events_per_sample: 1024
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -96,8 +99,8 @@ transform:
       max_shift: 20
       p: 0.5
 wandb:
-  log: null #true
+  log: True
   dir: ./
-  experiment_name: ''
+  experiment_name: 'EST-aug 1024'
   entity: 'haraghi'
   project: 'DGCNN'

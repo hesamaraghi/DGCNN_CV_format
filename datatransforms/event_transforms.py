@@ -141,3 +141,29 @@ class AddEdgeAttr(BaseTransform):
     def __repr__(self) -> str:
         return (f'{self.__class__.__name__}(norm={self.norm}, '
                 f'max_value={self.max})')
+        
+        
+        
+class ShiftAndFlip(BaseTransform):
+
+    def __init__(self, cfg):
+        self.max_shift = cfg.max_shift
+        self.p = cfg.p
+
+    def __call__(self, data,resolution=(180,240)):
+        H, W = resolution
+        x_shift, y_shift = torch.randint(-self.max_shift, self.max_shift + 1, (2,))
+        data.pos[..., -3] += x_shift
+        data.pos[..., -2] += y_shift
+        
+        valid_data = (data.pos[..., -3] >= 0) & (data.pos[..., -3] < W) & (data.pos[..., -2] >= 0) & (data.pos[..., -2] < H)
+        data.pos = data.pos[valid_data]
+
+        if torch.rand(1) < self.p:
+            data.pos[..., -3] = W - 1 - data.pos[..., -3]
+            
+        return data
+
+    def __repr__(self) -> str:
+        return (f'{self.__class__.__name__}(max_shift={self.max_shift}, '
+                f'p={self.p})')
