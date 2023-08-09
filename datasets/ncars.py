@@ -11,8 +11,7 @@ import torch
 
 
 dir_path = osp.dirname(osp.realpath(__file__))
-parent_dir_path = osp.dirname(dir_path)
-datasets_path = osp.join(parent_dir_path,'prophesee-automotive-dataset-toolbox')
+datasets_path = osp.join(dir_path, 'NCARS', 'prophesee-automotive-dataset-toolbox')
 sys.path.append(datasets_path)
 
 

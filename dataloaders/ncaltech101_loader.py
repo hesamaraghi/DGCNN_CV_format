@@ -15,7 +15,8 @@ def ncaltech101_train_loader(cfg):
         NCALTECH101(
             dataset_path,
             name = 'training',
-            transform = transforms(cfg.transform.train)
+            transform = transforms(cfg.transform.train),
+            num_workers=cfg.dataset.num_workers
         ),
         batch_size=cfg.train.batch_size,
         shuffle=True,
@@ -34,6 +35,7 @@ def ncaltech101_validation_loader(cfg):
             dataset_path,
             name = 'validation',
             transform = transforms(cfg.transform.validation),
+            num_workers=cfg.dataset.num_workers
         ),
         batch_size=cfg.train.batch_size,
         shuffle=False,
@@ -52,6 +54,7 @@ def ncaltech101_test_loader(cfg):
             dataset_path,
             name = 'test',
             transform=transforms(cfg.transform.test),
+            num_workers=cfg.dataset.num_workers
         ),
         batch_size=cfg.train.batch_size,
         shuffle=False,
