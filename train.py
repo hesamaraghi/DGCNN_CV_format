@@ -74,8 +74,8 @@ class Runner(pl.LightningModule):
         self.train_accuracy(preds, batch.y)
 
         # Log step-level loss & accuracy
-        self.log("train/loss_step", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
-        self.log("train/acc_step", self.train_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
+        self.log("train/loss_step", loss, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
+        self.log("train/acc_step", self.train_accuracy, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -84,8 +84,8 @@ class Runner(pl.LightningModule):
         self.val_accuracy(preds, batch.y)
 
         # Log step-level loss & accuracy
-        self.log("val/loss_step", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
-        self.log("val/acc_step", self.val_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
+        self.log("val/loss_step", loss, on_step=False, on_epoch=True, logger=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
+        self.log("val/acc_step", self.val_accuracy, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -94,8 +94,8 @@ class Runner(pl.LightningModule):
         self.test_accuracy(preds, batch.y)
 
         # Log test loss
-        self.log("test/loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
-        self.log('test/acc', self.test_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size)
+        self.log("test/loss", loss, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
+        self.log('test/acc', self.test_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
         return loss
 
     # def on_train_epoch_end(self):
@@ -158,6 +158,7 @@ def main():
     trainer = pl.Trainer(
         max_epochs=cfg.train.epochs,
         logger=wandb_logger,
+        enable_progress_bar=False,
         # Use DDP training by default, even for CPU training
         strategy="ddp_find_unused_parameters_false",
         devices=torch.cuda.device_count(),
