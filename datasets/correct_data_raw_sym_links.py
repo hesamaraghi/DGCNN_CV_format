@@ -18,11 +18,13 @@ import numpy as np
 
 # %%
 
+download_folder = {'NCALTECH101':   'Caltech101',
+                   'NASL':          ''}
 
 def correct_sym_links(dataset_name):
-    
+    assert dataset_name in download_folder.keys(), f"{dataset_name} is not in {download_folder.keys()}"
     raw_path = osp.join(osp.dirname(osp.abspath(__file__)),dataset_name,'data','raw')
-    src_path = osp.join(osp.dirname(osp.abspath(__file__)),dataset_name,'downloaded','Caltech101')
+    src_path = osp.join(osp.dirname(osp.abspath(__file__)),dataset_name,'downloaded',download_folder[dataset_name])
     assert osp.exists(src_path), f"'download' directory for {dataset_name} dataset is corrupted!"
     all_path = os.path.join(raw_path, 'all')
 
@@ -48,8 +50,9 @@ def correct_sym_links(dataset_name):
 if __name__ == '__main__':
     # input arguments
     parser = argparse.ArgumentParser(description='get the dataset name')
-    parser.add_argument('--dataset_name', type=str, required=True,
+    parser.add_argument('--dataset-name', type=str, required=True,
                         help='name of the dataset')
+
     args = parser.parse_args()
     correct_sym_links(args.dataset_name)
     print("Good bye!")
