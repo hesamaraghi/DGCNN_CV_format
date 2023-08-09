@@ -5,14 +5,14 @@ def factory(cfg):
       
       if cfg.transform is not None:
             transform_list = []
+            if cfg.thresh_quantile is not None:
+                  transform_list.append(RemoveOutliers(cfg))
             if cfg.shift_and_flip.transform:
                   transform_list.append(ShiftAndFlip(cfg.shift_and_flip))
             if cfg.temporal_scale is not None:
                   transform_list.append(TemporalScaling(cfg))
             if cfg.spatial_centering:
                   transform_list.append(SpatialCentering())
-            if cfg.thresh_quantile is not None:
-                  transform_list.append(RemoveOutliers(cfg))
             if cfg.num_events_per_sample is not None:
                   transform_list.append(T.FixedPoints(cfg.num_events_per_sample, replace = False, allow_duplicates = True))
             if cfg.random_flip is not None:
