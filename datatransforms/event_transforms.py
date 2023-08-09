@@ -156,8 +156,18 @@ class ShiftAndFlip(BaseTransform):
         data.pos[..., -3] += x_shift
         data.pos[..., -2] += y_shift
         
-        valid_data = (data.pos[..., -3] >= 0) & (data.pos[..., -3] < W) & (data.pos[..., -2] >= 0) & (data.pos[..., -2] < H)
-        data.pos = data.pos[valid_data]
+        indices = (data.pos[..., -3] >= 0) & (data.pos[..., -3] < W) & (data.pos[..., -2] >= 0) & (data.pos[..., -2] < H)
+        
+        num_nodes = data.num_nodes   
+        for key, item in data:
+            if key == 'num_nodes':
+                data.num_nodes = torch.sum(indices)
+            elif bool(re.search('edge', key)):
+                continue
+            elif (torch.is_tensor(item) and item.size(0) == num_nodes
+                  and item.size(0) != 1):
+                data[key] = item[indices]
+                
 
         if torch.rand(1) < self.p:
             data.pos[..., -3] = W - 1 - data.pos[..., -3]
