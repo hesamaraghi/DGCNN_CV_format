@@ -135,7 +135,7 @@ class NCALTECH101(Dataset):
     
     def process_raw_paths_batch(self,raw_paths):
         for idx_and_raw_path in raw_paths:
-            idx, raw_path = idx_and_raw_path
+            _, raw_path = idx_and_raw_path
             data = read_events(raw_path)
             data.file_id = osp.basename(raw_path)
             data.label = [raw_path.split(os.sep)[-2]]
@@ -147,9 +147,10 @@ class NCALTECH101(Dataset):
             if self.pre_transform is not None:
                 data = self.pre_transform(data)
             
-            assert (osp.splitext(self.processed_paths[idx])[0].split(os.sep)[-3:] == osp.splitext(raw_path)[0].split(os.sep)[-3:])  , "The processed path does not match with the raw path."  
-            torch.save(data, self.processed_paths[idx])
-        print(f"Files from {raw_paths[0][0]} to {raw_paths[-1][0]} are processed and saved.")
+            tail_raw_path = raw_path.split(os.sep)[-3:]
+            tail_raw_path[-1] = osp.splitext(tail_raw_path[-1])[0] + '.pt'
+            torch.save(data, osp.join(self.processed_dir, *tail_raw_path))
+
 
     def divide_list_into_consecutive_groups(self, input_list, num_groups):
         group_size = len(input_list) // num_groups
@@ -172,9 +173,10 @@ class NCALTECH101(Dataset):
         return sorted(os.listdir(osp.join(self.raw_dir, 'all')))
     
     def process(self):
-        all_name_files = [f for f in self.processed_paths if f.split(os.sep)[-3] == 'all']
-        if  len(all_name_files) == 0 or not all([osp.exists(f) for f in all_name_files]):
-            self.process_all(all_name_files)
+        processed_paths_all = [f for f in self.processed_paths if f.split(os.sep)[-3] == 'all']
+        if  len(processed_paths_all) == 0 or not all([osp.exists(f) for f in processed_paths_all]):
+            raw_paths_all = [f for f in self.raw_paths if f.split(os.sep)[-3] == 'all']
+            self.process_all(raw_paths_all)
  
         for name in self.dataset_names:
             if name != 'all':
@@ -195,7 +197,7 @@ class NCALTECH101(Dataset):
                 print(f"Sym links for '{name}' dataset are created again.")
         
     
-    def process_all(self,all_name_files):
+    def process_all(self,raw_paths_all):
         for category in self.categories:
             if not os.path.exists(osp.join(self.processed_dir,'all', category)):
                 os.makedirs(osp.join(self.processed_dir,'all', category))
@@ -208,7 +210,7 @@ class NCALTECH101(Dataset):
         #     group_index = index % num_workers
         #     groups[group_index].append((index, raw_path))
         
-        groups = self.divide_list_into_consecutive_groups(all_name_files,num_workers)
+        groups = self.divide_list_into_consecutive_groups(raw_paths_all,num_workers)
         
         processes = []
         
@@ -236,5 +238,6 @@ class NCALTECH101(Dataset):
 if __name__ == '__main__':
     dir_path = osp.dirname(osp.realpath(__file__))
     dataset_path = osp.join(dir_path,'NCALTECH101','data')
+    print(dataset_path)
     dataset  = NCALTECH101(dataset_path, transform = None)
     print("Good bye!")
