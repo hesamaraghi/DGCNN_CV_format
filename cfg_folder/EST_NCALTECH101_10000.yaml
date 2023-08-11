@@ -1,5 +1,6 @@
 description: " \
-Applying EST on NASL with subsampling 64 and pretrained resnet (original case).
+Applying EST on NCALTECH101 with subsampling 10000 and pretrained resnet.
+Augmentation is the same as EST code (without removing outliers).
 Only the learning sceduler is slightly different."
 seed: 0
 optimize:
@@ -8,7 +9,7 @@ optimize:
   lr_scheduler: ReduceLROnPlateau
   mode: min 
   factor: 0.5
-  patience: 10
+  patience: 20
 model:
   name: EST
   k: null #20
@@ -19,13 +20,13 @@ model:
   est_activation: nn.LeakyReLU(negative_slope=0.1)
   resnet_pretrained: True
 train:
-  epochs: 100
+  epochs: 200
   batch_size: 16
   loss_fn: nn.CrossEntropyLoss()
   profiler: simple
   ckpt_path: null
 dataset:
-  name: NASL
+  name: NCALTECH101
   train_percentage: 0.75 # not applicable
   validation_percentage: 0.10 # not applicable
   image_resolution: [180,240]  # dimension of spatial grid  (H x W)
@@ -37,8 +38,8 @@ transform:
   train:
     transform: True
     spatial_centering: null #True
-    temporal_scale: null #1e-5
-    num_events_per_sample: 64
+    temporal_scale: null # 1e-5
+    num_events_per_sample: 10000
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
@@ -52,14 +53,14 @@ transform:
         transform: null #True
         cat: nul #True
     shift_and_flip:
-      transform: null #True
+      transform: True
       max_shift: 20
       p: 0.5
   validation:
     transform: True
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
-    num_events_per_sample: 64
+    num_events_per_sample: 10000
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -71,7 +72,7 @@ transform:
       max_num_neighbors: 32
       add_edge_attr:
         transform: null #True
-        cat: null #True  
+        cat: nul #True  
     shift_and_flip:
       transform: null #True
       max_shift: 20
@@ -80,7 +81,7 @@ transform:
     transform: True
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
-    num_events_per_sample: 64
+    num_events_per_sample: 10000
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -100,6 +101,6 @@ transform:
 wandb:
   log: True
   dir: ./
-  experiment_name: 'EST 64'
+  experiment_name: 'EST-aug 10000'
   entity: 'haraghi'
   project: 'DGCNN'

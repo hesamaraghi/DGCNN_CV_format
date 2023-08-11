@@ -67,7 +67,7 @@ transform:
       max_num_neighbors: 32
       add_edge_attr:
         transform: null #True
-        cat: nul #True         
+        cat: null #True  
   test:
     transform: True
     spatial_centering: null #False #True
