@@ -16,7 +16,7 @@ import torchmetrics
 
 # Imports of own files
 import model_factory
-import dataset_factory
+from graph_data_module import GraphDataModule
 
 
 class Runner(pl.LightningModule):
@@ -125,6 +125,11 @@ def main():
     # deterministic.
     pl.seed_everything(cfg.seed, workers=True)
 
+
+    # Create datasets using factory pattern
+    gdm = GraphDataModule(cfg)
+    cfg.dataset.num_classes = gdm.num_classes
+
     # Set cache dir to W&B logging directory
     os.environ["WANDB_CACHE_DIR"] = os.path.join(cfg.wandb.dir, 'cache')
     wandb_logger = WandbLogger(
@@ -138,13 +143,6 @@ def main():
         config=OmegaConf.to_object(cfg),
     )
     
-
-
-    # Create datasets using factory pattern
-    loaders = dataset_factory.factory(cfg)
-    train_dataset_loader, val_dataset_loader, test_dataset_loader = loaders
-    
-
     # Create model using factory pattern
     model = model_factory.factory(cfg)
 
@@ -158,7 +156,7 @@ def main():
     trainer = pl.Trainer(
         max_epochs=cfg.train.epochs,
         logger=wandb_logger,
-        enable_progress_bar=False,
+        enable_progress_bar=True,
         # Use DDP training by default, even for CPU training
         strategy="ddp_find_unused_parameters_false",
         devices=torch.cuda.device_count(),
@@ -168,11 +166,11 @@ def main():
     )
 
     # Train + validate (if validation dataset is implemented)
-    trainer.fit(model = runner, train_dataloaders = train_dataset_loader, val_dataloaders = val_dataset_loader)
+    trainer.fit(model = runner, datamodule=gdm)
 
     # Test (if test dataset is implemented)
-    if test_dataset_loader is not None:
-        trainer.test(runner, test_dataset_loader)
+    if gdm.test_dataloader is not None:
+        trainer.test(runner, gdm.test_dataloader)
 
 
 
