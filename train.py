@@ -9,7 +9,7 @@ import glob
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import LearningRateMonitor
+from pytorch_lightning.callbacks import LearningRateMonitor, TQDMProgressBar
 from pytorch_lightning.loggers import WandbLogger
 from omegaconf import OmegaConf
 import torchmetrics
@@ -152,6 +152,7 @@ def main():
     runner = Runner(cfg, model)
     
     lr_monitor = LearningRateMonitor(logging_interval='step')
+    bar = TQDMProgressBar(refresh_rate=100)
     
     trainer = pl.Trainer(
         max_epochs=cfg.train.epochs,
@@ -161,8 +162,8 @@ def main():
         strategy="ddp_find_unused_parameters_false",
         devices=torch.cuda.device_count(),
         accelerator="auto",
-        callbacks=[lr_monitor],
-        profiler=cfg.train.profiler,
+        callbacks=[lr_monitor,bar],
+        profiler=cfg.train.profiler
     )
 
     # Train + validate (if validation dataset is implemented)
@@ -170,7 +171,7 @@ def main():
 
     # Test (if test dataset is implemented)
     if gdm.test_dataloader is not None:
-        trainer.test(runner, gdm.test_dataloader)
+        trainer.test(runner, datamodule=gdm)
 
 
 
