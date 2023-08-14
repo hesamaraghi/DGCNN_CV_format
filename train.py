@@ -64,7 +64,7 @@ class Runner(pl.LightningModule):
 
     def _step(self, batch):
         y = batch.y
-        y_hat,_ = self.model(batch)
+        y_hat = self.model(batch)
         loss = self.loss_fn(y_hat, y)
         return loss, y_hat
 
