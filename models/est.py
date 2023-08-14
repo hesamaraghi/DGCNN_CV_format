@@ -155,6 +155,6 @@ class Net(nn.Module):
         vox = self.quantization_layer.forward(x)
         vox_cropped = self.crop_and_resize_to_resolution(vox, self.crop_dimension)
         pred = self.classifier.forward(vox_cropped)
-        return pred, vox
+        return pred #, vox
 
 
