@@ -1,5 +1,5 @@
 description: " \
-Applying DGCNN2 on NASL with subsampling 64.
+Applying DGCNN2 on NASL with subsampling 1024.
 Does it also show good results? about 99 percent?"
 seed: 0
 optimize:
@@ -38,7 +38,7 @@ transform:
     transform: True
     spatial_centering: null #True
     temporal_scale: 1e-5
-    num_events_per_sample: 64
+    num_events_per_sample: 1024
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
@@ -59,7 +59,7 @@ transform:
     transform: True
     spatial_centering: null #False #True
     temporal_scale: 1e-5
-    num_events_per_sample: 64
+    num_events_per_sample: 1024
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -80,7 +80,7 @@ transform:
     transform: True
     spatial_centering: null #False #True
     temporal_scale: 1e-5
-    num_events_per_sample: 64
+    num_events_per_sample: 1024
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -100,6 +100,6 @@ transform:
 wandb:
   log: True
   dir: ./
-  experiment_name: 'DGCNN2 64'
+  experiment_name: 'DGCNN2 1024'
   entity: 'haraghi'
   project: 'DGCNN'
