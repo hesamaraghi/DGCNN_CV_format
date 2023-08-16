@@ -3,7 +3,10 @@ import numpy as np
 import torch
 from torch_geometric.data import  Data
 
-from datasets.base_dataset import BaseDataset
+try:
+    from datasets.base_dataset import BaseDataset
+except ModuleNotFoundError:
+    from base_dataset import BaseDataset
 
 
 class NCALTECH101(BaseDataset):
