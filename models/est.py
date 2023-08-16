@@ -4,8 +4,29 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 from torchvision.models.resnet import resnet34
+import torchvision
 
+def percentile(t, q):
+    B, C, H, W = t.shape
+    k = 1 + round(.01 * float(q) * (C * H * W - 1))
+    result = t.view(B, -1).kthvalue(k).values
+    return result[:,None,None,None]
 
+def create_image(representation):
+    B, C, H, W = representation.shape
+    representation = representation.view(B, 3, C // 3, H, W).sum(2)
+
+    # do robust min max norm
+    representation = representation.detach().cpu()
+    robust_max_vals = percentile(representation, 99)
+    robust_min_vals = percentile(representation, 1)
+
+    representation = (representation - robust_min_vals)/(robust_max_vals - robust_min_vals)
+    representation = torch.clamp(255*representation, 0, 255).byte()
+
+    representation = torchvision.utils.make_grid(representation)
+
+    return representation
 
 class ValueLayer(nn.Module):
     def __init__(self, mlp_layers, activation=nn.ReLU(), num_channels=9):
