@@ -4,8 +4,16 @@ import numpy as np
 import torch
 from torch_geometric.data import  Data
 
-from datasets.NCARS.src.io.psee_loader import PSEELoader
-from datasets.base_dataset import BaseDataset
+
+try:
+    from datasets.NCARS.src.io.psee_loader import PSEELoader
+except ModuleNotFoundError:
+    from NCARS.src.io.psee_loader import PSEELoader
+
+try:
+    from datasets.base_dataset import BaseDataset
+except ModuleNotFoundError:
+    from base_dataset import BaseDataset
 
 
 class NCARS(BaseDataset):
