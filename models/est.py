@@ -3,8 +3,9 @@ from os.path import join, dirname, isfile
 import torch
 import torch.nn.functional as F
 import numpy as np
-from torchvision.models.resnet import resnet34
+from torchvision import models
 import torchvision
+from omegaconf.errors import ConfigAttributeError
 
 def percentile(t, q):
     B, C, H, W = t.shape
@@ -142,6 +143,55 @@ class QuantizationLayer(nn.Module):
         return vox
 
 
+def cnn_model(cfg):
+    
+    input_channels = 2*cfg.model.num_bins
+    try:
+        cnn_type = cfg.model.cnn_type
+    except ConfigAttributeError:
+        cnn_type = "resnet34"
+
+
+    if cnn_type == "resnet34":
+        if not cfg.model.resnet_pretrained:
+            weights = None
+        else:
+            weights = "DEFAULT"
+        model = models.get_model(cnn_type, weights=weights)
+        model.conv1 = nn.Conv2d(input_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        model.fc = nn.Linear(model.fc.in_features, cfg.dataset.num_classes)
+    
+    elif cnn_type == "shufflenet_v2_x0_5":
+        if not cfg.model.resnet_pretrained:
+            weights = None
+        else:
+            weights = "DEFAULT" 
+        model = models.get_model(cnn_type, weights=weights)   
+        model.conv1[0] = nn.Conv2d(input_channels, 24, kernel_size=3, stride=2, padding=1, bias=False)
+        model.fc = nn.Linear(model.fc.in_features, cfg.dataset.num_classes)
+    
+    elif cnn_type == "mobilenet_v3_small":
+        if not cfg.model.resnet_pretrained:
+            weights = None
+        else:
+            weights = "DEFAULT" 
+        model = models.get_model(cnn_type, weights=weights)
+        model.features[0] = nn.Conv2d(input_channels, 16, kernel_size=3, stride=2, padding=1, bias=False)
+        model.classifier[3] = nn.Linear(model.classifier[3].in_features, cfg.dataset.num_classes)
+    
+    elif cnn_type == "squeezenet1_1":    
+        if not cfg.model.resnet_pretrained:
+            weights = None
+        else:
+            weights = "DEFAULT" 
+        model = models.get_model(cnn_type, weights=weights)
+        model.features[0] = nn.Conv2d(input_channels, 64, kernel_size=3, stride=2)
+        model.classifier[1] = nn.Conv2d(512, cfg.dataset.num_classes, kernel_size=1, stride=1)
+    else:
+        raise NotImplementedError("CNN type not implemented")
+    
+    return model
+            
 class Net(nn.Module):
     def __init__(self, cfg):
 
@@ -150,14 +200,14 @@ class Net(nn.Module):
         self.mlp_layers = cfg.model.est_mlp_layers
         self.activation = eval(cfg.model.est_activation)
         self.quantization_layer = QuantizationLayer(self.voxel_dimension, self.mlp_layers, self.activation)
-        self.classifier = resnet34(pretrained=cfg.model.resnet_pretrained)
+        self.classifier = cnn_model(cfg)
 
         self.crop_dimension = cfg.model.resnet_crop_dimension
 
         # replace fc layer and first convolutional layer
-        input_channels = 2*cfg.model.num_bins
-        self.classifier.conv1 = nn.Conv2d(input_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        self.classifier.fc = nn.Linear(self.classifier.fc.in_features, cfg.dataset.num_classes)
+        # input_channels = 2*cfg.model.num_bins
+        # self.classifier.conv1 = nn.Conv2d(input_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        # self.classifier.fc = nn.Linear(self.classifier.fc.in_features, cfg.dataset.num_classes)
 
     def crop_and_resize_to_resolution(self, x, output_resolution=(224, 224)):
         B, C, H, W = x.shape
