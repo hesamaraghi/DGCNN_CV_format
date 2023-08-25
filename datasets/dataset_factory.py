@@ -2,13 +2,15 @@ from datasets.nmnist import NMNIST
 from datasets.ncaltech101 import NCALTECH101
 from datasets.nasl import NASL
 from datasets.ncars import NCARS
-
+import os
 
 def create_dataset(dataset_path = None, 
                    dataset_name = None, 
                    dataset_type = None,
                    transform = None, 
                    num_workers = 4):
+    dataset_path = os.path.abspath(dataset_path)
+    
     if dataset_name == "NMNIST":
         return NMNIST(  root = dataset_path, 
                         name = dataset_type, 
