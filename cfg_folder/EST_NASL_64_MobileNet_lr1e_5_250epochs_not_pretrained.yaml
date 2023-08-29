@@ -1,10 +1,11 @@
 description: " \
-Applying EST on NASL with subsampling 64 and NOT pretrained mobilenet_v3_small.
+Applying EST on NASL with subsampling 64 and NOT pretrained mobilenet_v3_small for 250 epoch.
+Also reduce the learning rate to 1e-5.
 Only the learning sceduler is slightly different."
 seed: 0
 optimize:
   optimizer: Adam
-  lr: 1e-4
+  lr: 1e-5
   lr_scheduler: ReduceLROnPlateau
   mode: min 
   factor: 0.5
@@ -20,7 +21,7 @@ model:
   est_activation: nn.LeakyReLU(negative_slope=0.1)
   resnet_pretrained: False
 train:
-  epochs: 100
+  epochs: 250
   batch_size: 16
   loss_fn: nn.CrossEntropyLoss()
   profiler: simple
@@ -101,6 +102,6 @@ transform:
 wandb:
   log: True
   dir: ./
-  experiment_name: 'EST 64 mobilenet_v3_small (not pretrained)'
+  experiment_name: 'EST 64 mobilenet_v3_small 250 epoch lr=1e-5 (not pretrained)'
   entity: 'haraghi'
   project: 'DGCNN'
