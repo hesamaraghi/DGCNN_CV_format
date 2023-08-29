@@ -1,5 +1,5 @@
 description: " \
-Applying EST on NASL with subsampling 64 and NOT pretrained mobilenet_v3_small.
+Applying EST on NASL with subsampling 64 and NOT pretrained shufflenet_v2_x0_5.
 Only the learning sceduler is slightly different."
 seed: 0
 optimize:
@@ -14,7 +14,7 @@ model:
   k: null #20
   aggr: "" #max
   num_bins: 9
-  cnn_type: mobilenet_v3_small
+  cnn_type: shufflenet_v2_x0_5
   resnet_crop_dimension: [224, 224]  # dimension of crop before it goes into classifier
   est_mlp_layers: [1, 30, 30, 1] # kernel layers for EST
   est_activation: nn.LeakyReLU(negative_slope=0.1)
@@ -101,6 +101,6 @@ transform:
 wandb:
   log: True
   dir: ./
-  experiment_name: 'EST 64 mobilenet_v3_small (not pretrained)'
+  experiment_name: 'EST 64 shufflenet_v2_x0_5 (not pretrained)'
   entity: 'haraghi'
   project: 'DGCNN'

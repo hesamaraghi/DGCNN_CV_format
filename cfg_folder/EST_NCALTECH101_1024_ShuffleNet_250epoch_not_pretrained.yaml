@@ -1,5 +1,5 @@
 description: " \
-Applying EST on NASL with subsampling 64 and NOT pretrained mobilenet_v3_small.
+Applying EST on NCALTECH101 with subsampling 1024 and NOT pretrained shufflenet_v2_x0_5 for 250 epoch.
 Only the learning sceduler is slightly different."
 seed: 0
 optimize:
@@ -14,32 +14,32 @@ model:
   k: null #20
   aggr: "" #max
   num_bins: 9
-  cnn_type: mobilenet_v3_small
+  cnn_type: shufflenet_v2_x0_5
   resnet_crop_dimension: [224, 224]  # dimension of crop before it goes into classifier
   est_mlp_layers: [1, 30, 30, 1] # kernel layers for EST
   est_activation: nn.LeakyReLU(negative_slope=0.1)
   resnet_pretrained: False
 train:
-  epochs: 100
+  epochs: 250
   batch_size: 16
   loss_fn: nn.CrossEntropyLoss()
   profiler: simple
   ckpt_path: null
 dataset:
-  name: NASL
+  name: NCALTECH101
   train_percentage: 0.75 # not applicable
   validation_percentage: 0.10 # not applicable
   image_resolution: [180,240]  # dimension of spatial grid  (H x W)
   num_samples_per_class: null
   num_classes: null
   dataset_path: null
-  num_workers: 4
+  num_workers: 8
 transform:
   train:
     transform: True
     spatial_centering: null #True
     temporal_scale: null #1e-5
-    num_events_per_sample: 64
+    num_events_per_sample: 1024
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
@@ -53,7 +53,7 @@ transform:
         transform: null #True
         cat: nul #True
     shift_and_flip:
-      transform: null #True
+      transform: True
       max_shift: 20
       p: 0.5
   validation:
@@ -101,6 +101,6 @@ transform:
 wandb:
   log: True
   dir: ./
-  experiment_name: 'EST 64 mobilenet_v3_small (not pretrained)'
+  experiment_name: 'EST 1024 shufflenet_v2_x0_5 250 epochs (not pretrained)'
   entity: 'haraghi'
   project: 'DGCNN'
