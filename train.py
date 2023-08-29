@@ -9,7 +9,7 @@ import glob
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import LearningRateMonitor, TQDMProgressBar
+from pytorch_lightning.callbacks import LearningRateMonitor, TQDMProgressBar, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from omegaconf import OmegaConf
 import torchmetrics
@@ -153,6 +153,7 @@ def main():
     
     lr_monitor = LearningRateMonitor(logging_interval='step')
     bar = TQDMProgressBar(refresh_rate=100)
+    checkpoint_callback = ModelCheckpoint(monitor="val/acc_step", mode="max")
     
     trainer = pl.Trainer(
         max_epochs=cfg.train.epochs,
@@ -162,7 +163,7 @@ def main():
         strategy="ddp_find_unused_parameters_false",
         devices=torch.cuda.device_count(),
         accelerator="auto",
-        callbacks=[lr_monitor,bar],
+        callbacks=[lr_monitor,bar,checkpoint_callback],
         profiler=cfg.train.profiler
     )
 
