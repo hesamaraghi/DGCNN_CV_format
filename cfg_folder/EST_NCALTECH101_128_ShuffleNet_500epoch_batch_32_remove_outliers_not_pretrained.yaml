@@ -1,5 +1,5 @@
 description: " \
-Applying EST on NCALTECH101 with subsampling 1024 and NOT pretrained shufflenet_v2_x0_5 for 500 epoch.
+Applying EST on NCALTECH101 with subsampling 128 and NOT pretrained shufflenet_v2_x0_5 for 500 epoch.
 And, batch size is 32.
 Remove outliers.
 Only the learning sceduler is slightly different."
@@ -41,7 +41,7 @@ transform:
     transform: True
     spatial_centering: null #True
     temporal_scale: null #1e-5
-    num_events_per_sample: 1024
+    num_events_per_sample: 128
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
@@ -103,6 +103,6 @@ transform:
 wandb:
   log: True
   dir: ./
-  experiment_name: 'EST 1024 shufflenet_v2_x0_5 500 epochs batch 32 with outlier removal (not pretrained)'
+  experiment_name: 'EST 128 shufflenet_v2_x0_5 500 epochs batch 32 with outlier removal (not pretrained)'
   entity: 'haraghi'
   project: 'DGCNN'
