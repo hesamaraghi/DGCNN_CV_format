@@ -1,5 +1,5 @@
 description: " \
-Applying DGCNN on NCALTECH101 with subsampling 1024 for 500 epoch.
+Applying DGCNN on NCALTECH101 with subsampling 512 for 500 epoch.
 Remove outliers but aug. only for spatial centering and flipping.
 Only the learning sceduler is slightly different."
 seed: 0
@@ -40,7 +40,7 @@ transform:
     transform: True
     spatial_centering: True
     temporal_scale: 1e-5
-    num_events_per_sample: 1024
+    num_events_per_sample: 512
     random_flip: 0.5
     scale_limits: [0.75,1.5] #null
     degree_limit: 20 #10  #null
@@ -102,6 +102,6 @@ transform:
 wandb:
   log: True
   dir: ./
-  experiment_name: 'DGCNN 1024 500 epochs with outlier removal (replicate previous)'
+  experiment_name: 'DGCNN 512 500 epochs with outlier removal (replicate previous)'
   entity: 'haraghi'
   project: 'DGCNN'
