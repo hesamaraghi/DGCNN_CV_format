@@ -1,16 +1,14 @@
 description: " \
-Applying EST on NCALTECH101 with subsampling 1024 and NOT pretrained shufflenet_v2_x0_5 for 500 epoch.
-And, batch size is 32.
-Remove outliers.
-Only the learning sceduler is slightly different."
+Applying EST on NCARS without any augmentation and NOT pretrained shufflenet_v2_x0_5 for 500 epoch.
+And, batch size is 100."
 seed: 0
 optimize:
   optimizer: Adam
-  lr: 1e-4
+  lr: 1e-5
   lr_scheduler: ReduceLROnPlateau
   mode: min 
   factor: 0.5
-  patience: 50
+  patience: 75
 model:
   name: EST
   k: null #20
@@ -23,29 +21,29 @@ model:
   resnet_pretrained: False
 train:
   epochs: 500
-  batch_size: 32
+  batch_size: 100
   loss_fn: nn.CrossEntropyLoss()
   profiler: simple
   ckpt_path: null
 dataset:
-  name: NCALTECH101
+  name: NCARS
   train_percentage: 0.75 # not applicable
   validation_percentage: 0.10 # not applicable
-  image_resolution: [180,240]  # dimension of spatial grid  (H x W)
+  image_resolution: [120,100]  # dimension of spatial grid  (H x W)
   num_samples_per_class: null
   num_classes: null
   dataset_path: null
   num_workers: 8
 transform:
   train:
-    transform: True
+    transform: False
     spatial_centering: null #True
     temporal_scale: null #1e-5
-    num_events_per_sample: 1024
+    num_events_per_sample: null #1024
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
-    thresh_quantile: 0.3
+    thresh_quantile: null #0.3
     conv_vec_path: 'datasets/NCALTECH101/conv_scores'
     radius_graph:
       transform: null #True
@@ -55,11 +53,11 @@ transform:
         transform: null #True
         cat: nul #True
     shift_and_flip:
-      transform: True
+      transform: null #True
       max_shift: 20
       p: 0.5
   validation:
-    transform: True
+    transform: False
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
     num_events_per_sample: ${transform.train.num_events_per_sample}
@@ -80,7 +78,7 @@ transform:
       max_shift: 20
       p: 0.5
   test:
-    transform: True
+    transform: False
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
     num_events_per_sample: ${transform.train.num_events_per_sample}
@@ -88,7 +86,7 @@ transform:
     scale_limits: null
     degree_limit: null
     thresh_quantile: ${transform.train.thresh_quantile}
-    conv_vec_path: ${transform.train.conv_vec_path} 
+    conv_vec_path: ${transform.train.conv_vec_path}  
     radius_graph:
       transform: null #True
       r: 3
@@ -103,6 +101,6 @@ transform:
 wandb:
   log: True
   dir: ./
-  experiment_name: 'EST 1024 shufflenet_v2_x0_5 500 epochs batch 32 with outlier removal (not pretrained)'
+  experiment_name: 'EST no aug. shufflenet_v2_x0_5 (not pretrained)'
   entity: 'haraghi'
   project: 'DGCNN'
