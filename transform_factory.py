@@ -3,7 +3,7 @@ from datatransforms.event_transforms import TemporalScaling, RemoveOutliers, Spa
 
 def factory(cfg):
       
-      if cfg.transform is not None:
+      if cfg.transform:
             transform_list = []
             if cfg.thresh_quantile is not None:
                   transform_list.append(RemoveOutliers(cfg))
