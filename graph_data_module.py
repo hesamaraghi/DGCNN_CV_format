@@ -2,9 +2,9 @@ from torch_geometric.loader import DataLoader
 import os.path as osp
 import pytorch_lightning as pl
 from transform_factory import factory as transforms
-from datasets.dataset_factory import create_dataset
+from datasets_torch_geometric.dataset_factory import create_dataset
 
-datasets_path = 'datasets'
+datasets_path = 'datasets_torch_geometric'
 
 
 class GraphDataModule(pl.LightningDataModule):
