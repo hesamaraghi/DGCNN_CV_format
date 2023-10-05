@@ -1,0 +1,6 @@
+[submodule "datasets_torch_geometric"]
+	path = datasets_torch_geometric
+	url = git@github.com:hesamaraghi/datasets_torch_geometric.git
+[submodule "event_utils"]
+	path = event_utils
+	url = git@github.com:hesamaraghi/event_utils.git
