@@ -11,7 +11,7 @@ for nn = 1:N
     n_rand = n(rand_idx);
     t_rand = n_rand/fs;
     a_rand = cos(2*pi*f1*t_rand);
-    tensor_90(1,:,nn) = t_rand;
+    tensor_90(1,:,nn) = n_rand;
     tensor_90(2,:,nn) = a_rand;
 end
 a_unif_90 = cos(2*pi*f1*n_unif/fs);
@@ -25,7 +25,7 @@ for nn = 1:N
     n_rand = n(rand_idx);
     t_rand = n_rand/fs;
     a_rand = cos(2*pi*f1*t_rand);
-    tensor_110(1,:,nn) = t_rand;
+    tensor_110(1,:,nn) = n_rand;
     tensor_110(2,:,nn) = a_rand;
 end
 hold on
