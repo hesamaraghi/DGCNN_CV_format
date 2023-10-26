@@ -1,5 +1,5 @@
 description: " \
-Applying DGCNN on FAN1VS3 with subsampling 1024."
+Applying DGCNN on FAN1VS3 with subsampling 512."
 seed: 0
 optimize:
   optimizer: Adam
@@ -38,7 +38,7 @@ transform:
     transform: True
     spatial_centering: null #True
     temporal_scale: 1e-5
-    num_events_per_sample: 1024
+    num_events_per_sample: 512
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
@@ -100,6 +100,6 @@ transform:
 wandb:
   log: True
   dir: ./
-  experiment_name: 'DGCNN 1024'
+  experiment_name: 'DGCNN 512'
   entity: 'haraghi'
   project: 'DGCNN'
