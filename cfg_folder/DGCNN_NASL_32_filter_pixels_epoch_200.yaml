@@ -19,7 +19,7 @@ model:
   est_activation: null # nn.LeakyReLU(negative_slope=0.1)
   resnet_pretrained: null #True
 train:
-  epochs: 100
+  epochs: 200
   batch_size: 32
   loss_fn: nn.NLLLoss()
   profiler: simple
