@@ -1,5 +1,5 @@
 description: " \
-Applying DGCNN2 on NASL with subsampling 32.
+Applying DGCNN2 on NASL with subsampling 16.
 Does it also show good results? about 99 percent?"
 seed: 0
 optimize:
@@ -19,9 +19,9 @@ model:
   est_activation: null # nn.LeakyReLU(negative_slope=0.1)
   resnet_pretrained: null #True
 train:
-  epochs: 100
+  epochs: 200
   batch_size: 32
-  loss_fn: nn.CrossEntropyLoss()
+  loss_fn: nn.NLLLoss()
   profiler: simple
   ckpt_path: null
 dataset:
@@ -38,7 +38,7 @@ transform:
     transform: True
     spatial_centering: null #True
     temporal_scale: 1e-5
-    num_events_per_sample: 32
+    num_events_per_sample: 16
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
@@ -59,7 +59,7 @@ transform:
     transform: True
     spatial_centering: null #False #True
     temporal_scale: 1e-5
-    num_events_per_sample: 32
+    num_events_per_sample: 16
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -80,7 +80,7 @@ transform:
     transform: True
     spatial_centering: null #False #True
     temporal_scale: 1e-5
-    num_events_per_sample: 32
+    num_events_per_sample: 16
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -100,6 +100,6 @@ transform:
 wandb:
   log: True
   dir: ./
-  experiment_name: 'DGCNN2 32'
+  experiment_name: 'DGCNN2 16 epoch 200'
   entity: 'haraghi'
   project: 'DGCNN'
