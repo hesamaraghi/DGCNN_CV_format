@@ -4,12 +4,14 @@ import scipy.io as sio
 import re
 import random
 
-
 import torch
 from torch_geometric.transforms import BaseTransform
 from torch_geometric.data import Data, HeteroData
 
-
+try:
+    from .event_filters import *
+except ModuleNotFoundError:
+    from event_filters import *
 
 class TemporalScaling(BaseTransform):
     r"""Centers and normalizes node positions to the interval :math:`(-1, 1)`
@@ -64,8 +66,33 @@ class RemoveOutliers(BaseTransform):
                   and item.size(0) != 1):
                 data[key] = item[indices]
                 
+        return data
+   
+   
+    
+class FilterNodes(BaseTransform):
+    r"""Centers and normalizes node positions to the interval :math:`(-1, 1)`
+    (functional name: :obj:`normalize_scale`).
+    """
+    def __init__(self, cfg):
+
+        assert cfg.filter_nodes is not None, "'filter_nodes' cannot be empty!"
+        self.filter_nodes = cfg.filter_nodes
+
+    def __call__(self, data):
+
+        num_nodes = data.num_nodes
+        indices = eval(self.filter_nodes)(data)
 
 
+        for key, item in data:
+            if key == 'num_nodes':
+                data.num_nodes = torch.sum(indices)
+            elif bool(re.search('edge', key)):
+                continue
+            elif (torch.is_tensor(item) and item.size(0) == num_nodes
+                  and item.size(0) != 1):
+                data[key] = item[indices]
         return data
     
 

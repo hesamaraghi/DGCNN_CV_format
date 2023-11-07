@@ -1,10 +1,12 @@
 import torch_geometric.transforms as T
-from datatransforms.event_transforms import TemporalScaling, RemoveOutliers, SpatialCentering, SpatialScaling, AddEdgeAttr, ShiftAndFlip
+from datatransforms.event_transforms import TemporalScaling, RemoveOutliers, SpatialCentering, SpatialScaling, AddEdgeAttr, ShiftAndFlip, FilterNodes
 
 def factory(cfg):
       
       if cfg.transform:
             transform_list = []
+            if cfg.filter_nodes is not None:
+                  transform_list.append(FilterNodes(cfg))
             if cfg.thresh_quantile is not None:
                   transform_list.append(RemoveOutliers(cfg))
             if cfg.shift_and_flip.transform:
