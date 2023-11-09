@@ -11,3 +11,4 @@ sbatch*
 datasets/*
 !datasets/*.py
 .DS_Store
+_test*

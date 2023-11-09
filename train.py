@@ -117,6 +117,8 @@ def main():
     cfg = OmegaConf.load(cmd_cfg.cfg_path)
     
     cfg = OmegaConf.merge(cfg, cmd_cfg)
+    cfg_bare = OmegaConf.load("config_bare.yaml")
+    cfg = OmegaConf.merge(cfg_bare,cfg)
     print(OmegaConf.to_yaml(cfg))
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
