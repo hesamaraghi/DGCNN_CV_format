@@ -175,7 +175,7 @@ def main():
 
     # Test (if test dataset is implemented)
     if gdm.test_dataloader is not None:
-        trainer.test(runner, datamodule=gdm)
+        trainer.test(datamodule=gdm)
 
 
 
