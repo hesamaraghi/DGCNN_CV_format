@@ -12,6 +12,7 @@ model:
   k: null #50
   aggr: null #max
   num_bins: null #9
+  cnn_type: null #""
   resnet_crop_dimension: null # [224, 224]  # dimension of crop before it goes into classifier
   est_mlp_layers: null # [1, 30, 30, 1] # kernel layers for EST
   est_activation: null # nn.LeakyReLU(negative_slope=0.1)

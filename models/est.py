@@ -148,6 +148,8 @@ def cnn_model(cfg):
     input_channels = 2*cfg.model.num_bins
     try:
         cnn_type = cfg.model.cnn_type
+        if not cnn_type:
+            cnn_type = "resnet34"    
     except ConfigAttributeError:
         cnn_type = "resnet34"
 
