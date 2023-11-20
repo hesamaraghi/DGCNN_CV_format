@@ -16,7 +16,7 @@ command:
   - ${interpreter}
   - ${program}
   - "cfg_path=cfg_folder/EST_FAN1VS3_1024_250epochs.yaml"
-  - "wandb.experiment_name='EST 1024 250 epochs (for sweep)'"
+  - "wandb.experiment_name=''"
   - ${args_no_hyphens}
 parameters:
   seed:
