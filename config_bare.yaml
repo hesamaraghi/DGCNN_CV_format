@@ -23,6 +23,7 @@ train:
   loss_fn: null #nn.NLLLoss()
   profiler: null #simple
   ckpt_path: null
+  multi_val_test_num: null #1
 dataset:
   name: null #NASL
   train_percentage: null #0.75 # not applicable
