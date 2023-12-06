@@ -14,10 +14,13 @@ from pytorch_lightning.callbacks import LearningRateMonitor, TQDMProgressBar, Mo
 from pytorch_lightning.loggers import WandbLogger
 from omegaconf import OmegaConf
 import torchmetrics
+import copy
+import numpy as np
 
 # Imports of own files
 import model_factory
 from graph_data_module import GraphDataModule
+from utils import evaluate_manually
 
 
 class Runner(pl.LightningModule):
@@ -56,7 +59,7 @@ class Runner(pl.LightningModule):
             "optimizer": optimizer,
             "lr_scheduler": {
                 "scheduler": scheduler,
-                "monitor": "val/loss_step",
+                "monitor": "val/multi_acc/mean",
                 "frequency": 1
                 # If "monitor" references validation metrics, then "frequency" should be set to a
                 # multiple of "trainer.check_val_every_n_epoch".
@@ -75,8 +78,8 @@ class Runner(pl.LightningModule):
         self.train_accuracy(preds, batch.y)
 
         # Log step-level loss & accuracy
-        self.log("train/loss_step", loss, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
-        self.log("train/acc_step", self.train_accuracy, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
+        self.log("train/loss_step", loss, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=len(batch.label), sync_dist=True)
+        self.log("train/acc_step", self.train_accuracy, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=len(batch.label), sync_dist=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -85,8 +88,8 @@ class Runner(pl.LightningModule):
         self.val_accuracy(preds, batch.y)
 
         # Log step-level loss & accuracy
-        self.log("val/loss_step", loss, on_step=False, on_epoch=True, logger=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
-        self.log("val/acc_step", self.val_accuracy, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
+        self.log("val/loss_step", loss, on_step=False, on_epoch=True, logger=True, batch_size=len(batch.label), sync_dist=True)
+        self.log("val/acc_step", self.val_accuracy, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=len(batch.label), sync_dist=True)
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -95,8 +98,8 @@ class Runner(pl.LightningModule):
         self.test_accuracy(preds, batch.y)
 
         # Log test loss
-        self.log("test/loss", loss, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
-        self.log('test/acc', self.test_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=self.cfg.train.batch_size, sync_dist=True)
+        self.log("test/loss", loss, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=len(batch.label), sync_dist=True)
+        self.log('test/acc', self.test_accuracy, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(batch.label), sync_dist=True)
         return loss
 
     # def on_train_epoch_end(self):
@@ -109,6 +112,19 @@ class Runner(pl.LightningModule):
     #     self.log('val/acc', self.val_accuracy.compute())
     #     self.val_accuracy.reset()
 
+
+class MultiValCallback(pl.Callback):
+    def __init__(self,gdm,multi_val_test_num):
+        super().__init__()
+        self.gdm = gdm
+        self.multi_val_test_num = multi_val_test_num
+    def on_validation_epoch_end(self, trainer, pl_module):
+        model = copy.deepcopy(pl_module.model)
+        multi_val_acc = []
+        for _ in range(self.multi_val_test_num):
+            multi_val_acc.append(evaluate_manually(model,self.gdm.val_dataloader()))
+        pl_module.log('val/multi_acc/mean', np.mean(multi_val_acc), sync_dist=True)
+        pl_module.log('val/multi_acc/std', np.std(multi_val_acc), sync_dist=True)
 
 def main():
     # Load defaults and overwrite by command-line arguments
@@ -156,7 +172,8 @@ def main():
     
     lr_monitor = LearningRateMonitor(logging_interval='step')
     bar = TQDMProgressBar(refresh_rate=100)
-    checkpoint_callback = ModelCheckpoint(monitor="val/acc_step", mode="max")
+    checkpoint_callback = ModelCheckpoint(monitor="val/multi_acc/mean", mode="max")
+    multi_val_callback = MultiValCallback(gdm,cfg.train.multi_val_test_num)
     
     trainer = pl.Trainer(
         max_epochs=cfg.train.epochs,
@@ -166,9 +183,14 @@ def main():
         strategy="ddp_find_unused_parameters_false",
         devices=torch.cuda.device_count(),
         accelerator="auto",
-        callbacks=[lr_monitor,bar,checkpoint_callback],
+        callbacks=[lr_monitor,bar,checkpoint_callback,multi_val_callback],
         profiler=cfg.train.profiler
     )
+    
+
+    
+    # torch.set_num_threads(1)
+    print(f"Number of threads: {torch.get_num_threads()}")
 
     # Train + validate (if validation dataset is implemented)
     trainer.fit(model = runner, datamodule=gdm)
@@ -177,6 +199,12 @@ def main():
     if gdm.test_dataloader is not None:
         trainer.test(datamodule=gdm)
 
+    model = copy.deepcopy(runner.model)
+    multi_test_acc = []
+    for _ in range(cfg.train.multi_val_test_num):
+        multi_test_acc.append(evaluate_manually(model,gdm.test_dataloader()))
+    trainer.logger.experiment.log({'test/multi_acc/mean': np.mean(multi_test_acc)})
+    trainer.logger.experiment.log({'test/multi_acc/std': np.std(multi_test_acc)})
 
 
 
