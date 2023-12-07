@@ -1,7 +1,7 @@
 program: train.py
 method: random
-name: EST (FAN1VS3)
-project: sweep EST (FAN1VS3)
+name: EST (FAN1VS3) only 500 epochs
+project: sweep EST (FAN1VS3) (multi val test num 20)
 entity: haraghi
 description: |
   This is a grid search over the hyperparameters of the EST model 
@@ -15,8 +15,9 @@ command:
   - ${env}
   - ${interpreter}
   - ${program}
-  - "cfg_path=cfg_folder/EST_FAN1VS3_1024_250epochs.yaml"
+  - "cfg_path=cfg_folder/EST_FAN1VS3_1024_wandb_sweep.yaml"
   - "wandb.experiment_name=''"
+  - "wandb.log=True"
   - ${args_no_hyphens}
 parameters:
   seed:
@@ -41,8 +42,8 @@ parameters:
     parameters:
       epochs:
         values:
-          - 100
-          - 250
+          # - 100
+          # - 250
           - 500
       batch_size:
         values:
