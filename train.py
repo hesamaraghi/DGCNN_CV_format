@@ -155,7 +155,7 @@ def main():
         save_dir=cfg.wandb.dir,
         project=cfg.wandb.project,
         name=cfg.wandb.experiment_name,
-        log_model='all' if cfg.wandb.log else None,
+        log_model=cfg.wandb.log,
         offline=not cfg.wandb.log,
         # Keyword args passed to wandb.init()
         entity=cfg.wandb.entity,
@@ -191,6 +191,9 @@ def main():
     
     # torch.set_num_threads(1)
     print(f"Number of threads: {torch.get_num_threads()}")
+    if cfg.dataset.num_workers > 0:
+        torch.set_num_threads(cfg.dataset.num_workers)
+        print(f"Number of threads is set to: {torch.get_num_threads()}")
 
     # Train + validate (if validation dataset is implemented)
     trainer.fit(model = runner, datamodule=gdm)
