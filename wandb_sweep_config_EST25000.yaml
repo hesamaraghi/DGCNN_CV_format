@@ -1,0 +1,53 @@
+program: train.py
+method: random
+name: EST-FAN1VS3-25000-500epochs 
+project: sweep EST (FAN1VS3) 25000 (multi val test num 20)
+entity: haraghi
+description: |
+  This is a grid search over the hyperparameters of the EST model 
+  for FAN1VS3 dataset with 25000 events per sample.
+  The hyperparameters are the learning rate, the batch size, and the
+  number of epochs.
+metric:
+  goal: maximize
+  name: val/acc_step
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "cfg_path=cfg_folder/EST_FAN1VS3_25000_wandb_sweep.yaml"
+  - "wandb.experiment_name=''"
+  - "wandb.log=True"
+  - ${args_no_hyphens}
+parameters:
+  seed:
+    distribution: int_uniform
+    min: 0
+    max: 100
+  optimize:
+    parameters:
+      lr:
+        values:
+          - 1e-4
+          - 1e-3
+          - 1e-2
+          - 5e-4
+          - 5e-3
+      patience:
+        values:
+          - 10
+          - 20
+          - 40
+  train:
+    parameters:
+      epochs:
+        values:
+          # - 100
+          # - 250
+          - 500
+      batch_size:
+        values:
+          - 8
+          - 16
+          - 32
+          - 64
