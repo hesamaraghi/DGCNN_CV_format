@@ -1,5 +1,5 @@
 description: " \
-Applying EST on FAN1VS3 with subsampling 1024."
+Applying EST on FAN1VS3 with subsampling 25000."
 seed: 0
 optimize:
   optimizer: Adam
@@ -19,7 +19,7 @@ model:
   est_activation: nn.LeakyReLU(negative_slope=0.1)
   resnet_pretrained: True
 train:
-  epochs: 250
+  epochs: 100
   batch_size: 8
   loss_fn: nn.CrossEntropyLoss()
   profiler: simple
@@ -39,7 +39,7 @@ transform:
     transform: True
     spatial_centering: null #True
     temporal_scale: null # 1e-5
-    num_events_per_sample: 1024
+    num_events_per_sample: 25000
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
@@ -102,5 +102,5 @@ wandb:
   log: True
   dir: ./
   experiment_name: ""
-  entity: ""
-  project: ""
+  entity: 'haraghi'
+  project: 'DGCNN'

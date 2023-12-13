@@ -1,27 +1,27 @@
 description: " \
-Applying EST on FAN1VS3 with subsampling 1024."
+Applying DGCNN on FAN1VS3 with subsampling 1024."
 seed: 0
 optimize:
   optimizer: Adam
-  lr: 1e-4
+  lr: 1e-3
   lr_scheduler: ReduceLROnPlateau
   mode: min 
   factor: 0.5
   patience: 10
 model:
-  name: EST
-  k: null #20
-  aggr: "" #max
-  num_bins: 9
-  cnn_type: resnet34
-  resnet_crop_dimension: [224, 224]  # dimension of crop before it goes into classifier
-  est_mlp_layers: [1, 30, 30, 1] # kernel layers for EST
-  est_activation: nn.LeakyReLU(negative_slope=0.1)
-  resnet_pretrained: True
+  name: DGCNN
+  k: 20
+  aggr: max
+  num_bins: null #9
+  cnn_type: "" #shufflenet_v2_x0_5
+  resnet_crop_dimension: null #[224, 224]  # dimension of crop before it goes into classifier
+  est_mlp_layers: null #[1, 30, 30, 1] # kernel layers for EST
+  est_activation: "" #nn.LeakyReLU(negative_slope=0.1)
+  resnet_pretrained: null #False
 train:
-  epochs: 250
+  epochs: 100
   batch_size: 8
-  loss_fn: nn.CrossEntropyLoss()
+  loss_fn: nn.NLLLoss()
   profiler: simple
   ckpt_path: null
   multi_val_test_num: 20
@@ -38,7 +38,7 @@ transform:
   train:
     transform: True
     spatial_centering: null #True
-    temporal_scale: null # 1e-5
+    temporal_scale: 1e-5
     num_events_per_sample: 1024
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
