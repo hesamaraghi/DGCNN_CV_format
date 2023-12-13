@@ -8,7 +8,7 @@ import shutil
 def main():
     api = wandb.Api()
 
-    runs = api.runs("haraghi/sweep EST (FAN1VS3)")
+    runs = api.runs("haraghi/sweep EST (FAN1VS3) (multi val test num 20)")
     valid_run_ids = [r.id for r in runs]
     checkpoint_folders = glob(os.path.join(args.folder, '*'))
 

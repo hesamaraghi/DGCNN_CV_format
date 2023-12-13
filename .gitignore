@@ -13,3 +13,4 @@ datasets/*
 .DS_Store
 _test*
 images
+*.ckpt
