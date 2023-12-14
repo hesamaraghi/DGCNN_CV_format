@@ -242,7 +242,7 @@ class VaryingSamplingPoints(BaseTransform):
 
     def __call__(self, data: Data) -> Data:
         
-        self.num = np.random.choice(self.num_list, size=1, p=self.weights) 
+        self.num = np.random.choice(self.num_list, size=1, p=self.weights)[0]
         num_nodes = data.num_nodes
 
         if self.replace:
