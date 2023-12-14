@@ -20,7 +20,9 @@ def factory(cfg):
             elif cfg.random_num_events_per_sample.transform:
                   transform_list.append(VaryingSamplingPoints((   cfg.random_num_events_per_sample.min_num_events, 
                                                                   cfg.random_num_events_per_sample.max_num_events), 
-                                                                  replace = False, allow_duplicates = False)) # TODO: allow duplicates is set to False for now
+                                                                  replace = False, 
+                                                                  allow_duplicates = False,
+                                                                  inverse_sampling = cfg.random_num_events_per_sample.inverse_sampling)) # TODO: allow duplicates is set to False for now
             if cfg.random_flip is not None:
                   transform_list.append(T.RandomFlip(axis = 0, p = cfg.random_flip))
             if cfg.scale_limits is not None:

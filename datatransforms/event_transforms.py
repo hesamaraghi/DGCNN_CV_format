@@ -228,16 +228,21 @@ class VaryingSamplingPoints(BaseTransform):
         range_num: tuple,
         replace: bool = True,
         allow_duplicates: bool = False,
+        inverse_sampling: bool = False,
     ):
-        self.range_num = range_num
+        assert len(range_num) == 2 and range_num[0] < range_num[1]
+        self.num_list = np.arange(*range_num)
+        if inverse_sampling:
+            weights = 1 / self.num_list
+            self.weights = weights / weights.sum()
+        else:
+            self.weights = None
         self.replace = replace
         self.allow_duplicates = allow_duplicates
 
     def __call__(self, data: Data) -> Data:
         
-        min_num, max_num = self.range_num
-        self.num = random.randint(min_num, max_num)
-        
+        self.num = np.random.choice(self.num_list, size=1, p=self.weights) 
         num_nodes = data.num_nodes
 
         if self.replace:
