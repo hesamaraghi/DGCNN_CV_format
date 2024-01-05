@@ -15,16 +15,14 @@ class GraphDataModule(pl.LightningDataModule):
         else:
             self.dataset_path = cfg.dataset.dataset_path
         self.batch_size = cfg.train.batch_size      
-        self.dataset_name = cfg.dataset.name          
+        self.dataset_name = cfg.dataset.name
+        self.multi_val_test_num = cfg.train.multi_val_test_num      
         self.transform_dict = {}
         self.transform_dict['train'] = transforms(cfg.transform.train)
         self.transform_dict['validation'] = transforms(cfg.transform.validation)
         self.transform_dict['test'] = transforms(cfg.transform.test)
         self.num_workers=cfg.dataset.num_workers
-        
-    @property
-    def num_classes(self):
-        return create_dataset(
+        self.num_classes = create_dataset(
                 dataset_path = self.dataset_path,
                 dataset_name  = self.dataset_name,
                 dataset_type = 'training',
@@ -57,7 +55,7 @@ class GraphDataModule(pl.LightningDataModule):
 
     def val_dataloader(self):
         # Return a DataLoader for the validation dataset
-        return DataLoader(
+        return [DataLoader(
             create_dataset(
                 dataset_path = self.dataset_path,
                 dataset_name  = self.dataset_name,
@@ -68,11 +66,11 @@ class GraphDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-        )
+        ) for _ in range(self.multi_val_test_num)]
 
     def test_dataloader(self):
         # Return a DataLoader for the test dataset
-        return DataLoader(
+        return [DataLoader(
             create_dataset(
                 dataset_path = self.dataset_path,
                 dataset_name = self.dataset_name,
@@ -83,4 +81,4 @@ class GraphDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-        )
+        ) for _ in range(self.multi_val_test_num)]
