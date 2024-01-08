@@ -34,7 +34,7 @@ dataset:
   num_samples_per_class: null
   num_classes: null
   dataset_path: null
-  num_workers: 4
+  num_workers: 3
 transform:
   train:
     transform: True
