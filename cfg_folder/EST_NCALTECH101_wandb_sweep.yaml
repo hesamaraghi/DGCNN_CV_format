@@ -1,5 +1,5 @@
 description: " \
-Applying EST on NCALTECH101 with subsampling 1024."
+Hyperparameter tuning of EST on NCALTECH101 with."
 seed: 0
 optimize:
   optimizer: Adam

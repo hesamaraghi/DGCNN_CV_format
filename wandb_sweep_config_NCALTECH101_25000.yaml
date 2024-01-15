@@ -1,0 +1,55 @@
+program: train.py
+method: random
+name: EST-NCALTECH101-25000
+project: sweep_EST_NCALTECH101_25000_multi20
+entity: haraghi
+description: |
+  This is a random search over the hyperparameters of the EST model 
+  for NCALTECH101 dataset with 25000 events per sample.
+  The hyperparameters are the learning rate, the batch size, and the
+  number of epochs.
+metric:
+  goal: maximize
+  name: val/acc/mean
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "cfg_path=cfg_folder/EST_NCALTECH101_wandb_sweep.yaml"
+  - "transform.train.num_events_per_sample=25000"
+  - "wandb.experiment_name=''"
+  - "wandb.log=True"
+  - ${args_no_hyphens}
+parameters:
+  seed:
+    distribution: int_uniform
+    min: 0
+    max: 100
+  optimize:
+    parameters:
+      lr:
+        values:
+          - 1e-5
+          - 5e-5
+          - 1e-4
+          - 5e-4
+          - 5e-3
+      patience:
+        values:
+          - 10
+          - 20
+          - 40
+          - 80
+  train:
+    parameters:
+      epochs:
+        values:
+          - 100
+          - 250
+          # - 500
+      batch_size:
+        values:
+          - 8
+          - 16
+          - 32
+          - 64
