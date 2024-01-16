@@ -1,6 +1,6 @@
 program: train.py
 method: random
-name: EST-NCALTECH101-25000
+name: EST-NCALTECH101-25000-500eopchs
 project: sweep_EST_NCALTECH101_25000_multi20
 entity: haraghi
 description: |
@@ -44,9 +44,9 @@ parameters:
     parameters:
       epochs:
         values:
-          - 100
-          - 250
-          # - 500
+          # - 100
+          # - 250
+          - 500
       batch_size:
         values:
           - 8
