@@ -14,3 +14,4 @@ datasets/*
 _test*
 images
 *.ckpt
+landscape_plots
