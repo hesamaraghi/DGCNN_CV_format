@@ -33,6 +33,8 @@ class Runner(pl.LightningModule):
         
         self.val_loss = torch.tensor([0.0 for _ in range(self.multi_val_test_num)])
         self.test_loss = torch.tensor([0.0 for _ in range(self.multi_val_test_num)])
+        self.val_num_samples = torch.tensor([0 for _ in range(self.multi_val_test_num)])
+        self.test_num_samples = torch.tensor([0 for _ in range(self.multi_val_test_num)])
 
         self.train_accuracy = torchmetrics.Accuracy(task='multiclass', num_classes=cfg.dataset.num_classes)
         self.val_accuracy =  nn.ModuleList([torchmetrics.Accuracy(task='multiclass', num_classes=cfg.dataset.num_classes) for _ in range(self.multi_val_test_num) ])
@@ -89,22 +91,26 @@ class Runner(pl.LightningModule):
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         loss, y_hat = self._step(batch)
         preds = torch.argmax(y_hat, dim=1)
+        batch_size = torch.tensor(len(batch.label))
         self.val_accuracy[dataloader_idx](preds, batch.y)
-        self.val_loss[dataloader_idx] = loss
+        self.val_loss[dataloader_idx] += loss.to('cpu') * batch_size
+        self.val_num_samples[dataloader_idx] += batch_size
         
         # Log step-level loss & accuracy
-        self.log(f"val/loss_step", loss, on_step=False, on_epoch=True, logger=True, batch_size=len(batch.label), sync_dist=True)
-        self.log(f"val/acc_step", self.val_accuracy[dataloader_idx], on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=len(batch.label), sync_dist=True)
+        self.log(f"val/loss_step", loss, on_step=False, on_epoch=True, logger=True, batch_size=batch_size, sync_dist=True)
+        self.log(f"val/acc_step", self.val_accuracy[dataloader_idx], on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=batch_size, sync_dist=True)
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
         loss, y_hat = self._step(batch)
         preds = torch.argmax(y_hat, dim=1)
+        batch_size = torch.tensor(len(batch.label))
         self.test_accuracy[dataloader_idx](preds, batch.y)
-        self.test_loss[dataloader_idx] = loss
+        self.test_loss[dataloader_idx] += loss.to('cpu') * batch_size
+        self.test_num_samples[dataloader_idx] += batch_size
         
         # Log test loss
-        self.log("test/loss", loss, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=len(batch.label), sync_dist=True)
-        self.log('test/acc', self.test_accuracy[dataloader_idx], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(batch.label), sync_dist=True)
+        self.log("test/loss", loss, on_step=False, on_epoch=True, logger=True, prog_bar=True, batch_size=batch_size, sync_dist=True)
+        self.log('test/acc', self.test_accuracy[dataloader_idx], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=batch_size, sync_dist=True)
 
     # def on_train_epoch_end(self):
     #     # Log the epoch-level training accuracy
@@ -116,20 +122,28 @@ class Runner(pl.LightningModule):
         acc_list = torch.tensor([metric.compute() for metric in self.val_accuracy])
         self.log('val/acc/mean', torch.mean(acc_list), sync_dist=True)
         self.log('val/acc/std', torch.std(acc_list), sync_dist=True)
+        self.val_loss = self.val_loss / self.val_num_samples
         self.log('val/loss/mean', torch.mean(self.val_loss), sync_dist=True)
         self.log('val/loss/std', torch.std(self.val_loss), sync_dist=True)
         for metric in self.val_accuracy:
             metric.reset()
+        self.val_loss = torch.tensor([0.0 for _ in range(self.multi_val_test_num)])
+        self.val_num_samples = torch.tensor([0 for _ in range(self.multi_val_test_num)])
+  
             
     def on_test_epoch_end(self):
         # Log the epoch-level validation accuracy
         acc_list = torch.tensor([metric.compute() for metric in self.test_accuracy])
         self.log('test/acc_mean', torch.mean(acc_list), sync_dist=True)
         self.log('test/acc_std', torch.std(acc_list), sync_dist=True)
+        self.test_loss = self.test_loss / self.test_num_samples
         self.log('test/loss_mean', torch.mean(self.test_loss), sync_dist=True)
         self.log('test/loss_std', torch.std(self.test_loss), sync_dist=True)
         for metric in self.test_accuracy:
             metric.reset()
+        self.test_loss = torch.tensor([0.0 for _ in range(self.multi_val_test_num)])
+        self.test_num_samples = torch.tensor([0 for _ in range(self.multi_val_test_num)])
+
 
 
 def main():
