@@ -72,19 +72,21 @@ class RemoveOutliers(BaseTransform):
    
     
 class FilterNodes(BaseTransform):
-    r"""Centers and normalizes node positions to the interval :math:`(-1, 1)`
-    (functional name: :obj:`normalize_scale`).
+    r"""
+    Keep the nodes that satisfy the condition defined in the filter_nodes function.
     """
-    def __init__(self, cfg):
+    # def __init__(self, cfg):
 
-        assert cfg.filter_nodes is not None, "'filter_nodes' cannot be empty!"
-        self.filter_nodes = cfg.filter_nodes
+    #     assert cfg.filter_nodes is not None, "'filter_nodes' cannot be empty!"
+    #     self.filter_nodes = cfg.filter_nodes
 
+    def get_indices(self,data):
+        raise NotImplementedError
+    
     def __call__(self, data):
 
         num_nodes = data.num_nodes
-        indices = eval(self.filter_nodes)(data)
-
+        indices = self.get_indices(data)
 
         for key, item in data:
             if key == 'num_nodes':
