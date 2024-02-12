@@ -10,7 +10,7 @@ def main():
         sbatch_command = f"sbatch {args.sbatch_folder}/run_train.sbatch wandb agent --count {args.agent_count} {args.sweep_id}"
         print(sbatch_command)
         # Submit the job using subprocess
-        # subprocess.call(sbatch_command, shell=True)
+        subprocess.call(sbatch_command, shell=True)
 
 if __name__ == "__main__":
     

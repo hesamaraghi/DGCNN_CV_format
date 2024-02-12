@@ -39,6 +39,11 @@ transform:
     spatial_centering: null #True
     temporal_scale: null #1e-5
     num_events_per_sample: null #32
+    random_num_events_per_sample:
+      transform: null #True
+      min_num_events: null #8
+      max_num_events: null #2048
+      inverse_sampling: null #False
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
@@ -61,6 +66,11 @@ transform:
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
     num_events_per_sample: null #32
+    random_num_events_per_sample:
+      transform: null #True
+      min_num_events: null #8
+      max_num_events: null #2048
+      inverse_sampling: null #False
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -83,6 +93,11 @@ transform:
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
     num_events_per_sample: null #32
+    random_num_events_per_sample:
+      transform: null #True
+      min_num_events: null #8
+      max_num_events: null #2048
+      inverse_sampling: null #False
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -100,6 +115,25 @@ transform:
       transform: null #True
       max_shift: null #20
       p: null #0.5
+pre_transform:
+  train:
+    transform: null #True
+    num_events_per_sample: null #32
+    thresh_quantile: null #0.3
+    filter_nodes: null #remove_NASL_failed_pixels
+    conv_vec_path: null #'datasets/NCALTECH101/conv_scores'
+  validation:
+    transform: null #True
+    num_events_per_sample: null #32
+    thresh_quantile: null #0.3
+    filter_nodes: null #remove_NASL_failed_pixels 
+    conv_vec_path: null #'datasets/NCALTECH101/conv_scores'
+  test:
+    transform: null #True
+    num_events_per_sample: null #32
+    thresh_quantile: null #0.3
+    filter_nodes:  null #remove_NASL_failed_pixels 
+    conv_vec_path: null #'datasets/NCALTECH101/conv_scores'  
 wandb:
   log: null #True
   dir: null #./

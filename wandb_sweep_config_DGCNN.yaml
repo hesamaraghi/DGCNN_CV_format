@@ -1,21 +1,21 @@
 program: train.py
 method: random
-name: EST (FAN1VS3) only 500 epochs
-project: sweep EST (FAN1VS3) (multi val test num 20)
+name: DGCNN-FAN1VS3-500epochs 
+project: sweep_DGCNN_FAN1VS3_multi20
 entity: haraghi
 description: |
-  This is a grid search over the hyperparameters of the EST model 
+  This is a random search over the hyperparameters of the DGCNN model 
   for FAN1VS3 dataset with 1024 events per sample.
   The hyperparameters are the learning rate, the batch size, and the
   number of epochs.
 metric:
   goal: maximize
-  name: val/acc_step
+  name: val/multi_acc/mean
 command:
   - ${env}
   - ${interpreter}
   - ${program}
-  - "cfg_path=cfg_folder/EST_FAN1VS3_1024_wandb_sweep.yaml"
+  - "cfg_path=cfg_folder/DGCNN_FAN1VS3_1024_wandb_sweep.yaml"
   - "wandb.experiment_name=''"
   - "wandb.log=True"
   - ${args_no_hyphens}

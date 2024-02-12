@@ -4,3 +4,6 @@
 [submodule "event_utils"]
 	path = event_utils
 	url = git@github.com:hesamaraghi/event_utils.git
+[submodule "loss-landscape"]
+	path = loss-landscape
+	url = git@github.com:hesamaraghi/loss-landscape.git

@@ -13,3 +13,5 @@ datasets/*
 .DS_Store
 _test*
 images
+*.ckpt
+landscape_plots

@@ -3,7 +3,8 @@ import os.path as osp
 import scipy.io as sio
 import re
 import random
-
+import math
+import numpy as np
 import torch
 from torch_geometric.transforms import BaseTransform
 from torch_geometric.data import Data, HeteroData
@@ -71,19 +72,21 @@ class RemoveOutliers(BaseTransform):
    
     
 class FilterNodes(BaseTransform):
-    r"""Centers and normalizes node positions to the interval :math:`(-1, 1)`
-    (functional name: :obj:`normalize_scale`).
+    r"""
+    Keep the nodes that satisfy the condition defined in the filter_nodes function.
     """
-    def __init__(self, cfg):
+    # def __init__(self, cfg):
 
-        assert cfg.filter_nodes is not None, "'filter_nodes' cannot be empty!"
-        self.filter_nodes = cfg.filter_nodes
+    #     assert cfg.filter_nodes is not None, "'filter_nodes' cannot be empty!"
+    #     self.filter_nodes = cfg.filter_nodes
 
+    def get_indices(self,data):
+        raise NotImplementedError
+    
     def __call__(self, data):
 
         num_nodes = data.num_nodes
-        indices = eval(self.filter_nodes)(data)
-
+        indices = self.get_indices(data)
 
         for key, item in data:
             if key == 'num_nodes':
@@ -204,3 +207,67 @@ class ShiftAndFlip(BaseTransform):
     def __repr__(self) -> str:
         return (f'{self.__class__.__name__}(max_shift={self.max_shift}, '
                 f'p={self.p})')
+        
+        
+        
+class VaryingSamplingPoints(BaseTransform):
+    r"""Samples a random number of points and features from the nodes.
+    Args:
+        range_num (tuple): minimun and maximum for random number of points to sample.
+        replace (bool, optional): If set to :obj:`False`, samples points
+            without replacement. (default: :obj:`True`)
+        allow_duplicates (bool, optional): In case :obj:`replace` is
+            :obj`False` and :obj:`num` is greater than the number of points,
+            this option determines whether to add duplicated nodes to the
+            output points or not.
+            In case :obj:`allow_duplicates` is :obj:`False`, the number of
+            output points might be smaller than :obj:`num`.
+            In case :obj:`allow_duplicates` is :obj:`True`, the number of
+            duplicated points are kept to a minimum. (default: :obj:`False`)
+    """
+    def __init__(
+        self,
+        range_num: tuple,
+        replace: bool = True,
+        allow_duplicates: bool = False,
+        inverse_sampling: bool = False,
+    ):
+        assert len(range_num) == 2 and range_num[0] < range_num[1]
+        self.num_list = np.arange(*range_num)
+        if inverse_sampling:
+            weights = 1 / self.num_list
+            self.weights = weights / weights.sum()
+        else:
+            self.weights = None
+        self.replace = replace
+        self.allow_duplicates = allow_duplicates
+
+    def __call__(self, data: Data) -> Data:
+        
+        self.num = np.random.choice(self.num_list, size=1, p=self.weights)[0]
+        num_nodes = data.num_nodes
+
+        if self.replace:
+            choice = np.random.choice(num_nodes, self.num, replace=True)
+            choice = torch.from_numpy(choice).to(torch.long)
+        elif not self.allow_duplicates:
+            choice = torch.randperm(num_nodes)[:self.num]
+        else:
+            choice = torch.cat([
+                torch.randperm(num_nodes)
+                for _ in range(math.ceil(self.num / num_nodes))
+            ], dim=0)[:self.num]
+
+        for key, item in data:
+            if key == 'num_nodes':
+                data.num_nodes = choice.size(0)
+            elif bool(re.search('edge', key)):
+                continue
+            elif (torch.is_tensor(item) and item.size(0) == num_nodes
+                  and item.size(0) != 1):
+                data[key] = item[choice]
+
+        return data
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}(({self.range_num[0]},{self.range_num[1]}), replace={self.replace})'

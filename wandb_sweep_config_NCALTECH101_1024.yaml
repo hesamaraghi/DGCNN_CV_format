@@ -1,21 +1,22 @@
 program: train.py
 method: random
-name: EST (FAN1VS3) only 500 epochs
-project: sweep EST (FAN1VS3) (multi val test num 20)
+name: EST-NCALTECH101-1024
+project: sweep_EST_NCALTECH101_1024_multi20
 entity: haraghi
 description: |
-  This is a grid search over the hyperparameters of the EST model 
-  for FAN1VS3 dataset with 1024 events per sample.
+  This is a random search over the hyperparameters of the EST model 
+  for NCALTECH101 dataset with 1024 events per sample.
   The hyperparameters are the learning rate, the batch size, and the
   number of epochs.
 metric:
   goal: maximize
-  name: val/acc_step
+  name: val/acc/mean
 command:
   - ${env}
   - ${interpreter}
   - ${program}
-  - "cfg_path=cfg_folder/EST_FAN1VS3_1024_wandb_sweep.yaml"
+  - "cfg_path=cfg_folder/EST_NCALTECH101_wandb_sweep.yaml"
+  - "transform.train.num_events_per_sample=1024"
   - "wandb.experiment_name=''"
   - "wandb.log=True"
   - ${args_no_hyphens}
@@ -28,9 +29,9 @@ parameters:
     parameters:
       lr:
         values:
+          - 1e-5
+          - 5e-5
           - 1e-4
-          - 1e-3
-          - 1e-2
           - 5e-4
           - 5e-3
       patience:
@@ -38,13 +39,14 @@ parameters:
           - 10
           - 20
           - 40
+          - 80
   train:
     parameters:
       epochs:
         values:
-          # - 100
-          # - 250
-          - 500
+          - 100
+          - 250
+          # - 500
       batch_size:
         values:
           - 8
