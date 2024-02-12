@@ -1,0 +1,106 @@
+description: " \
+Applying DGCNN on FAN1VS3 with subsampling 4096."
+seed: 0
+optimize:
+  optimizer: Adam
+  lr: 1e-3
+  lr_scheduler: ReduceLROnPlateau
+  mode: min 
+  factor: 0.5
+  patience: 10
+model:
+  name: DGCNN
+  k: 20
+  aggr: max
+  num_bins: null #9
+  cnn_type: "" #shufflenet_v2_x0_5
+  resnet_crop_dimension: null #[224, 224]  # dimension of crop before it goes into classifier
+  est_mlp_layers: null #[1, 30, 30, 1] # kernel layers for EST
+  est_activation: "" #nn.LeakyReLU(negative_slope=0.1)
+  resnet_pretrained: null #False
+train:
+  epochs: 100
+  batch_size: 8
+  loss_fn: nn.NLLLoss()
+  profiler: simple
+  ckpt_path: null
+  multi_val_test_num: 1
+dataset:
+  name: FAN1VS3
+  train_percentage: 0.75 # not applicable
+  validation_percentage: 0.10 # not applicable
+  image_resolution: [720,1280]  # dimension of spatial grid  (H x W)
+  num_samples_per_class: null
+  num_classes: null
+  dataset_path: null
+  num_workers: 7
+transform:
+  train:
+    transform: True
+    spatial_centering: null #True
+    temporal_scale: 1e-5
+    num_events_per_sample: 4096
+    random_flip: null #0.5
+    scale_limits: null #[0.75,1.5]
+    degree_limit: null #10  #20
+    thresh_quantile: null #0.3
+    conv_vec_path: 'datasets/NCALTECH101/conv_scores'
+    radius_graph:
+      transform: null #True
+      r: 3
+      max_num_neighbors: 32
+      add_edge_attr:
+        transform: null #True
+        cat: null #True
+    shift_and_flip:
+      transform: False
+      max_shift: 20
+      p: 0.5
+  validation:
+    transform: True
+    spatial_centering: ${transform.train.spatial_centering}
+    temporal_scale: ${transform.train.temporal_scale}
+    num_events_per_sample: ${transform.train.num_events_per_sample}
+    random_flip: null
+    scale_limits: null
+    degree_limit: null
+    thresh_quantile: ${transform.train.thresh_quantile}
+    conv_vec_path: ${transform.train.conv_vec_path}
+    radius_graph:
+      transform: null #True
+      r: 3
+      max_num_neighbors: 32
+      add_edge_attr:
+        transform: null #True
+        cat: null #True  
+    shift_and_flip:
+      transform: False
+      max_shift: 20
+      p: 0.5
+  test:
+    transform: True
+    spatial_centering: ${transform.train.spatial_centering}
+    temporal_scale: ${transform.train.temporal_scale}
+    num_events_per_sample: ${transform.train.num_events_per_sample}
+    random_flip: null
+    scale_limits: null
+    degree_limit: null
+    thresh_quantile: ${transform.train.thresh_quantile}
+    conv_vec_path: ${transform.train.conv_vec_path} 
+    radius_graph:
+      transform: null #True
+      r: 3
+      max_num_neighbors: 32
+      add_edge_attr:
+        transform: null #True
+        cat: null #True
+    shift_and_flip:
+      transform: False
+      max_shift: 20
+      p: 0.5
+wandb:
+  log: True
+  dir: ./
+  experiment_name: 'DGCNN 4096'
+  entity: 'haraghi'
+  project: 'DGCNN'
