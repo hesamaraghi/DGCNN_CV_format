@@ -21,12 +21,20 @@ class GraphDataModule(pl.LightningDataModule):
         self.transform_dict['train'] = transforms(cfg.transform.train)
         self.transform_dict['validation'] = transforms(cfg.transform.validation)
         self.transform_dict['test'] = transforms(cfg.transform.test)
+        self.pre_transform_dict = {'train': None, 'validation': None, 'test': None}
+        if cfg.pre_transform.train.transform == True:
+            self.pre_transform_dict['train'] = transforms(cfg.pre_transform.train)
+        if cfg.pre_transform.validation.transform == True:
+            self.pre_transform_dict['validation'] = transforms(cfg.pre_transform.validation)
+        if cfg.pre_transform.test.transform == True:
+            self.pre_transform_dict['test'] = transforms(cfg.pre_transform.test)
         self.num_workers=cfg.dataset.num_workers
         self.num_classes = create_dataset(
                 dataset_path = self.dataset_path,
                 dataset_name  = self.dataset_name,
                 dataset_type = 'training',
                 transform = self.transform_dict['train'],
+                pre_transform=self.pre_transform_dict['train'],
                 num_workers=self.num_workers
             ).num_classes
 
@@ -46,6 +54,7 @@ class GraphDataModule(pl.LightningDataModule):
                 dataset_name  = self.dataset_name,
                 dataset_type = 'training',
                 transform = self.transform_dict['train'],
+                pre_transform=self.pre_transform_dict['train'],
                 num_workers=self.num_workers
             ),
             batch_size=self.batch_size,
@@ -61,6 +70,7 @@ class GraphDataModule(pl.LightningDataModule):
                 dataset_name  = self.dataset_name,
                 dataset_type = 'validation',
                 transform = self.transform_dict['validation'],
+                pre_transform=self.pre_transform_dict['validation'],
                 num_workers=self.num_workers
             ),
             batch_size=self.batch_size,
@@ -76,6 +86,7 @@ class GraphDataModule(pl.LightningDataModule):
                 dataset_name = self.dataset_name,
                 dataset_type = 'test',
                 transform = self.transform_dict['test'],
+                pre_transform=self.pre_transform_dict['test'],
                 num_workers=self.num_workers
             ),
             batch_size=self.batch_size,
