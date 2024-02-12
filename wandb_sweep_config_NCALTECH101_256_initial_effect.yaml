@@ -1,0 +1,54 @@
+program: train.py
+method: random
+name: EST-NCALTECH101-HP-set1
+project: sweep_EST_NCALTECH101_256_initialization_effect_multi20
+entity: haraghi
+description: |
+  This is a random search over different initialization points of the EST model 
+  for NCALTECH101 dataset with 256 events per sample.
+  The hyperparameters are choosen for the best performance of val. acc.
+metric:
+  goal: maximize
+  name: val/acc/mean
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "cfg_path=cfg_folder/EST_NCALTECH101_wandb_sweep.yaml"
+  - "transform.train.num_events_per_sample=256"
+  - "wandb.experiment_name=''"
+  - "wandb.log=True"
+  - ${args_no_hyphens}
+parameters:
+  seed:
+    distribution: int_uniform
+    min: 0
+    max: 10000
+  optimize:
+    parameters:
+      lr:
+        values:
+          # - 1e-5
+          # - 5e-5
+          - 1e-4
+          # - 5e-4
+          # - 5e-3
+      patience:
+        values:
+          # - 10
+          # - 20
+          - 40
+          # - 80
+  train:
+    parameters:
+      epochs:
+        values:
+          # - 100
+          - 250
+          # - 500
+      batch_size:
+        values:
+          # - 8
+          - 16
+          # - 32
+          # - 64
