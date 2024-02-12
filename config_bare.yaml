@@ -115,6 +115,25 @@ transform:
       transform: null #True
       max_shift: null #20
       p: null #0.5
+pre_transform:
+  train:
+    transform: null #True
+    num_events_per_sample: null #32
+    thresh_quantile: null #0.3
+    filter_nodes: null #remove_NASL_failed_pixels
+    conv_vec_path: null #'datasets/NCALTECH101/conv_scores'
+  validation:
+    transform: null #True
+    num_events_per_sample: null #32
+    thresh_quantile: null #0.3
+    filter_nodes: null #remove_NASL_failed_pixels 
+    conv_vec_path: null #'datasets/NCALTECH101/conv_scores'
+  test:
+    transform: null #True
+    num_events_per_sample: null #32
+    thresh_quantile: null #0.3
+    filter_nodes:  null #remove_NASL_failed_pixels 
+    conv_vec_path: null #'datasets/NCALTECH101/conv_scores'  
 wandb:
   log: null #True
   dir: null #./
