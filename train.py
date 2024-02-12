@@ -20,7 +20,6 @@ import numpy as np
 # Imports of own files
 import model_factory
 from graph_data_module import GraphDataModule
-from utils import evaluate_manually
 
 
 class Runner(pl.LightningModule):
