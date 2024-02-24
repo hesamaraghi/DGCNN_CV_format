@@ -1,7 +1,7 @@
 clear all 
 close all
 
-        dataset_name = 'ncaltech101';
+dataset_name = 'dvs_gesture';
 main_addr = '../datasets';
 
 
@@ -9,6 +9,15 @@ if(exist('file_list_nasl.mat','file')); load('file_list_nasl.mat'); end
 if(exist('file_list_fan1vs3.mat','file')); load('file_list_fan1vs3.mat'); end
 if(exist('file_list_ncaltech101.mat','file')); load('file_list_ncaltech101.mat'); end
 if(exist('file_list_ncars.mat','file')); load('file_list_ncars.mat'); end
+if(exist('file_list_dvsgesture.mat','file')); load('file_list_dvsgesture.mat'); end
+
+if(strcmpi(dataset_name,'dvs_gesture') && ~exist('file_list_dvsgesture','var'))
+    DS_folder = [main_addr '/DVS_GESTURE/test'];
+    class_folder = DS_folder; 
+    file_list_dvsgesture = getCategorizedPaths(class_folder);
+    class_names_dvs_gesture = keys(file_list_dvsgesture);
+    save 'file_list_dvsgesture.mat' file_list_dvsgesture class_names_dvs_gesture
+end
 
 if(strcmpi(dataset_name,'fan1vs3') && ~exist('file_list_fan1vs3','var'))
     DS_folder = [main_addr '/fan1vs3/downloaded'];
@@ -45,6 +54,7 @@ end
 if(strcmp(dataset_name,'nasl'))
     camera_resolution = [240,180];
     class_id = randi(length(class_names_nasl));
+    class_id = 1;
     class_name = class_names_nasl{class_id};
     sample_id = randi(length(file_list_nasl(class_name)));
     class_files = file_list_nasl(class_name);
@@ -52,6 +62,22 @@ if(strcmp(dataset_name,'nasl'))
     % file = ['/Volumes/SFTP/staff-bulk/ewi/insy/VisionLab/maraghi/event-based-GNN/datasets/NASL/downloaded/l/l_2245.mat'];
     load(file)
     idx = pol == 1;
+elseif(strcmp(dataset_name,'dvs_gesture'))
+
+
+
+    camera_resolution = [180,180];
+    class_id = randi(length(class_names_dvs_gesture));
+    class_name = class_names_dvs_gesture{class_id};
+    sample_id = randi(length(file_list_dvsgesture(class_name)));
+    class_files = file_list_dvsgesture(class_name);
+    file = class_files{sample_id};
+    % file = ['/Volumes/SFTP/staff-bulk/ewi/insy/VisionLab/maraghi/event-based-GNN/datasets/NASL/downloaded/l/l_2245.mat'];
+    load(file)
+    ts = t;
+    idx = p == 1;
+
+
 elseif(strcmp(dataset_name,'ncaltech101'))
     camera_resolution = [240,180];
     class_id = randi(length(class_names_ncaltech101));
@@ -61,6 +87,7 @@ elseif(strcmp(dataset_name,'ncaltech101'))
     file = class_files{sample_id};
     
     % file = '/Volumes/SFTP/staff-bulk/ewi/insy/VisionLab/maraghi/event-based-GNN/datasets/NCALTECH101/downloaded/Caltech101/lobster/image_0030.bin';
+    file = '/Volumes/SFTP/staff-bulk/ewi/insy/VisionLab/maraghi/event-based-GNN/datasets/NCALTECH101/downloaded/Caltech101/butterfly/image_0001.bin';
 
     TD_ncaltech101 = Read_Ndataset(file);
     x = TD_ncaltech101.x;
@@ -109,12 +136,18 @@ idx_p = idx;
 idx_n =  ~idx;
 %%
 figure
+TD = struct('x', double(x)+1 ,  'y', double(y)+1,...
+                'ts', double(ts), 'p', double(p));
+ShowTD(TD);
+
+%%
+figure
 ax = axes;
 scatter3(ax,ts(idx_p)*1e-3,x(idx_p),y(idx_p),'r.','SizeData',100)
 hold on
 scatter3(ax,ts(idx_n)*1e-3,x(idx_n),y(idx_n),'b.','SizeData',100)
 hold off
-ax.ZDir = 'reverse';
+% ax.ZDir = 'reverse';
 ax.YDir = 'reverse';
 %%
 % close all
@@ -204,7 +237,7 @@ disp(nnz(X)/numel(X))
 % ylim(ax,[0 240]);
 % zlim(ax,[0 180]);
 %%
-num_ev = 32;length(locations);
+num_ev = 4096;length(locations);
 subset_idx = sort(randperm(length(ts),num_ev));
 ts = ts(subset_idx);
 x = x(subset_idx);
@@ -258,3 +291,5 @@ ax.YDir = 'reverse';
 % p_cumsum = cumsum(p_sample*2-1);
 % ts_sample = ts(ind_pixel);
 % plot(ts_sample,p_cumsum)
+
+%%
