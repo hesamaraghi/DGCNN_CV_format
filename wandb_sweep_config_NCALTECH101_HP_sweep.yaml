@@ -1,0 +1,61 @@
+program: train.py
+method: grid
+name: EST-NCALTECH101-256-HP-sweep-decimal-exponents
+project: sweep_EST_NCALTECH101_HP_sweep
+entity: haraghi
+description: |
+  This is a sweep over the learning rate hyperparameter of the EST model 
+  for NCALTECH101 dataset.
+metric:
+  goal: maximize
+  name: val/acc/mean
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "cfg_path=cfg_folder/EST_NCALTECH101_wandb_sweep.yaml"
+  - "transform.train.num_events_per_sample=256"
+  - "wandb.experiment_name=''"
+  - "wandb.log=True"
+  - ${args_no_hyphens}
+parameters:
+  seed:
+    values:
+      - 42
+      - 420
+      - 4200
+      - 42000
+  optimize:
+    parameters:
+      lr:
+        values:
+          - 1.0e-03
+          - 6.30957344e-04
+          - 3.98107171e-04 
+          - 2.51188643e-04
+          - 1.58489319e-04 
+          # - 1.00000000e-04 
+          - 6.30957344e-05
+          - 3.98107171e-05
+          - 2.51188643e-05
+          - 1.58489319e-05
+          # - 1.0e-05
+      patience:
+        values:
+          # - 10
+          # - 20
+          - 40
+          # - 80
+  train:
+    parameters:
+      epochs:
+        values:
+          # - 100
+          - 250
+          # - 500
+      batch_size:
+        values:
+          # - 8
+          - 16
+          # - 32
+          # - 64
