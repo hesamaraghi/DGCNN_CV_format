@@ -59,6 +59,7 @@ transform:
         cat: null #True
     shift_and_flip:
       transform: null #True
+      resolution: null #[180,240]
       max_shift: null #20
       p: null #0.5
   validation:
@@ -86,6 +87,7 @@ transform:
         cat: null #True  
     shift_and_flip:
       transform: null #True
+      resolution: null #[180,240]
       max_shift: null #20
       p: null #0.5
   test:
@@ -113,6 +115,7 @@ transform:
         cat: null #True
     shift_and_flip:
       transform: null #True
+      resolution: null #[180,240]
       max_shift: null #20
       p: null #0.5
 pre_transform:
