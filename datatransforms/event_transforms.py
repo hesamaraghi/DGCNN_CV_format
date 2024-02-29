@@ -179,9 +179,13 @@ class ShiftAndFlip(BaseTransform):
     def __init__(self, cfg):
         self.max_shift = cfg.max_shift
         self.p = cfg.p
+        if cfg.resolution is None:
+            self.resolution = (180,240)
+        else:
+            self.resolution = cfg.resolution
 
-    def __call__(self, data,resolution=(180,240)):
-        H, W = resolution
+    def __call__(self, data):
+        H, W = self.resolution
         x_shift, y_shift = torch.randint(-self.max_shift, self.max_shift + 1, (2,))
         data.pos[..., -3] += x_shift
         data.pos[..., -2] += y_shift
