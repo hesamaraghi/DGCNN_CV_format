@@ -5,7 +5,8 @@ Copyright (c) 2022 Robert-Jan Bruintjes, TU Delft.
 """
 # Package imports, from conda or pip
 import os
-os.environ['WANDB__SERVICE_WAIT'] = '1000'
+os.environ['WANDB__SERVICE_WAIT'] = "1000"
+os.environ["WANDB_INIT_TIMEOUT"] = "300"
 import glob 
 import torch
 import torch.nn as nn
