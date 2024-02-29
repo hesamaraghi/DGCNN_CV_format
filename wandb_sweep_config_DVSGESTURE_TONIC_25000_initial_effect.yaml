@@ -1,0 +1,53 @@
+program: train.py
+method: random
+name: test-25000-tonic-dataset
+project: EST-DVSGESTURE
+entity: haraghi
+description: |
+  for DVSGESTURE_TONIC dataset with 25000 events per sample.
+  The hyperparameters are chosen from NCALTECH101 dataset with 25000 events per sample.
+metric:
+  goal: maximize
+  name: val/acc/mean
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "cfg_path=cfg_folder/EST_DVSGESTURE_TONIC_wandb_sweep.yaml"
+  - "transform.train.num_events_per_sample=25000"
+  - "wandb.experiment_name=''"
+  - "wandb.log=True"
+  - ${args_no_hyphens}
+parameters:
+  seed:
+    distribution: int_uniform
+    min: 0
+    max: 10000
+  optimize:
+    parameters:
+      lr:
+        values:
+          # - 1e-5
+          - 5e-5
+          # - 1e-4
+          # - 5e-4
+          # - 5e-3
+      patience:
+        values:
+          - 10
+          # - 20
+          # - 40
+          # - 80
+  train:
+    parameters:
+      epochs:
+        values:
+          # - 100
+          - 250
+          # - 500
+      batch_size:
+        values:
+          - 8
+          # - 16
+          # - 32
+          # - 64
