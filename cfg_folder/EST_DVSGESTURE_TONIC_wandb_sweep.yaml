@@ -7,7 +7,8 @@ optimize:
   lr_scheduler: ReduceLROnPlateau
   mode: min 
   factor: 0.5
-  patience: 10
+  patience: 40
+  weight_decay: 1e-4
 model:
   name: EST
   k: null #20
@@ -20,7 +21,7 @@ model:
   resnet_pretrained: True
 train:
   epochs: 250
-  batch_size: 8
+  batch_size: 16
   loss_fn: nn.CrossEntropyLoss()
   profiler: simple
   ckpt_path: null
@@ -53,7 +54,7 @@ transform:
         transform: null #True
         cat: null #True
     shift_and_flip:
-      transform: False
+      transform: True
       resolution: ${dataset.image_resolution}
       max_shift: 20
       p: 0.5
@@ -102,7 +103,8 @@ transform:
       max_shift: 20
       p: 0.5
 wandb:
-  log: True
+  log: False
+  offline: False
   dir: ./
   experiment_name: ""
   entity: ""
