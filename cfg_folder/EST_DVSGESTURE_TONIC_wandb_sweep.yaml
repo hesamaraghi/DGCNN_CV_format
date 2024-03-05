@@ -54,7 +54,7 @@ transform:
         transform: null #True
         cat: null #True
     shift_and_flip:
-      transform: True
+      transform: False
       resolution: ${dataset.image_resolution}
       max_shift: 20
       p: 0.5
