@@ -7,6 +7,7 @@ optimize:
   mode: null #min 
   factor: null #0.5
   patience: null #10
+  weight_decay: null #0.0001
 model:
   name: null #DGCNN2
   k: null #50
@@ -139,6 +140,7 @@ pre_transform:
     conv_vec_path: null #'datasets/NCALTECH101/conv_scores'  
 wandb:
   log: null #True
+  offline: null #False
   dir: null #./
   experiment_name: null #""
   entity: null #'haraghi'

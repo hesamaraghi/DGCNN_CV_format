@@ -47,7 +47,10 @@ class Runner(pl.LightningModule):
 
     def configure_optimizers(self):
         if self.cfg.optimize.optimizer == 'Adam':
-            optimizer = torch.optim.Adam(self.model.parameters(), lr=self.cfg.optimize.lr)
+            optimizer = torch.optim.Adam(self.model.parameters(), 
+                                         lr=self.cfg.optimize.lr,
+                                         weight_decay=self.cfg.optimize.weight_decay if hasattr(self.cfg.optimize, 'weight_decay') and 
+                                         self.cfg.optimize.weight_decay is not None else 0)
         else:
             raise NotImplementedError(f"Optimizer {self.cfg.optimizer}")
         
@@ -174,7 +177,8 @@ def main():
         project=cfg.wandb.project,
         name=cfg.wandb.experiment_name,
         log_model=cfg.wandb.log,
-        offline=not cfg.wandb.log,
+        offline=cfg.wandb.offline if hasattr(cfg.wandb, 'offline') and 
+                                         cfg.wandb.offline is not None else not cfg.wandb.log,
         # Keyword args passed to wandb.init()
         entity=cfg.wandb.entity,
         config=OmegaConf.to_object(cfg),
@@ -190,7 +194,7 @@ def main():
     
     callback_list = []
     callback_list.append(LearningRateMonitor(logging_interval='step'))
-    callback_list.append(TQDMProgressBar(refresh_rate=100))
+    callback_list.append(TQDMProgressBar(refresh_rate=50))
     callback_list.append(ModelCheckpoint(monitor="val/acc/mean", mode="max"))
     
     trainer = pl.Trainer(
