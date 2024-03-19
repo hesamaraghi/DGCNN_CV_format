@@ -1,0 +1,57 @@
+program: submit_auto_resume.py
+method: random
+name: EST-FAN1VS3-HP-read-configs
+project: sweep_EST_FAN1VS3_1024_ideterministic_test_pythonhash_deterministic
+entity: haraghi
+description: |
+  This is a test to see if we get the same results for the same hyperparameters, and the same seed.
+metric:
+  goal: maximize
+  name: val/acc/mean
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - ${args_no_hyphens}
+parameters:
+  cfg_path:
+    values:
+      - "cfg_folder/EST_FAN1VS3_wandb_sweep.yaml"
+  seed:
+    values:
+      - 0
+  transform:
+    parameters:
+      train:
+        parameters:
+          num_events_per_sample:
+            values:
+              - 1024
+  optimize:
+    parameters:
+      lr:
+        values:
+          # - 1e-5
+          # - 5e-5
+          - 1e-4
+          # - 5e-4
+          # - 5e-3
+      patience:
+        values:
+          # - 10
+          - 20
+          # - 40
+          # - 80
+  train:
+    parameters:
+      epochs:
+        values:
+          - 100
+          # - 250
+          # - 500
+      batch_size:
+        values:
+          # - 8
+          - 16
+          # - 32
+          # - 64

@@ -120,7 +120,7 @@ transform:
 wandb:
   log: False
   offline: False
-  dir: ./
+  dir: "log_folder"
   experiment_name: ""
   entity: ""
   project: ""

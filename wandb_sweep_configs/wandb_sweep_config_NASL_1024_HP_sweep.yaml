@@ -1,6 +1,6 @@
 program: train.py
 method: random
-name: test-timing #test-1024-tonic-dataset-250epochs
+name: NASL_1024_HP_sweep_autoresume
 project: EST-NASL-HP-sweep
 entity: haraghi
 description: |
@@ -12,16 +12,21 @@ command:
   - ${env}
   - ${interpreter}
   - ${program}
-  - "cfg_path=cfg_folder/EST_NASL_wandb_sweep.yaml"
-  - "transform.train.num_events_per_sample=1024"
-  - "wandb.experiment_name=''"
-  - "wandb.log=False"
-  - "wandb.offline=False"
   - ${args_no_hyphens}
 parameters:
+  cfg_path:
+    values:
+      - "cfg_folder/EST_NASL_wandb_sweep.yaml"
   seed:
     values:
       - 0
+  transform:
+    parameters:
+      train:
+        parameters:
+          num_events_per_sample:
+            values:
+              - 1024
   optimize:
     parameters:
       lr:
@@ -52,8 +57,8 @@ parameters:
     parameters:
       epochs:
         values:
-          # - 100
-          - 250
+          - 100
+          # - 250
           # - 500
       batch_size:
         values:

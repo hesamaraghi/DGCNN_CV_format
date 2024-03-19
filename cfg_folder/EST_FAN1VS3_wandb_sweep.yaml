@@ -25,6 +25,10 @@ train:
   profiler: simple
   ckpt_path: null
   multi_val_test_num: 20
+  default_root_dir: null
+auto_resume:
+  sbatch_folder: "sbatch_folder"
+  num_repeat: 5
 dataset:
   name: FAN1VS3
   train_percentage: 0.75 # not applicable
@@ -99,8 +103,10 @@ transform:
       max_shift: 20
       p: 0.5
 wandb:
-  log: True
-  dir: ./
+  log: False
+  offline: False
+  dir: "log_folder"
+  id: null
   experiment_name: ""
   entity: ""
   project: ""
