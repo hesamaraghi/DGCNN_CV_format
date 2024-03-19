@@ -147,11 +147,20 @@ class Runner(pl.LightningModule):
         self.test_loss = torch.tensor([0.0 for _ in range(self.multi_val_test_num)])
         self.test_num_samples = torch.tensor([0 for _ in range(self.multi_val_test_num)])
 
-def main():
+def main(cfg_path: str = None):
     # Load defaults and overwrite by command-line arguments
 
     cmd_cfg = OmegaConf.from_cli()
-    cfg = OmegaConf.load(cmd_cfg.cfg_path)
+    
+    if hasattr(cmd_cfg, 'cfg_path') and cmd_cfg.cfg_path is not None:
+        cfg_path = cmd_cfg.cfg_path
+        print(f"cfg_path is loaded from command line: cfg_path={cfg_path}")
+    else:
+        if not cfg_path:
+            raise ValueError("cfg_path is not provided")
+            
+    cfg = OmegaConf.load(cfg_path)
+    cfg.cfg_path = cfg_path
     
     cfg = OmegaConf.merge(cfg, cmd_cfg)
     cfg_bare = OmegaConf.load("config_bare.yaml")
@@ -175,6 +184,7 @@ def main():
     wandb_logger = WandbLogger(
         save_dir=cfg.wandb.dir,
         project=cfg.wandb.project,
+        id=cfg.wandb.id if hasattr(cfg.wandb, 'id') and cfg.wandb.id is not None else None,
         name=cfg.wandb.experiment_name,
         log_model=cfg.wandb.log,
         offline=cfg.wandb.offline if hasattr(cfg.wandb, 'offline') and 
@@ -197,6 +207,13 @@ def main():
     callback_list.append(TQDMProgressBar(refresh_rate=50))
     callback_list.append(ModelCheckpoint(monitor="val/acc/mean", mode="max"))
     
+    if hasattr(cfg.train, 'default_root_dir') and cfg.train.default_root_dir is not None:
+        default_root_dir = cfg.train.default_root_dir
+    else:
+        default_root_dir = os.path.join(os.getcwd(),'pl_default_dir', wandb_logger.experiment.project, wandb_logger.experiment.name)
+        if not os.path.exists(default_root_dir):
+            os.makedirs(default_root_dir)
+    
     trainer = pl.Trainer(
         max_epochs=cfg.train.epochs,
         logger=wandb_logger,
@@ -206,10 +223,9 @@ def main():
         devices=torch.cuda.device_count(),
         accelerator="auto",
         callbacks=callback_list,
-        profiler=cfg.train.profiler
+        profiler=cfg.train.profiler,
+        default_root_dir=default_root_dir
     )
-    
-
     
     # torch.set_num_threads(1)
     print(f"Number of threads: {torch.get_num_threads()}")
@@ -224,6 +240,12 @@ def main():
     if gdm.test_dataloader is not None:
         trainer.test(datamodule=gdm)
 
+    # delete the default_root_dir checkpoints
+    if os.path.exists(default_root_dir):
+        files_to_delete = glob.glob(os.path.join(default_root_dir, "hpc_ckpt_*.ckpt"))
+        for file_path in files_to_delete:
+            os.remove(file_path)
 
+        
 if __name__ == '__main__':
     main()

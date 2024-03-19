@@ -15,3 +15,5 @@ _test*
 images
 *.ckpt
 landscape_plots
+log_folder
+pl_default_dir

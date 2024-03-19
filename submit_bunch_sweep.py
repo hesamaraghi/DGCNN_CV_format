@@ -23,8 +23,7 @@ if __name__ == "__main__":
     parser.add_argument("--sbatch-folder", type=str, default="sbatch_folder")
     parser.add_argument("--agent-count", type=int, default=1, help="number of agents per call")
     parser.add_argument("--sweep-id", type=str, help="sweep id")
-    parser.add_argument("--num-call", type=int, default=1, help="number of calls of the agent in each run")
-
+ 
     args = parser.parse_args()
 
     main()

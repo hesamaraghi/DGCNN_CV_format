@@ -25,6 +25,10 @@ train:
   profiler: null #simple
   ckpt_path: null
   multi_val_test_num: null #1
+  default_root_dir: null
+auto_resume:
+  sbatch_folder: null
+  num_repeat: null
 dataset:
   name: null #NASL
   train_percentage: null #0.75 # not applicable
@@ -142,6 +146,7 @@ wandb:
   log: null #True
   offline: null #False
   dir: null #./
+  id: null 
   experiment_name: null #""
   entity: null #'haraghi'
   project: null #'DGCNN'
