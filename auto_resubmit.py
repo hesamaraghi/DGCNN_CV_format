@@ -5,6 +5,8 @@ import argparse
 import re
 from datetime import datetime, timedelta
 import time
+import signal
+from glob import glob
 
 def extract_cfg_path(job_id):
     try:
@@ -64,15 +66,27 @@ def main():
             if cfg_path_str:
                 run_names_dict['running'][job_id] = (cfg_path_str.split('/')[-2])      
         runs = wandb.Api().runs(args.project_name)
+        runs = [r for r in runs if r.sweep.name == args.sweep_name]
         for run in runs:
-            if 'test/acc_mean' not in run.summary:
-                if "resume_config" in run.config:
-                    if run.state == "running" or run.state == "finished":
-                        if run.name not in run_names_dict['running'].values() and run.name not in run_names_dict['pending'].values():
-                            sbatch_command = f"bash {args.autoresume_file} \"{args.sbatch_file} python train.py cfg_path={run.config['resume_config']['cfg_path']}\" {args.num_repeat}"
-                            print(run.name, datetime.now(), sbatch_command)
-                            # Submit the job using subprocess
-                            subprocess.call(sbatch_command, shell=True)
+            if "resume_config" in run.config:
+                if 'test/acc_mean' not in run.summary:
+                    if os.path.exists(os.path.join('pl_default_dir',args.project_name,run.name,'config.yml')):
+                        if run.state == "running" or run.state == "finished":
+                            if run.name not in run_names_dict['running'].values() and run.name not in run_names_dict['pending'].values():
+                                sbatch_command = f"bash {args.autoresume_file} \"{args.sbatch_file} python train.py cfg_path={run.config['resume_config']['cfg_path']}\" {args.num_repeat}"
+                                print(run.name, datetime.now(), sbatch_command)
+                                # Submit the job using subprocess
+                                subprocess.call(sbatch_command, shell=True)
+                else:
+                    if os.path.exists(run.config['train']['default_root_dir']):
+                        hpc_ckpts_list = glob(os.path.join(run.config['train']['default_root_dir'], 'hpc_ckpt_*.ckpt'))
+                        if hpc_ckpts_list:
+                            if run.name not in run_names_dict['running'].values() and run.name not in run_names_dict['pending'].values():
+                                sbatch_command = f"bash {args.autoresume_file} \"{args.sbatch_file} python train.py cfg_path={run.config['resume_config']['cfg_path']}\" {args.num_repeat}"
+                                print(run.name, datetime.now(), sbatch_command)
+                                # Submit the job using subprocess
+                                subprocess.call(sbatch_command, shell=True)
+        
         
         dt = datetime.now() + timedelta(hours=1)
         dt = dt.replace(minute=12,second=34)
@@ -81,6 +95,13 @@ def main():
 
         while datetime.now() < dt:
             time.sleep(1)
+
+def signal_handler(sig, frame):
+    print('Signal received:', sig)
+    # You can add your custom handling logic here
+    # For example, you can gracefully exit the program
+    main()
+
 
 if __name__ == "__main__":
     
@@ -93,6 +114,9 @@ if __name__ == "__main__":
     parser.add_argument("--autoresume-file", type=str, default="sbatch_folder/auto_resume.sh")
     parser.add_argument("--num-repeat", type=int, default=2, help="number of repeats (dependent jobs) in auto resume")
     parser.add_argument("--sbatch-file", type=str, default="sbatch_folder/run_train.sbatch")
+    parser.add_argument("--sweep-name", type=str)
     
     args = parser.parse_args()
+
+    signal.signal(signal.SIGUSR1, signal_handler)
     main()
