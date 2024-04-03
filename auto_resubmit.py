@@ -74,18 +74,21 @@ def main():
                         if run.state == "running" or run.state == "finished":
                             if run.name not in run_names_dict['running'].values() and run.name not in run_names_dict['pending'].values():
                                 sbatch_command = f"bash {args.autoresume_file} \"{args.sbatch_file} python train.py cfg_path={run.config['resume_config']['cfg_path']}\" {args.num_repeat}"
-                                print(run.name, datetime.now(), sbatch_command)
+                                print("no test acc.: ",run.name, sbatch_command)
                                 # Submit the job using subprocess
-                                subprocess.call(sbatch_command, shell=True)
+                                if not args.dry_run:
+                                    subprocess.call(sbatch_command, shell=True)
                 else:
                     if os.path.exists(run.config['train']['default_root_dir']):
                         hpc_ckpts_list = glob(os.path.join(run.config['train']['default_root_dir'], 'hpc_ckpt_*.ckpt'))
                         if hpc_ckpts_list:
+                            hpc_ckpt_max = max([h.split('_')[-1].split('.')[0] for h in hpc_ckpts_list])
                             if run.name not in run_names_dict['running'].values() and run.name not in run_names_dict['pending'].values():
                                 sbatch_command = f"bash {args.autoresume_file} \"{args.sbatch_file} python train.py cfg_path={run.config['resume_config']['cfg_path']}\" {args.num_repeat}"
-                                print(run.name, datetime.now(), sbatch_command)
+                                print(f"resume from hpc_ckpt_{hpc_ckpt_max}", run.name, sbatch_command)
                                 # Submit the job using subprocess
-                                subprocess.call(sbatch_command, shell=True)
+                                if not args.dry_run:
+                                    subprocess.call(sbatch_command, shell=True)
         
         
         dt = datetime.now() + timedelta(hours=1)
@@ -115,6 +118,7 @@ if __name__ == "__main__":
     parser.add_argument("--num-repeat", type=int, default=2, help="number of repeats (dependent jobs) in auto resume")
     parser.add_argument("--sbatch-file", type=str, default="sbatch_folder/run_train.sbatch")
     parser.add_argument("--sweep-name", type=str)
+    parser.add_argument("--dry-run", action="store_true")
     
     args = parser.parse_args()
 
