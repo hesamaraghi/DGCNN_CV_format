@@ -29,15 +29,32 @@ class GraphDataModule(pl.LightningDataModule):
         if cfg.pre_transform.test.transform == True:
             self.pre_transform_dict['test'] = transforms(cfg.pre_transform.test)
         self.num_workers=cfg.dataset.num_workers
-        self.num_classes = create_dataset(
+        self.training_dataset = create_dataset(
                 dataset_path = self.dataset_path,
                 dataset_name  = self.dataset_name,
                 dataset_type = 'training',
                 transform = self.transform_dict['train'],
                 pre_transform=self.pre_transform_dict['train'],
                 num_workers=self.num_workers
-            ).num_classes
-
+            )
+        self.num_classes = self.training_dataset.num_classes
+        print(f"Number of classes: {self.num_classes}", flush=True)
+        self.validation_dataset = create_dataset(
+                dataset_path = self.dataset_path,
+                dataset_name  = self.dataset_name,
+                dataset_type = 'validation',
+                transform = self.transform_dict['validation'],
+                pre_transform=self.pre_transform_dict['validation'],
+                num_workers=self.num_workers
+            )
+        self.test_dataset = create_dataset(
+                dataset_path = self.dataset_path,
+                dataset_name  = self.dataset_name,
+                dataset_type = 'test',
+                transform = self.transform_dict['test'],
+                pre_transform=self.pre_transform_dict['test'],
+                num_workers=self.num_workers
+            )
     def prepare_data(self):
         # Implement data download or preparation logic if needed
         pass
@@ -49,14 +66,7 @@ class GraphDataModule(pl.LightningDataModule):
     def train_dataloader(self):
         # Return a DataLoader for the training dataset
         return DataLoader(
-            create_dataset(
-                dataset_path = self.dataset_path,
-                dataset_name  = self.dataset_name,
-                dataset_type = 'training',
-                transform = self.transform_dict['train'],
-                pre_transform=self.pre_transform_dict['train'],
-                num_workers=self.num_workers
-            ),
+            self.training_dataset,
             batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.num_workers,
@@ -65,14 +75,7 @@ class GraphDataModule(pl.LightningDataModule):
     def val_dataloader(self):
         # Return a DataLoader for the validation dataset
         return [DataLoader(
-            create_dataset(
-                dataset_path = self.dataset_path,
-                dataset_name  = self.dataset_name,
-                dataset_type = 'validation',
-                transform = self.transform_dict['validation'],
-                pre_transform=self.pre_transform_dict['validation'],
-                num_workers=self.num_workers
-            ),
+            self.validation_dataset,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
@@ -81,14 +84,7 @@ class GraphDataModule(pl.LightningDataModule):
     def test_dataloader(self):
         # Return a DataLoader for the test dataset
         return [DataLoader(
-            create_dataset(
-                dataset_path = self.dataset_path,
-                dataset_name = self.dataset_name,
-                dataset_type = 'test',
-                transform = self.transform_dict['test'],
-                pre_transform=self.pre_transform_dict['test'],
-                num_workers=self.num_workers
-            ),
+            self.test_dataset,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
