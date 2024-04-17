@@ -17,6 +17,7 @@ from omegaconf import OmegaConf
 import torchmetrics
 import copy
 import numpy as np
+import time
 
 # Imports of own files
 import model_factory
@@ -165,18 +166,20 @@ def main(cfg_path: str = None):
     cfg = OmegaConf.merge(cfg, cmd_cfg)
     cfg_bare = OmegaConf.load("config_bare.yaml")
     cfg = OmegaConf.merge(cfg_bare,cfg)
-    print(OmegaConf.to_yaml(cfg))
+    print(OmegaConf.to_yaml(cfg), flush=True)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"Using device: {device}")
+    print(f"Using device: {device}", flush=True)
 
     # Seed everything. Note that this does not make training entirely
     # deterministic.
     pl.seed_everything(cfg.seed, workers=True)
 
-
     # Create datasets using factory pattern
+    
+    start = time.time()
     gdm = GraphDataModule(cfg)
+    print(f"Time to create GraphDataModule: {time.time()-start}", flush=True)
     cfg.dataset.num_classes = gdm.num_classes
 
     # Set cache dir to W&B logging directory
