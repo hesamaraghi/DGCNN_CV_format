@@ -1,10 +1,10 @@
 program: train.py
 method: random
-name: NASL_1024_HP_sweep_autoresume
+name: NASL_8_HP_sweep_autoresume
 project: EST-NASL-HP-sweep
 entity: haraghi
 description: |
-  HP tuning for NASL dataset with 1024 events per sample.
+  HP tuning for NASL dataset with 8 events per sample.
 metric:
   goal: maximize
   name: val/acc/mean
@@ -26,7 +26,7 @@ parameters:
         parameters:
           num_events_per_sample:
             values:
-              - 1024
+              - 8
   optimize:
     parameters:
       lr:
@@ -43,8 +43,8 @@ parameters:
       patience:
         values:
           # - 10
-          # - 20
-          - 40
+          - 20
+          # - 40
           # - 80
       weight_decay:
         values:
