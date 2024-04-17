@@ -43,6 +43,7 @@ transform:
     transform: null #True
     spatial_centering: null #True
     temporal_scale: null #1e-5
+    temporal_quantization: null #9
     num_events_per_sample: null #32
     random_num_events_per_sample:
       transform: null #True
@@ -71,6 +72,7 @@ transform:
     transform: null #True
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
+    temporal_quantization: null #9
     num_events_per_sample: null #32
     random_num_events_per_sample:
       transform: null #True
@@ -99,6 +101,7 @@ transform:
     transform: null #True
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
+    temporal_quantization: null #9
     num_events_per_sample: null #32
     random_num_events_per_sample:
       transform: null #True

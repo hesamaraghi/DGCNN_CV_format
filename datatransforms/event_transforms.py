@@ -29,6 +29,17 @@ class TemporalScaling(BaseTransform):
         return data
 
 
+class TemporalQuantization(BaseTransform):
+    def __init__(self,cfg):
+        self.temporal_num_bins = cfg.temporal_quantization
+
+    def __call__(self, data):
+        t = data.pos[..., -1]
+        range_t = (t.max() - t.min())*(1 + 2e-3)
+        min_t = t.min() - 1e-3 * range_t
+        t = (t - min_t) / range_t * self.temporal_num_bins - 0.5
+        data.pos[..., -1] = t.round()/self.temporal_num_bins
+        return data
 
 class RemoveOutliers(BaseTransform):
     r"""Centers and normalizes node positions to the interval :math:`(-1, 1)`

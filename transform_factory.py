@@ -14,6 +14,8 @@ def factory(cfg):
                   transform_list.append(ShiftAndFlip(cfg.shift_and_flip))
             if 'temporal_scale' in cfg_dict and cfg.temporal_scale is not None:
                   transform_list.append(TemporalScaling(cfg))
+            if 'temporal_quantization' in cfg_dict and cfg.temporal_quantization is not None:
+                  transform_list.append(TemporalQuantization(cfg))
             if 'spatial_centering' in cfg_dict and cfg.spatial_centering:
                   transform_list.append(SpatialCentering())
             if 'num_events_per_sample' in cfg_dict and cfg.num_events_per_sample is not None:

@@ -6,6 +6,15 @@ import wandb
 from omegaconf import OmegaConf
 import yaml
 import numpy as np
+import json
+
+def show_cfg(cfg):
+    """
+    Print the configuration in a readable format.
+    """
+
+    print(yaml.dump(OmegaConf.to_container(cfg), default_flow_style=False))
+                #  sort_keys=True, indent=4))
 
 def recursive_dict_compare(all_cfg, other_cfg):
     """

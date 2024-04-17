@@ -248,6 +248,10 @@ def main(cfg_path: str = None):
         files_to_delete = glob.glob(os.path.join(default_root_dir, "hpc_ckpt_*.ckpt"))
         for file_path in files_to_delete:
             os.remove(file_path)
+            
+    # Logger closing to release resources/avoid multi-run conflicts
+    if wandb_logger is not None:
+        wandb_logger.experiment.finish()
 
         
 if __name__ == '__main__':
