@@ -66,7 +66,11 @@ def main():
             if cfg_path_str:
                 run_names_dict['running'][job_id] = (cfg_path_str.split('/')[-2])      
         runs = wandb.Api().runs(args.project_name)
-        runs = [r for r in runs if r.sweep.name == args.sweep_name]
+        if args.sweep_name:
+            runs = [r for r in runs if r.sweep.name == args.sweep_name]
+        if args.tags:
+            tags = args.tags.split(",")
+            runs = [r for r in runs if all(t in r.tags for t in tags)]
         for run in runs:
             if "resume_config" in run.config:
                 if 'test/acc_mean' not in run.summary:
@@ -115,10 +119,12 @@ if __name__ == "__main__":
 
     parser.add_argument("--project-name", type=str)
     parser.add_argument("--autoresume-file", type=str, default="sbatch_folder/auto_resume.sh")
-    parser.add_argument("--num-repeat", type=int, default=2, help="number of repeats (dependent jobs) in auto resume")
+    parser.add_argument("--num-repeat", type=int, default=1, help="number of repeats (dependent jobs) in auto resume")
     parser.add_argument("--sbatch-file", type=str, default="sbatch_folder/run_train.sbatch")
     parser.add_argument("--sweep-name", type=str)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("tags", nargs="?", help="List of tags separated by commas")
+
     
     args = parser.parse_args()
 
