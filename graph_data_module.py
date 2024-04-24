@@ -74,13 +74,12 @@ class GraphDataModule(pl.LightningDataModule):
 
     def val_dataloader(self):
         # Return a DataLoader for the validation dataset
-        return [DataLoader(
+        return DataLoader(
             self.validation_dataset,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-        ) for _ in range(self.multi_val_test_num)]
-
+        ) 
     def test_dataloader(self):
         # Return a DataLoader for the test dataset
         return [DataLoader(
