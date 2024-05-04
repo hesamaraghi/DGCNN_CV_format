@@ -30,16 +30,17 @@ class Runner(pl.LightningModule):
         self.cfg = cfg
         self.model = model
         self.loss_fn = eval(cfg.train.loss_fn)
-        self.multi_val_test_num = cfg.train.multi_val_test_num
+        self.multi_val_num = cfg.train.multi_val_num
+        self.multi_test_num = cfg.train.multi_test_num
         
-        self.val_loss = torch.tensor([0.0 for _ in range(self.multi_val_test_num)])
-        self.test_loss = torch.tensor([0.0 for _ in range(self.multi_val_test_num)])
-        self.val_num_samples = torch.tensor([0 for _ in range(self.multi_val_test_num)])
-        self.test_num_samples = torch.tensor([0 for _ in range(self.multi_val_test_num)])
+        self.val_loss = torch.tensor([0.0 for _ in range(self.multi_val_num)])
+        self.test_loss = torch.tensor([0.0 for _ in range(self.multi_test_num)])
+        self.val_num_samples = torch.tensor([0 for _ in range(self.multi_val_num)])
+        self.test_num_samples = torch.tensor([0 for _ in range(self.multi_test_num)])
 
         self.train_accuracy = torchmetrics.Accuracy(task='multiclass', num_classes=cfg.dataset.num_classes)
-        self.val_accuracy =  nn.ModuleList([torchmetrics.Accuracy(task='multiclass', num_classes=cfg.dataset.num_classes) for _ in range(self.multi_val_test_num) ])
-        self.test_accuracy = nn.ModuleList([torchmetrics.Accuracy(task='multiclass', num_classes=cfg.dataset.num_classes) for _ in range(self.multi_val_test_num) ])
+        self.val_accuracy =  nn.ModuleList([torchmetrics.Accuracy(task='multiclass', num_classes=cfg.dataset.num_classes) for _ in range(self.multi_val_num) ])
+        self.test_accuracy = nn.ModuleList([torchmetrics.Accuracy(task='multiclass', num_classes=cfg.dataset.num_classes) for _ in range(self.multi_test_num) ])
 
     def forward(self, x):
         # Runner needs to redirect any model.forward() calls to the actual
@@ -131,8 +132,8 @@ class Runner(pl.LightningModule):
         self.log('val/loss/std', torch.std(self.val_loss), sync_dist=True)
         for metric in self.val_accuracy:
             metric.reset()
-        self.val_loss = torch.tensor([0.0 for _ in range(self.multi_val_test_num)])
-        self.val_num_samples = torch.tensor([0 for _ in range(self.multi_val_test_num)])
+        self.val_loss = torch.tensor([0.0 for _ in range(self.multi_val_num)])
+        self.val_num_samples = torch.tensor([0 for _ in range(self.multi_val_num)])
   
             
     def on_test_epoch_end(self):
@@ -145,8 +146,8 @@ class Runner(pl.LightningModule):
         self.log('test/loss_std', torch.std(self.test_loss), sync_dist=True)
         for metric in self.test_accuracy:
             metric.reset()
-        self.test_loss = torch.tensor([0.0 for _ in range(self.multi_val_test_num)])
-        self.test_num_samples = torch.tensor([0 for _ in range(self.multi_val_test_num)])
+        self.test_loss = torch.tensor([0.0 for _ in range(self.multi_test_num)])
+        self.test_num_samples = torch.tensor([0 for _ in range(self.multi_test_num)])
 
 def main(cfg_path: str = None):
     # Load defaults and overwrite by command-line arguments

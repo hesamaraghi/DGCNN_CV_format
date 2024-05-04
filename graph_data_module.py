@@ -16,7 +16,8 @@ class GraphDataModule(pl.LightningDataModule):
             self.dataset_path = cfg.dataset.dataset_path
         self.batch_size = cfg.train.batch_size      
         self.dataset_name = cfg.dataset.name
-        self.multi_val_test_num = cfg.train.multi_val_test_num      
+        self.multi_val_num = cfg.train.multi_val_num
+        self.multi_test_num = cfg.train.multi_test_num      
         self.transform_dict = {}
         self.transform_dict['train'] = transforms(cfg.transform.train)
         self.transform_dict['validation'] = transforms(cfg.transform.validation)
@@ -74,12 +75,12 @@ class GraphDataModule(pl.LightningDataModule):
 
     def val_dataloader(self):
         # Return a DataLoader for the validation dataset
-        return DataLoader(
+        return [DataLoader(
             self.validation_dataset,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-        ) 
+        ) for _ in range(self.multi_val_num)]
     def test_dataloader(self):
         # Return a DataLoader for the test dataset
         return [DataLoader(
@@ -87,4 +88,4 @@ class GraphDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-        ) for _ in range(self.multi_val_test_num)]
+        ) for _ in range(self.multi_test_num)]

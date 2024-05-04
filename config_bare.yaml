@@ -24,7 +24,8 @@ train:
   loss_fn: null #nn.NLLLoss()
   profiler: null #simple
   ckpt_path: null
-  multi_val_test_num: null #1
+  multi_val_num: null #1
+  multi_test_num: null #1
   default_root_dir: null
 auto_resume:
   sbatch_folder: null
