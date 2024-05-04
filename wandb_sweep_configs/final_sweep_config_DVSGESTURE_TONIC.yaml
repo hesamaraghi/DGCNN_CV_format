@@ -1,10 +1,10 @@
 program: train.py
 method: random
-name: test-64-tonic-dataset-250epochs-InMemory-long
-project: EST-DVSGESTURE-HP-sweep-InMemory
+name: DVSGESTURE_TONIC_HP_sweep_autoresume
+project: FINAL-DVSGESTURE_TONIC-HP-sweep-reduced
 entity: haraghi
 description: |
-  HP tuning for DVSGESTURE_TONIC dataset with 64 events per sample.
+  Final HP optimization for DVSGESTURE_TONIC dataset.
 metric:
   goal: maximize
   name: val/acc/mean
@@ -17,28 +17,24 @@ parameters:
   cfg_path:
     values:
       - "cfg_folder/EST_DVSGESTURE_TONIC_wandb_sweep.yaml"
-  seed:
-    values:
-      - 0
-  transform:
-    parameters:
-      train:
-        parameters:
-          num_events_per_sample:
-            values:
-              - 64
+  # seed:
+  #   values:
+  #     - 0
+  # transform:
+  #   parameters:
+  #     train:
+  #       parameters:
+  #         num_events_per_sample:
+  #           values:
+  #             - 8
   optimize:
     parameters:
       lr:
         values:
-          # - 1e-6
-          # - 5e-6
-          # - 1e-5
-          # - 5e-5
-          # - 1e-4
-          # - 5e-4
-          # - 1e-3
-          # - 5e-3
+          - 1e-6
+          - 1e-5
+          - 1e-4
+          - 1e-3
           - 1e-2
       patience:
         values:
@@ -49,10 +45,10 @@ parameters:
       weight_decay:
         values:
           - 0
-          # - 1e-5
-          # - 1e-4
-          # - 1e-3
-          # - 1e-2
+          - 1e-4
+          - 1e-3
+          - 1e-2
+          - 1e-1
   train:
     parameters:
       epochs:
@@ -62,7 +58,9 @@ parameters:
           # - 500
       batch_size:
         values:
-          # - 8
-          # - 16
-          # - 32
+          - 1
+          - 8
+          - 16
+          - 32
           - 64
+          - 128

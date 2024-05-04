@@ -1,13 +1,13 @@
 description: " \
-Hyperparameter tuning of EST on NASL."
+Hyperparameter tuning of EST on NCARS."
 seed: 0
 optimize:
   optimizer: Adam
-  lr: 1e-4
+  lr: 1e-5
   lr_scheduler: ReduceLROnPlateau
   mode: min 
   factor: 0.5
-  patience: 20
+  patience: 75
   weight_decay: 0
 model:
   name: EST
@@ -20,22 +20,22 @@ model:
   est_activation: nn.LeakyReLU(negative_slope=0.1)
   resnet_pretrained: True
 train:
-  epochs: 100
+  epochs: 500
   batch_size: 8
   loss_fn: nn.CrossEntropyLoss()
   profiler: simple
   ckpt_path: null
-  multi_val_num: 1
+  multi_val_num: 5
   multi_test_num: 20
   default_root_dir: null
 auto_resume:
   sbatch_folder: null
   num_repeat: null
 dataset:
-  name: NASL
+  name: NCARS
   train_percentage: 0.75 # not applicable
   validation_percentage: 0.10 # not applicable
-  image_resolution: [180,240]  # dimension of spatial grid  (H x W)
+  image_resolution: [120,100]  # dimension of spatial grid  (H x W)
   num_samples_per_class: null
   num_classes: null
   dataset_path: null
@@ -45,7 +45,7 @@ transform:
     transform: True
     spatial_centering: null #True
     temporal_scale: null # 1e-5
-    num_events_per_sample: null #64
+    num_events_per_sample: null #1024
     random_num_events_per_sample:
       transform: False
       min_num_events: null #8

@@ -7,7 +7,8 @@ optimize:
   lr_scheduler: ReduceLROnPlateau
   mode: min 
   factor: 0.5
-  patience: 10
+  patience: 40
+  weight_decay: 0
 model:
   name: EST
   k: null #20
@@ -24,7 +25,12 @@ train:
   loss_fn: nn.CrossEntropyLoss()
   profiler: simple
   ckpt_path: null
-  multi_val_test_num: 20
+  multi_val_num: 5
+  multi_test_num: 20
+  default_root_dir: null
+auto_resume:
+  sbatch_folder: null
+  num_repeat: null
 dataset:
   name: DVSGESTURE
   train_percentage: 0.75 # not applicable
@@ -39,7 +45,12 @@ transform:
     transform: True
     spatial_centering: null #True
     temporal_scale: null # 1e-5
-    num_events_per_sample: null #1024
+    num_events_per_sample: null #64
+    random_num_events_per_sample:
+      transform: False
+      min_num_events: null #8
+      max_num_events: null #2048
+      inverse_sampling: "" #True
     random_flip: null #0.5
     scale_limits: null #[0.75,1.5]
     degree_limit: null #10  #20
@@ -62,6 +73,11 @@ transform:
     spatial_centering: ${transform.train.spatial_centering}
     temporal_scale: ${transform.train.temporal_scale}
     num_events_per_sample: ${transform.train.num_events_per_sample}
+    random_num_events_per_sample:
+      transform: ${transform.train.random_num_events_per_sample.transform}
+      min_num_events: ${transform.train.random_num_events_per_sample.min_num_events}
+      max_num_events: ${transform.train.random_num_events_per_sample.max_num_events}
+      inverse_sampling: ${transform.train.random_num_events_per_sample.inverse_sampling}
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -84,6 +100,11 @@ transform:
     spatial_centering: ${transform.train.spatial_centering}
     temporal_scale: ${transform.train.temporal_scale}
     num_events_per_sample: ${transform.train.num_events_per_sample}
+    random_num_events_per_sample:
+      transform: ${transform.train.random_num_events_per_sample.transform}
+      min_num_events: ${transform.train.random_num_events_per_sample.min_num_events}
+      max_num_events: ${transform.train.random_num_events_per_sample.max_num_events}
+      inverse_sampling: ${transform.train.random_num_events_per_sample.inverse_sampling}
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -102,8 +123,10 @@ transform:
       max_shift: 20
       p: 0.5
 wandb:
-  log: True
-  dir: ./
+  log: False
+  offline: False
+  dir: "log_folder"
+  id: null
   experiment_name: ""
   entity: ""
   project: ""
