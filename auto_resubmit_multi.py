@@ -98,7 +98,7 @@ def main():
             if "resume_config" in run.config:
                 if 'test/acc_mean' not in run.summary:
                     if os.path.exists(os.path.join('pl_default_dir',args.project_name,run.name,'config.yml')):
-                        if run.state == "running" or run.state == "finished" or run.state == "failed":
+                        # if run.state == "running" or run.state == "finished" or run.state == "failed":
                             if run.name not in all_job_commands:
                                 run_list.append(run.name)
                                 command_list.append(f"python train.py cfg_path={run.config['resume_config']['cfg_path']}")
