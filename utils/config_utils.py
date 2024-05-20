@@ -47,38 +47,43 @@ def get_checkpoint_file(entity,project,run_id):
     """
     Load the checkpoint from the specified run_id
     """
-
-    checkpoint_file = glob(osp.join(project, run_id, "checkpoints","*"))
+    checkpoint_file = glob(osp.join('log_folder', project, run_id, "checkpoints","*"))
     if checkpoint_file:
-        assert len(checkpoint_file) == 1
-        checkpoint_file = checkpoint_file[0]
+        # assert len(checkpoint_file) == 1
+        checkpoint_file = checkpoint_file[-1]
         print("loading checkpoint from", checkpoint_file)
-    else:
-        checkpoint_file = glob(osp.join(run_id, "checkpoints","*"))
+    else:    
+        checkpoint_file = glob(osp.join(project, run_id, "checkpoints","*"))
         if checkpoint_file:
             assert len(checkpoint_file) == 1
             checkpoint_file = checkpoint_file[0]
             print("loading checkpoint from", checkpoint_file)
         else:
-            checkpoint_file = glob(osp.join('DGCNN',run_id, "checkpoints","*"))
+            checkpoint_file = glob(osp.join(run_id, "checkpoints","*"))
             if checkpoint_file:
                 assert len(checkpoint_file) == 1
                 checkpoint_file = checkpoint_file[0]
                 print("loading checkpoint from", checkpoint_file)
             else:
-                print("loading checkpoint from wandb server:")
-                checkpoint_folder = WandbLogger.download_artifact(artifact=osp.join(entity, project, f"model-{run_id}:best"))
-                checkpoint_file = glob(osp.join(checkpoint_folder,"*.ckpt"))
+                checkpoint_file = glob(osp.join('DGCNN',run_id, "checkpoints","*"))
                 if checkpoint_file:
                     assert len(checkpoint_file) == 1
                     checkpoint_file = checkpoint_file[0]
-                    print("loading checkpoint from", checkpoint_file) 
+                    print("loading checkpoint from", checkpoint_file)
                 else:
-                    raise ValueError("Attemps failed in finding checkpoint file!")
+                    print("loading checkpoint from wandb server:")
+                    checkpoint_folder = WandbLogger.download_artifact(artifact=osp.join(entity, project, f"model-{run_id}:best"))
+                    checkpoint_file = glob(osp.join(checkpoint_folder,"*.ckpt"))
+                    if checkpoint_file:
+                        assert len(checkpoint_file) == 1
+                        checkpoint_file = checkpoint_file[0]
+                        print("loading checkpoint from", checkpoint_file) 
+                    else:
+                        raise ValueError("Attemps failed in finding checkpoint file!")
     
     return checkpoint_file
 
-def get_config_file(entity,project,run_id):
+def get_config_file(entity,project,run_id, verbose = True):
     """
     Load the config from the specified run_id
     """
@@ -94,15 +99,15 @@ def get_config_file(entity,project,run_id):
     else:
         cfg_file = cfg
     cfg = OmegaConf.merge(cfg_file, cfg)
-    
-    print(50*"=")
-    print("cfg_file")
-    print(50*"-")
-    print(yaml.dump(recursive_dict_compare(OmegaConf.to_object(cfg),OmegaConf.to_object(cfg_file)), default_flow_style=False))
-    print(50*"=")
-    print("cfg")
-    print(50*"-")
-    print(yaml.dump(recursive_dict_compare(OmegaConf.to_object(cfg_file),OmegaConf.to_object(cfg)), default_flow_style=False))
+    if verbose:
+        print(50*"=")
+        print("cfg_file")
+        print(50*"-")
+        print(yaml.dump(recursive_dict_compare(OmegaConf.to_object(cfg),OmegaConf.to_object(cfg_file)), default_flow_style=False))
+        print(50*"=")
+        print("cfg")
+        print(50*"-")
+        print(yaml.dump(recursive_dict_compare(OmegaConf.to_object(cfg_file),OmegaConf.to_object(cfg)), default_flow_style=False))
     
     return cfg, cfg_file
 
