@@ -95,7 +95,10 @@ def get_config_file(entity,project,run_id, verbose = True):
 
     if "cfg_path" in cfg.keys():
         print(cfg.cfg_path)
-        cfg_file = OmegaConf.merge(cfg_bare,OmegaConf.load(cfg.cfg_path))
+        try:
+            cfg_file = OmegaConf.merge(cfg_bare,OmegaConf.load(cfg.cfg_path))
+        except FileNotFoundError:
+            cfg_file = cfg
     else:
         cfg_file = cfg
     cfg = OmegaConf.merge(cfg_file, cfg)
