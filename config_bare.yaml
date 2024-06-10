@@ -46,6 +46,9 @@ transform:
     temporal_scale: null #1e-5
     temporal_quantization: null #9
     num_events_per_sample: null #32
+    fixed_sampling:
+      transform: null #True
+      seed_str: null #32
     random_num_events_per_sample:
       transform: null #True
       min_num_events: null #8
@@ -74,7 +77,10 @@ transform:
     spatial_centering: null #False #True
     temporal_scale: null #1e-5
     temporal_quantization: null #9
-    num_events_per_sample: null #32
+    num_events_per_sample: null #""
+    fixed_sampling:
+      transform: null #True
+      seed_str: null #32
     random_num_events_per_sample:
       transform: null #True
       min_num_events: null #8
@@ -104,6 +110,9 @@ transform:
     temporal_scale: null #1e-5
     temporal_quantization: null #9
     num_events_per_sample: null #32
+    fixed_sampling:
+      transform: null #True
+      seed_str: null #32
     random_num_events_per_sample:
       transform: null #True
       min_num_events: null #8

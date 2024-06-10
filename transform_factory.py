@@ -19,7 +19,11 @@ def factory(cfg):
             if 'spatial_centering' in cfg_dict and cfg.spatial_centering:
                   transform_list.append(SpatialCentering())
             if 'num_events_per_sample' in cfg_dict and cfg.num_events_per_sample is not None:
-                  transform_list.append(T.FixedPoints(cfg.num_events_per_sample, replace = False, allow_duplicates = True))
+                  if "fixed_sampling" in cfg_dict and cfg.fixed_sampling.transform is True:
+                        if "seed_str" in cfg_dict["fixed_sampling"] and cfg.fixed_sampling.seed_str is not None:
+                              transform_list.append(FixedSubsampling(cfg, replace = False, allow_duplicates = False))
+                  else:
+                        transform_list.append(T.FixedPoints(cfg.num_events_per_sample, replace = False, allow_duplicates = True))
             elif 'random_num_events_per_sample' in cfg_dict and cfg.random_num_events_per_sample.transform:
                   transform_list.append(VaryingSamplingPoints((   cfg.random_num_events_per_sample.min_num_events, 
                                                                   cfg.random_num_events_per_sample.max_num_events), 

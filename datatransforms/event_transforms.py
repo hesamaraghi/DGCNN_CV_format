@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from torch_geometric.transforms import BaseTransform
 from torch_geometric.data import Data, HeteroData
+import hashlib
 
 try:
     from .event_filters import *
@@ -86,10 +87,10 @@ class FilterNodes(BaseTransform):
     r"""
     Keep the nodes that satisfy the condition defined in the filter_nodes function.
     """
-    # def __init__(self, cfg):
+    def __init__(self, cfg):
 
-    #     assert cfg.filter_nodes is not None, "'filter_nodes' cannot be empty!"
-    #     self.filter_nodes = cfg.filter_nodes
+        assert cfg.filter_nodes is not None, "'filter_nodes' cannot be empty!"
+        self.filter_nodes = eval(cfg.filter_nodes)
 
     def get_indices(self,data):
         raise NotImplementedError
@@ -97,7 +98,7 @@ class FilterNodes(BaseTransform):
     def __call__(self, data):
 
         num_nodes = data.num_nodes
-        indices = self.get_indices(data)
+        indices = self.filter_nodes(data)
 
         for key, item in data:
             if key == 'num_nodes':
@@ -120,7 +121,63 @@ class SpatialCentering(BaseTransform):
         return data
     
 
+class FixedSubsampling(BaseTransform):
+    r"""Fixed num subsampling of nodes.
+    """
+    def __init__(
+        self,
+        cfg,
+        replace: bool = True,
+        allow_duplicates: bool = False,
+    ):
+        self.num = cfg.num_events_per_sample
+        self.seed_str = cfg.fixed_sampling.seed_str
+        self.replace = replace
+        self.allow_duplicates = allow_duplicates
 
+
+    def create_seed(self, data_str: str) -> int:
+        # Create a SHA-256 hash of the input string
+        hash_object = hashlib.sha256((self.seed_str + '_' + data_str).encode())
+        # Convert the hash to a hexadecimal string
+        hex_dig = hash_object.hexdigest()
+        # Convert the hexadecimal string to an integer
+        seed = int(hex_dig, 16)
+        return seed
+
+    def __call__(self, data: Data) -> Data:
+        num_nodes = data.num_nodes
+        seed = self.create_seed(data.label[0] + '_' + data.file_id)
+        rng = np.random.default_rng(seed)
+        torch_rng = torch.Generator().manual_seed(seed % (2**32))
+
+        if self.replace:
+            choice = rng.choice(num_nodes, self.num, replace=True)
+            choice = torch.from_numpy(choice).to(torch.long)
+        elif not self.allow_duplicates:
+            choice = torch.randperm(num_nodes, generator=torch_rng)[:self.num]
+        else:
+            choice = torch.cat([
+                torch.randperm(num_nodes, generator=torch_rng)
+                for _ in range(math.ceil(self.num / num_nodes))
+            ], dim=0)[:self.num]
+
+        for key, item in data:
+            if key == 'num_nodes':
+                data.num_nodes = choice.size(0)
+            elif bool(re.search('edge', key)):
+                continue
+            elif (torch.is_tensor(item) and item.size(0) == num_nodes
+                  and item.size(0) != 1):
+                data[key] = item[choice]
+
+        return data
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({self.num}, replace={self.replace})'
+
+    
+    
 
 class SpatialScaling(BaseTransform):
     r"""Scales node positions by a randomly sampled factor :math:`s` within a
