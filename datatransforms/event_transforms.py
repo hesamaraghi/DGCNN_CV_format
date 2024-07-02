@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from torch_geometric.transforms import BaseTransform
 from torch_geometric.data import Data, HeteroData
+import hashlib
 
 try:
     from .event_filters import *
@@ -27,6 +28,18 @@ class TemporalScaling(BaseTransform):
 
 
         return data
+
+def filter_data(data, indices):
+    num_nodes = data.num_nodes
+    for key, item in data:
+        if key == 'num_nodes':
+            data.num_nodes = indices.size(0)
+        elif bool(re.search('edge', key)):
+            continue
+        elif (torch.is_tensor(item) and item.size(0) == num_nodes
+                and item.size(0) != 1):
+            data[key] = item[indices]
+    return data
 
 
 class TemporalQuantization(BaseTransform):
@@ -68,17 +81,8 @@ class RemoveOutliers(BaseTransform):
             thr = torch.quantile(td_conv[pol_ind], self.thresh_quantile)
             indices = indices | (pol_ind & (td_conv > thr))
 
-
-        for key, item in data:
-            if key == 'num_nodes':
-                data.num_nodes = torch.sum(indices)
-            elif bool(re.search('edge', key)):
-                continue
-            elif (torch.is_tensor(item) and item.size(0) == num_nodes
-                  and item.size(0) != 1):
-                data[key] = item[indices]
-                
-        return data
+        indices = torch.nonzero(indices, as_tuple=True)[0]
+        return filter_data(data, indices)
    
    
     
@@ -86,10 +90,10 @@ class FilterNodes(BaseTransform):
     r"""
     Keep the nodes that satisfy the condition defined in the filter_nodes function.
     """
-    # def __init__(self, cfg):
+    def __init__(self, cfg):
 
-    #     assert cfg.filter_nodes is not None, "'filter_nodes' cannot be empty!"
-    #     self.filter_nodes = cfg.filter_nodes
+        assert cfg.filter_nodes is not None, "'filter_nodes' cannot be empty!"
+        self.filter_nodes = eval(cfg.filter_nodes)
 
     def get_indices(self,data):
         raise NotImplementedError
@@ -97,17 +101,9 @@ class FilterNodes(BaseTransform):
     def __call__(self, data):
 
         num_nodes = data.num_nodes
-        indices = self.get_indices(data)
-
-        for key, item in data:
-            if key == 'num_nodes':
-                data.num_nodes = torch.sum(indices)
-            elif bool(re.search('edge', key)):
-                continue
-            elif (torch.is_tensor(item) and item.size(0) == num_nodes
-                  and item.size(0) != 1):
-                data[key] = item[indices]
-        return data
+        indices = self.filter_nodes(data)
+        indices = torch.nonzero(indices, as_tuple=True)[0]
+        return filter_data(data, indices)
     
 
 class SpatialCentering(BaseTransform):
@@ -119,8 +115,104 @@ class SpatialCentering(BaseTransform):
                 store.pos[..., -3] = store.pos[..., -3] - store.pos[..., -3].mean()
         return data
     
+class SpatialSubsampling(BaseTransform):
+    r"""Subsamples events horizontally and vertically.
+    """
+    def __init__(
+        self,
+        subsampling_ratios: tuple,
+    ):
+        assert len(subsampling_ratios) == 2, 'Subsampling ratios must be a tuple of two integers.'
+        assert all([isinstance(ratio, int) for ratio in subsampling_ratios]), 'Subsampling ratios must be integers.'
+        assert all([ratio > 0 for ratio in subsampling_ratios]), 'Subsampling ratios must be positive integers.'
+        self.subsampling_ratios = subsampling_ratios
+        
+    def __call__(self, data: Data) -> Data:
+        pos = data.pos
+        x = pos[..., -3]
+        y = pos[..., -2]
+        mask = torch.ones_like(x, dtype=torch.bool)
+        if self.subsampling_ratios[0] > 1:
+            mask = mask & (x % self.subsampling_ratios[0] == 0)
+        if self.subsampling_ratios[1] > 1:
+            mask = mask & (y % self.subsampling_ratios[1] == 0)
+        indices = torch.nonzero(mask, as_tuple=True)[0]
+        return filter_data(data, indices)
+
+class TemporalSubsampling(BaseTransform):
+    r"""Subsamples events temporally.
+    """
+    def __init__(
+        self,
+        subsampling_ratio: int,
+        window_size: int,
+    ):
+        assert isinstance(subsampling_ratio, int), 'Subsampling ratio must be an integer.'
+        assert subsampling_ratio > 0, 'Subsampling ratio must be a positive integer.'
+        self.subsampling_ratio = subsampling_ratio
+        self.window_size = window_size * 1000
+        
+    def __call__(self, data: Data) -> Data:
+        pos = data.pos
+        t = pos[..., -1].contiguous()
+        min_time = t.min()
+        max_time = t.max()
+        n_slices = torch.ceil((max_time - min_time) / self.window_size).int()
+        window_start_times = torch.arange(n_slices) * self.window_size + min_time
+        window_end_times = window_start_times + self.window_size/self.subsampling_ratio
+        indices_start = torch.searchsorted(t, window_start_times)
+        indices_end = torch.searchsorted(t, window_end_times)
+        indices = torch.cat([torch.arange(start, end) for start, end in zip(indices_start, indices_end)])
+        return filter_data(data, indices)
+
+class FixedSubsampling(BaseTransform):
+    r"""Fixed num subsampling of nodes.
+    """
+    def __init__(
+        self,
+        cfg,
+        replace: bool = True,
+        allow_duplicates: bool = False,
+    ):
+        self.num = cfg.num_events_per_sample
+        self.seed_str = cfg.fixed_sampling.seed_str
+        self.replace = replace
+        self.allow_duplicates = allow_duplicates
 
 
+    def create_seed(self, data_str: str) -> int:
+        # Create a SHA-256 hash of the input string
+        hash_object = hashlib.sha256((self.seed_str + '_' + data_str).encode())
+        # Convert the hash to a hexadecimal string
+        hex_dig = hash_object.hexdigest()
+        # Convert the hexadecimal string to an integer
+        seed = int(hex_dig, 16)
+        return seed
+
+    def __call__(self, data: Data) -> Data:
+        num_nodes = data.num_nodes
+        seed = self.create_seed(data.label[0] + '_' + data.file_id)
+        rng = np.random.default_rng(seed)
+        torch_rng = torch.Generator().manual_seed(seed % (2**32))
+
+        if self.replace:
+            choice = rng.choice(num_nodes, self.num, replace=True)
+            choice = torch.from_numpy(choice).to(torch.long)
+        elif not self.allow_duplicates:
+            choice = torch.randperm(num_nodes, generator=torch_rng)[:self.num]
+        else:
+            choice = torch.cat([
+                torch.randperm(num_nodes, generator=torch_rng)
+                for _ in range(math.ceil(self.num / num_nodes))
+            ], dim=0)[:self.num]
+
+        return filter_data(data, choice)
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({self.num}, replace={self.replace})'
+
+    
+    
 
 class SpatialScaling(BaseTransform):
     r"""Scales node positions by a randomly sampled factor :math:`s` within a
@@ -202,18 +294,8 @@ class ShiftAndFlip(BaseTransform):
         data.pos[..., -2] += y_shift
         
         indices = (data.pos[..., -3] >= 0) & (data.pos[..., -3] < W) & (data.pos[..., -2] >= 0) & (data.pos[..., -2] < H)
-        
-        num_nodes = data.num_nodes   
-        for key, item in data:
-            if key == 'num_nodes':
-                data.num_nodes = torch.sum(indices)
-            elif bool(re.search('edge', key)):
-                continue
-            elif (torch.is_tensor(item) and item.size(0) == num_nodes
-                  and item.size(0) != 1):
-                data[key] = item[indices]
-                
-
+        indices = torch.nonzero(indices, as_tuple=True)[0]
+        data =  filter_data(data, indices)
         if torch.rand(1) < self.p:
             data.pos[..., -3] = W - 1 - data.pos[..., -3]
             
@@ -273,16 +355,66 @@ class VaryingSamplingPoints(BaseTransform):
                 for _ in range(math.ceil(self.num / num_nodes))
             ], dim=0)[:self.num]
 
-        for key, item in data:
-            if key == 'num_nodes':
-                data.num_nodes = choice.size(0)
-            elif bool(re.search('edge', key)):
-                continue
-            elif (torch.is_tensor(item) and item.size(0) == num_nodes
-                  and item.size(0) != 1):
-                data[key] = item[choice]
-
-        return data
+        return filter_data(data, choice)
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}(({self.range_num[0]},{self.range_num[1]}), replace={self.replace})'
+    
+    
+    
+    
+
+class DropEveryNthEvent(BaseTransform):
+    """ From tonic.transforms
+    
+    Deterministically drops every nth event for every spatial location x (and potentially y).
+
+    Parameters:
+        n (int): The event stream for each x/y location is reduced to 1/n.
+
+    Example:
+        >>> transform = tonic.transforms.Decimation(n=5)
+    """
+
+    def __init__(
+        self,
+        n: int,
+    ):
+        assert n > 0, "n has to be an integer greater than zero."
+        self.n = n
+        
+    def __call__(self, data: Data) -> Data:
+        
+        max_x = data.pos[..., -3].max().int().item()
+        max_y = data.pos[..., -2].max().int().item()
+
+        indices = []
+        memory = torch.zeros((max_x + 1, max_y + 1))
+
+        # Sort the data.pos[..., -1] array in ascending order
+        sorted_indices = torch.argsort(data.pos[..., -1])
+        data.pos = data.pos[sorted_indices]
+        data.x = data.x[sorted_indices]
+
+        for event_num in range(data.num_nodes):
+            event_x, event_y = data.pos[event_num,-3].int(), data.pos[event_num,-2].int()
+            memory[event_x, event_y] += data.x[event_num,0]
+            if torch.abs(memory[event_x, event_y]) >= self.n:
+                memory[event_x, event_y] = 0
+                indices.append(event_num)
+        
+        return filter_data(data, indices)
+
+
+def DropEventRandomly(BaseTransform):
+
+    def __init__(
+        self,
+        p: float,
+    ):
+        self.p = p
+        
+    def __call__(self, data: Data) -> Data:   
+        n_events = data.num_nodes
+        indices = torch.where(torch.rand(n_events) > self.p)[0]
+        return filter_data(data, indices)   

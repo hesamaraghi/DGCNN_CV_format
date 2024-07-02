@@ -1,5 +1,8 @@
-description: null
-seed: null #0
+description: " \
+compare num events and the bandwidth (num events per video duration) \
+with respect to the parameters of different subsampling methods \
+"
+seed: 0
 optimize:
   optimizer: null #Adam
   lr: null #0.001
@@ -20,35 +23,35 @@ model:
   resnet_pretrained: null #True
 train:
   epochs: null #200
-  batch_size: null #32
+  batch_size: 7
   loss_fn: null #nn.NLLLoss()
   profiler: null #simple
   ckpt_path: null
-  multi_val_num: null #1
-  multi_test_num: null #1
+  multi_val_num: 1
+  multi_test_num: 1
   default_root_dir: null
 auto_resume:
   sbatch_folder: null
   num_repeat: null
 dataset:
-  name: null #NASL
-  train_percentage: null #0.75 # not applicable
-  validation_percentage: null #0.10 # not applicable
-  image_resolution: null #[180,240]  # dimension of spatial grid  (H x W)
+  name: NCARS
+  train_percentage: 0.75 # not applicable
+  validation_percentage: 0.10 # not applicable
+  image_resolution: [120,100]  # dimension of spatial grid  (H x W)
   num_samples_per_class: null
   num_classes: null
   dataset_path: null
-  num_workers: null #4
+  num_workers: 8
 transform:
   train:
-    transform: null #True
+    transform: True
     spatial_centering: null #True
     temporal_scale: null #1e-5
     temporal_quantization: null #9
     spatial_subsampling:  
-      transform: null #True
-      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
-      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+      transform: null
+      h_r: null
+      v_r: null
     temporal_subsampling:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
@@ -82,23 +85,23 @@ transform:
       max_shift: null #20
       p: null #0.5
   validation:
-    transform: null #True
-    spatial_centering: null #False #True
-    temporal_scale: null #1e-5
-    temporal_quantization: null #9
-    spatial_subsampling:  
-      transform: null #True
-      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
-      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+    transform: True
+    spatial_centering: ${transform.train.spatial_centering}
+    temporal_scale: ${transform.train.temporal_scale}
+    temporal_quantization: ${transform.train.temporal_quantization}
+    spatial_subsampling:
+      transform: ${transform.train.spatial_subsampling.transform}
+      h_r: ${transform.train.spatial_subsampling.h_r}
+      v_r: ${transform.train.spatial_subsampling.v_r}
     temporal_subsampling:
-      transform: null #True
-      subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
-      window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds
-    random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
-    num_events_per_sample: null #""
+      transform: ${transform.train.temporal_subsampling.transform}
+      subsampling_ratio: ${transform.train.temporal_subsampling.subsampling_ratio}
+      window_size: ${transform.train.temporal_subsampling.window_size}
+    random_ratio_subsampling: ${transform.train.random_ratio_subsampling}   
+    num_events_per_sample: ${transform.train.num_events_per_sample}
     fixed_sampling:
-      transform: null #True
-      seed_str: null #32
+      transform: ${transform.train.fixed_sampling.transform}
+      seed_str: ${transform.train.fixed_sampling.seed_str}
     random_num_events_per_sample:
       transform: null #True
       min_num_events: null #8
@@ -107,9 +110,9 @@ transform:
     random_flip: null
     scale_limits: null
     degree_limit: null
-    thresh_quantile: null #0.3
-    filter_nodes: null #remove_NASL_failed_pixels 
-    conv_vec_path: null #'datasets/NCALTECH101/conv_scores'
+    thresh_quantile: ${transform.train.thresh_quantile}
+    filter_nodes: ${transform.train.filter_nodes}
+    conv_vec_path: ${transform.train.conv_vec_path}
     radius_graph:
       transform: null #True
       r: null #3
@@ -119,27 +122,27 @@ transform:
         cat: null #True  
     shift_and_flip:
       transform: null #True
-      resolution: null #[180,240]
+      resolution: ${dataset.image_resolution}
       max_shift: null #20
       p: null #0.5
   test:
-    transform: null #True
-    spatial_centering: null #False #True
-    temporal_scale: null #1e-5
-    temporal_quantization: null #9
-    spatial_subsampling:  
-      transform: null #True
-      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
-      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+    transform: True
+    spatial_centering: ${transform.train.spatial_centering}
+    temporal_scale: ${transform.train.temporal_scale}
+    temporal_quantization: ${transform.train.temporal_quantization}
+    spatial_subsampling:
+      transform: ${transform.train.spatial_subsampling.transform}
+      h_r: ${transform.train.spatial_subsampling.h_r}
+      v_r: ${transform.train.spatial_subsampling.v_r}
     temporal_subsampling:
-      transform: null #True
-      subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
-      window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds 
-    random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
-    num_events_per_sample: null #32
+      transform: ${transform.train.temporal_subsampling.transform}
+      subsampling_ratio: ${transform.train.temporal_subsampling.subsampling_ratio}
+      window_size: ${transform.train.temporal_subsampling.window_size}
+    random_ratio_subsampling: ${transform.train.random_ratio_subsampling}   
+    num_events_per_sample: ${transform.train.num_events_per_sample}
     fixed_sampling:
-      transform: null #True
-      seed_str: null #32
+      transform: ${transform.train.fixed_sampling.transform}
+      seed_str: ${transform.train.fixed_sampling.seed_str}
     random_num_events_per_sample:
       transform: null #True
       min_num_events: null #8
@@ -148,9 +151,9 @@ transform:
     random_flip: null
     scale_limits: null
     degree_limit: null
-    thresh_quantile: null #0.3
-    filter_nodes:  null #remove_NASL_failed_pixels 
-    conv_vec_path: null #'datasets/NCALTECH101/conv_scores'  
+    thresh_quantile: ${transform.train.thresh_quantile}
+    filter_nodes: ${transform.train.filter_nodes}
+    conv_vec_path: ${transform.train.conv_vec_path} 
     radius_graph:
       transform: null #True
       r: null #3
@@ -183,10 +186,10 @@ pre_transform:
     filter_nodes:  null #remove_NASL_failed_pixels 
     conv_vec_path: null #'datasets/NCALTECH101/conv_scores'  
 wandb:
-  log: null #True
-  offline: null #False
-  dir: null #./
+  log: False
+  offline: False
+  dir: "."
   id: null 
   experiment_name: null #""
-  entity: null #'haraghi'
-  project: null #'DGCNN'
+  entity: 'haraghi'
+  project: delete-me

@@ -30,8 +30,8 @@ class Runner(pl.LightningModule):
         self.cfg = cfg
         self.model = model
         self.loss_fn = eval(cfg.train.loss_fn)
-        self.multi_val_num = cfg.train.multi_val_num
-        self.multi_test_num = cfg.train.multi_test_num
+        self.multi_val_num = cfg.train.multi_val_num if hasattr(cfg.train, 'multi_val_num') and cfg.train.multi_val_num is not None else 1
+        self.multi_test_num = cfg.train.multi_test_num if hasattr(cfg.train, 'multi_test_num') and cfg.train.multi_test_num is not None else 1
         
         self.val_loss = torch.tensor([0.0 for _ in range(self.multi_val_num)])
         self.test_loss = torch.tensor([0.0 for _ in range(self.multi_test_num)])
