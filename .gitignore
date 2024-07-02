@@ -17,3 +17,5 @@ images
 landscape_plots
 log_folder
 pl_default_dir
+grad_diversity
+grad_analysis_FAN1VS3

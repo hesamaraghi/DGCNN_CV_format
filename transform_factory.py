@@ -18,6 +18,12 @@ def factory(cfg):
                   transform_list.append(TemporalQuantization(cfg))
             if 'spatial_centering' in cfg_dict and cfg.spatial_centering:
                   transform_list.append(SpatialCentering())
+            if 'spatial_subsampling' in cfg_dict and cfg.spatial_subsampling.transform:
+                  transform_list.append(SpatialSubsampling((cfg.spatial_subsampling.h_r, cfg.spatial_subsampling.v_r)))
+            if 'temporal_subsampling' in cfg_dict and cfg.temporal_subsampling.transform:
+                  transform_list.append(TemporalSubsampling(cfg.temporal_subsampling.subsampling_ratio, cfg.temporal_subsampling.window_size))
+            if 'random_ratio_subsampling' in cfg_dict and cfg.random_ratio_subsampling is not None:
+                  transform_list.append(DropEventRandomly(cfg.random_ratio_subsampling))
             if 'num_events_per_sample' in cfg_dict and cfg.num_events_per_sample is not None:
                   if "fixed_sampling" in cfg_dict and cfg.fixed_sampling.transform is True:
                         if "seed_str" in cfg_dict["fixed_sampling"] and cfg.fixed_sampling.seed_str is not None:
