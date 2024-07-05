@@ -406,7 +406,7 @@ class DropEveryNthEvent(BaseTransform):
         return filter_data(data, indices)
 
 
-def DropEventRandomly(BaseTransform):
+class DropEventRandomly(BaseTransform):
 
     def __init__(
         self,
@@ -416,5 +416,5 @@ def DropEventRandomly(BaseTransform):
         
     def __call__(self, data: Data) -> Data:   
         n_events = data.num_nodes
-        indices = torch.where(torch.rand(n_events) > self.p)[0]
+        indices = torch.where(torch.rand(n_events) < self.p)[0]
         return filter_data(data, indices)   
