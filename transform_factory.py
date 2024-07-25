@@ -23,11 +23,10 @@ def factory(cfg):
             if 'temporal_subsampling' in cfg_dict and cfg.temporal_subsampling.transform:
                   transform_list.append(TemporalSubsampling(cfg.temporal_subsampling.subsampling_ratio, cfg.temporal_subsampling.window_size))
             if 'random_ratio_subsampling' in cfg_dict and cfg.random_ratio_subsampling is not None:
-                  transform_list.append(DropEventRandomly(cfg.random_ratio_subsampling))
+                  transform_list.append(DropEventRandomly(cfg))    
             if 'num_events_per_sample' in cfg_dict and cfg.num_events_per_sample is not None:
                   if "fixed_sampling" in cfg_dict and cfg.fixed_sampling.transform is True:
-                        if "seed_str" in cfg_dict["fixed_sampling"] and cfg.fixed_sampling.seed_str is not None:
-                              transform_list.append(FixedSubsampling(cfg, replace = False, allow_duplicates = False))
+                        transform_list.append(FixedSubsampling(cfg, replace = False, allow_duplicates = False))
                   else:
                         transform_list.append(T.FixedPoints(cfg.num_events_per_sample, replace = False, allow_duplicates = True))
             elif 'random_num_events_per_sample' in cfg_dict and cfg.random_num_events_per_sample.transform:

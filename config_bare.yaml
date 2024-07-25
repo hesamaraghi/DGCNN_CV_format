@@ -39,6 +39,7 @@ dataset:
   num_classes: null
   dataset_path: null
   num_workers: null #4
+  in_memory: null #False
 transform:
   train:
     transform: null #True
@@ -53,6 +54,7 @@ transform:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
       window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds
+      fixed_interval: null #Default:False if True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #32
     fixed_sampling:
@@ -94,6 +96,7 @@ transform:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
       window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds
+      fixed_interval: null #Default:False if True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #""
     fixed_sampling:
@@ -135,6 +138,7 @@ transform:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
       window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds 
+      fixed_interval: null #Default:False if True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #32
     fixed_sampling:

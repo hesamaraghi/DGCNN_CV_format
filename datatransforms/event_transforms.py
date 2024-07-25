@@ -9,6 +9,7 @@ import torch
 from torch_geometric.transforms import BaseTransform
 from torch_geometric.data import Data, HeteroData
 import hashlib
+from omegaconf import OmegaConf
 
 try:
     from .event_filters import *
@@ -40,6 +41,15 @@ def filter_data(data, indices):
                 and item.size(0) != 1):
             data[key] = item[indices]
     return data
+
+def create_seed(seed_str: str) -> int:
+    # Create a SHA-256 hash of the input string
+    hash_object = hashlib.sha256((seed_str).encode())
+    # Convert the hash to a hexadecimal string
+    hex_dig = hash_object.hexdigest()
+    # Convert the hexadecimal string to an integer
+    seed = int(hex_dig, 16)
+    return seed
 
 
 class TemporalQuantization(BaseTransform):
@@ -146,25 +156,37 @@ class TemporalSubsampling(BaseTransform):
         self,
         subsampling_ratio: int,
         window_size: int,
-    ):
+        fixed_interval: bool = False
+        ):
+        """__init__.
+        Args:
+            subsampling_ratio (int): Keep one out of every `subsampling_ratio` temporal intervals.
+            fixed_interval (bool): If True, the interval length is fixed and equals the `window_size` parameter in milliseconds,
+            if False, the interval length is calcultaed by dividing the `window_size` parameter in milliseconds by the `subsampling_ratio` parameter.
+        """
         assert isinstance(subsampling_ratio, int), 'Subsampling ratio must be an integer.'
         assert subsampling_ratio > 0, 'Subsampling ratio must be a positive integer.'
         self.subsampling_ratio = subsampling_ratio
-        self.window_size = window_size * 1000
+        if fixed_interval:
+            self.interval_length = window_size * 1000
+            self.subsampling_period = self.interval_length * self.subsampling_ratio
+        else:
+            self.subsampling_period = window_size * 1000
+            self.interval_length = self.subsampling_period / self.subsampling_ratio
         
     def __call__(self, data: Data) -> Data:
         pos = data.pos
         t = pos[..., -1].contiguous()
         min_time = t.min()
         max_time = t.max()
-        n_slices = torch.ceil((max_time - min_time) / self.window_size).int()
-        window_start_times = torch.arange(n_slices) * self.window_size + min_time
-        window_end_times = window_start_times + self.window_size/self.subsampling_ratio
+        n_slices = torch.ceil((max_time - min_time) / self.subsampling_period).int()
+        window_start_times = torch.arange(n_slices) * self.subsampling_period + min_time
+        window_end_times = window_start_times + self.interval_length
         indices_start = torch.searchsorted(t, window_start_times)
         indices_end = torch.searchsorted(t, window_end_times)
         indices = torch.cat([torch.arange(start, end) for start, end in zip(indices_start, indices_end)])
         return filter_data(data, indices)
-
+    
 class FixedSubsampling(BaseTransform):
     r"""Fixed num subsampling of nodes.
     """
@@ -175,23 +197,16 @@ class FixedSubsampling(BaseTransform):
         allow_duplicates: bool = False,
     ):
         self.num = cfg.num_events_per_sample
-        self.seed_str = cfg.fixed_sampling.seed_str
+        if "seed_str" in cfg["fixed_sampling"] and cfg.fixed_sampling.seed_str is not None:   
+            self.seed_str = str(cfg.fixed_sampling.seed_str)
+        else:
+            self.seed_str = 'fixed_subsampling' 
         self.replace = replace
         self.allow_duplicates = allow_duplicates
 
-
-    def create_seed(self, data_str: str) -> int:
-        # Create a SHA-256 hash of the input string
-        hash_object = hashlib.sha256((self.seed_str + '_' + data_str).encode())
-        # Convert the hash to a hexadecimal string
-        hex_dig = hash_object.hexdigest()
-        # Convert the hexadecimal string to an integer
-        seed = int(hex_dig, 16)
-        return seed
-
     def __call__(self, data: Data) -> Data:
         num_nodes = data.num_nodes
-        seed = self.create_seed(data.label[0] + '_' + data.file_id)
+        seed = create_seed(self.seed_str + '_' + data.label[0] + '_' + data.file_id)
         rng = np.random.default_rng(seed)
         torch_rng = torch.Generator().manual_seed(seed % (2**32))
 
@@ -408,13 +423,24 @@ class DropEveryNthEvent(BaseTransform):
 
 class DropEventRandomly(BaseTransform):
 
-    def __init__(
-        self,
-        p: float,
-    ):
-        self.p = p
+    def __init__(self, cfg):
+        cfg_dict = OmegaConf.to_object(cfg)
+        self.fixed_subsampling = False
+        if "fixed_sampling" in cfg_dict and cfg.fixed_sampling.transform is True:
+            self.fixed_subsampling = True
+            if "seed_str" in cfg["fixed_sampling"] and cfg.fixed_sampling.seed_str is not None:   
+                self.seed_str = str(cfg.fixed_sampling.seed_str)
+            else:
+                self.seed_str = 'fixed_subsampling' 
+        self.p = cfg.random_ratio_subsampling
         
     def __call__(self, data: Data) -> Data:   
         n_events = data.num_nodes
-        indices = torch.where(torch.rand(n_events) < self.p)[0]
+        if self.fixed_subsampling:
+            seed = create_seed(self.seed_str + '_' + data.label[0] + '_' + data.file_id)
+            torch_rng = torch.Generator().manual_seed(seed % (2**32))
+            indices = torch.where(torch.rand(n_events, generator=torch_rng) < self.p)[0]
+        else:
+            indices = torch.where(torch.rand(n_events) < self.p)[0]
+            
         return filter_data(data, indices)   
