@@ -35,6 +35,7 @@ def main(cfg_path: str = None):
 
     # Create datasets using factory pattern
     
+    cfg.dataset.in_memory = False
     start = time.time()
     gdm = GraphDataModule(cfg)
     print(f"Time to create GraphDataModule: {time.time()-start}", flush=True)
@@ -61,9 +62,7 @@ def main(cfg_path: str = None):
         config=OmegaConf.to_object(cfg),
         dir=cfg.wandb.dir,
         mode=wandb_mode,
-        name=cfg.wandb.experiment_name,
-        id=cfg.wandb.id if hasattr(cfg.wandb, 'id') and cfg.wandb.id is not None else None
-    )
+        name=cfg.wandb.experiment_name + '_bandwidth')
     
     dataloader_split = {
         'train':gdm.train_dataloader(),
