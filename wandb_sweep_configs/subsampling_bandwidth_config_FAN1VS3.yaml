@@ -1,7 +1,7 @@
 program: bandwidth_calculation.py
 method: grid
 name: random_subsampling
-project: Subsamplimg-vs-bandwidth-NCARS
+project: Subsamplimg-vs-bandwidth-FAN1VS3
 entity: haraghi
 description: |
   Spatial, temporal, and random subsampling bandwidth calculation for NCARS dataset.
@@ -13,7 +13,7 @@ command:
 parameters:
   cfg_path:
     values:
-      - "cfg_folder/sampling_bandwidth_NCARS.yaml"
+      - "cfg_folder/sampling_bandwidth_FAN1VS3.yaml"
   # seed:
   #   values:
   #     - 0

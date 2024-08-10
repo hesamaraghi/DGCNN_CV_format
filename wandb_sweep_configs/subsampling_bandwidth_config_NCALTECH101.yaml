@@ -1,7 +1,7 @@
 program: bandwidth_calculation.py
 method: grid
-name: random_subsampling
-project: Subsamplimg-vs-bandwidth-NCARS
+name: temporal_subsampling
+project: Subsamplimg-vs-bandwidth-NCALTECH101
 entity: haraghi
 description: |
   Spatial, temporal, and random subsampling bandwidth calculation for NCARS dataset.
@@ -13,7 +13,7 @@ command:
 parameters:
   cfg_path:
     values:
-      - "cfg_folder/sampling_bandwidth_NCARS.yaml"
+      - "cfg_folder/sampling_bandwidth_NCALTECH101.yaml"
   # seed:
   #   values:
   #     - 0
@@ -35,20 +35,20 @@ parameters:
           #       min: 2
           #       max: 11
           #       q: 2
-          # temporal_subsampling:
-          #   parameters:
-          #     transform:
-          #       value: True
-          #     subsampling_ratio:
-          #       min: 2
-          #       max: 20
-          #     window_size:
-          #       value: 10
-          random_ratio_subsampling:
-            distribution: q_uniform
-            min: 0.05
-            max: 0.5
-            q: 0.05
+          temporal_subsampling:
+            parameters:
+              transform:
+                value: True
+              subsampling_ratio:
+                min: 2
+                max: 20
+              window_size:
+                value: 10
+          # random_ratio_subsampling:
+          #   distribution: q_uniform
+          #   min: 0.05
+          #   max: 0.5
+          #   q: 0.05
   train:
     parameters:
       batch_size:

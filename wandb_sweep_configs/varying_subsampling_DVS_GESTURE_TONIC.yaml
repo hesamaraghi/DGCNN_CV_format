@@ -1,10 +1,13 @@
-program: bandwidth_calculation.py
-method: grid
-name: random_subsampling
-project: Subsamplimg-vs-bandwidth-NCARS
+program: train.py
+method: random
+name: DVSGESTURE_TONIC_varyinig_subsampling
+project: DVSGESTURE_TONIC-varyinig-subsampling
 entity: haraghi
 description: |
-  Spatial, temporal, and random subsampling bandwidth calculation for NCARS dataset.
+  Spatial, temporal, and random subsampling bandwidth calculation for DVSGESTURE_TONIC dataset.
+metric:
+  goal: maximize
+  name: val/acc/mean
 command:
   - ${env}
   - ${interpreter}
@@ -13,7 +16,7 @@ command:
 parameters:
   cfg_path:
     values:
-      - "cfg_folder/sampling_bandwidth_NCARS.yaml"
+      - "cfg_folder/sampling_bandwidth_DVS_GESTURE_TONIC.yaml"
   # seed:
   #   values:
   #     - 0
@@ -51,11 +54,16 @@ parameters:
             q: 0.05
   train:
     parameters:
+      epochs:
+        values:
+          # - 100
+          - 250
+          # - 500
       batch_size:
         values:
           # - 1
-          - 8
+          # - 8
           # - 16
           # - 32
-          # - 64
-          # - 100
+          - 64
+          # - 128

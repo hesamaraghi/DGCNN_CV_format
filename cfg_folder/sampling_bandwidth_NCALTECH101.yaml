@@ -5,48 +5,49 @@ with respect to the parameters of different subsampling methods \
 seed: 0
 optimize:
   optimizer: Adam
-  lr: null #0.001
-  lr_scheduler: null #ReduceLROnPlateau
-  mode: null #min 
-  factor: null #0.5
-  patience: null #10
-  weight_decay: null #0.0001
+  lr: 1e-4
+  lr_scheduler: ReduceLROnPlateau
+  mode: min 
+  factor: 0.5
+  patience: 40
+  weight_decay: 0
 model:
-  name: null #DGCNN2
-  k: null #50
+  name: EST
+  k: null #20
   aggr: null #max
-  num_bins: null #9
-  cnn_type: null #""
-  resnet_crop_dimension: null # [224, 224]  # dimension of crop before it goes into classifier
-  est_mlp_layers: null # [1, 30, 30, 1] # kernel layers for EST
-  est_activation: null # nn.LeakyReLU(negative_slope=0.1)
-  resnet_pretrained: null #True
+  num_bins: 9
+  cnn_type: resnet34
+  resnet_crop_dimension: [224, 224]  # dimension of crop before it goes into classifier
+  est_mlp_layers: [1, 30, 30, 1] # kernel layers for EST
+  est_activation: nn.LeakyReLU(negative_slope=0.1)
+  resnet_pretrained: True
 train:
-  epochs: null #200
-  batch_size: 8
-  loss_fn: null #nn.NLLLoss()
+  epochs: 250
+  batch_size: 16
+  loss_fn: nn.CrossEntropyLoss()
   profiler: null #simple
   ckpt_path: null
-  multi_val_num: 1
-  multi_test_num: 1
+  multi_val_num: 5
+  multi_test_num: 20
   default_root_dir: null
 auto_resume:
   sbatch_folder: null
   num_repeat: null
 dataset:
-  name: NCARS
+  name: NCALTECH101
   train_percentage: 0.75 # not applicable
   validation_percentage: 0.10 # not applicable
-  image_resolution: [120,100]  # dimension of spatial grid  (H x W)
+  image_resolution: [180,240]  # dimension of spatial grid  (H x W)
   num_samples_per_class: null
   num_classes: null
   dataset_path: null
   num_workers: 8
+  in_memory: True
 transform:
   train:
     transform: True
     spatial_centering: null #True
-    temporal_scale: null #1e-5
+    temporal_scale: null # 1e-5
     temporal_quantization: null #9
     spatial_subsampling:  
       transform: null
@@ -59,8 +60,8 @@ transform:
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #32
     fixed_sampling:
-      transform: null #True
-      seed_str: null #32
+      transform: True
+      seed_str: ${seed}
     random_num_events_per_sample:
       transform: null #True
       min_num_events: null #8
@@ -81,7 +82,7 @@ transform:
         cat: null #True
     shift_and_flip:
       transform: null #True
-      resolution: null #[180,240]
+      resolution: ${dataset.image_resolution}
       max_shift: null #20
       p: null #0.5
   validation:
@@ -103,10 +104,10 @@ transform:
       transform: ${transform.train.fixed_sampling.transform}
       seed_str: ${transform.train.fixed_sampling.seed_str}
     random_num_events_per_sample:
-      transform: null #True
-      min_num_events: null #8
-      max_num_events: null #2048
-      inverse_sampling: null #False
+      transform: ${transform.train.random_num_events_per_sample.transform}
+      min_num_events: ${transform.train.random_num_events_per_sample.min_num_events}
+      max_num_events: ${transform.train.random_num_events_per_sample.max_num_events}
+      inverse_sampling: ${transform.train.random_num_events_per_sample.inverse_sampling}
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -144,10 +145,10 @@ transform:
       transform: ${transform.train.fixed_sampling.transform}
       seed_str: ${transform.train.fixed_sampling.seed_str}
     random_num_events_per_sample:
-      transform: null #True
-      min_num_events: null #8
-      max_num_events: null #2048
-      inverse_sampling: null #False
+      transform: ${transform.train.random_num_events_per_sample.transform}
+      min_num_events: ${transform.train.random_num_events_per_sample.min_num_events}
+      max_num_events: ${transform.train.random_num_events_per_sample.max_num_events}
+      inverse_sampling: ${transform.train.random_num_events_per_sample.inverse_sampling}
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -188,8 +189,8 @@ pre_transform:
 wandb:
   log: False
   offline: False
-  dir: "."
-  id: null 
-  experiment_name: null #""
-  entity: 'haraghi'
-  project: delete-me
+  dir: "log_folder"
+  id: null
+  experiment_name: ""
+  entity: ""
+  project: ""

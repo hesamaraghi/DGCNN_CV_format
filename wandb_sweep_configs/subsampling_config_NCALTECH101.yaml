@@ -1,0 +1,47 @@
+name: subsampling
+project: Subsamplimg_methods_NCALTECH101
+entity: haraghi
+description: |
+  Spatial, temporal, and random subsampling bandwidth calculation for NCALTECH101 dataset.
+cfg_path: "cfg_folder/sampling_bandwidth_NCALTECH101.yaml"
+sweep_parameters:
+  seed:
+      - 42
+      - 420
+      - 4200
+      - 42000
+      - 420000
+  transform:
+    train:
+  ############################################################################################################
+  #     spatial_subsampling:
+  #       transform: True
+  #       h_r:
+  #         - 2
+  #         - 3
+  #         - 6
+  #         - 8
+  #         # - 12
+  #       v_r:
+  #         - 2
+  #         - 4
+  #         - 6
+  #         - 10
+  #         # - 15
+  # ##########################################################################################################
+  #     temporal_subsampling:
+  #       transform: True
+  #       subsampling_ratio:
+  #         - 4
+  #         - 12
+  #         - 36
+  #         - 80
+  #         # - 180
+  #       window_size: 10
+  ###########################################################################################################
+      random_ratio_subsampling:
+        - 0.25
+        - 0.0833333
+        - 0.0277777
+        - 0.0125
+      #   - 0.0055555

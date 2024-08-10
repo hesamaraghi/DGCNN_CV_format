@@ -4,7 +4,7 @@ with respect to the parameters of different subsampling methods \
 "
 seed: 0
 optimize:
-  optimizer: Adam
+  optimizer: null #Adam
   lr: null #0.001
   lr_scheduler: null #ReduceLROnPlateau
   mode: null #min 
@@ -34,10 +34,10 @@ auto_resume:
   sbatch_folder: null
   num_repeat: null
 dataset:
-  name: NCARS
+  name: NASL
   train_percentage: 0.75 # not applicable
   validation_percentage: 0.10 # not applicable
-  image_resolution: [120,100]  # dimension of spatial grid  (H x W)
+  image_resolution: [180,240]  # dimension of spatial grid  (H x W)
   num_samples_per_class: null
   num_classes: null
   dataset_path: null

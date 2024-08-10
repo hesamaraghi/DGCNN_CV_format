@@ -1,0 +1,89 @@
+program: train.py
+# program: bandwidth_calculation.py
+method: grid
+name: spatial_12x15_subsampling
+# name: temporal_bandwidth_2
+project: Subsamplimg_methods_DVS_GESTURE_TONIC
+entity: haraghi
+description: |
+  Spatial, temporal, and random subsampling bandwidth calculation for DVS-GESTURE TONIC dataset.
+metric:
+  goal: maximize
+  name: val/acc/mean
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - ${args_no_hyphens}
+parameters:
+  cfg_path:
+    values:
+      - "cfg_folder/sampling_bandwidth_DVS_GESTURE_TONIC.yaml"
+  seed:
+    values:
+      - 42
+      - 420
+      - 4200
+      - 42000
+      - 420000
+  transform:
+    parameters:
+      train:
+        parameters:
+############################################################################################################
+          spatial_subsampling:
+            parameters:
+              transform:
+                value: True
+              h_r:
+                # distribution: q_uniform
+                # min: 2
+                # max: 11
+                # q: 2
+                values:
+                  # - 2
+                  # - 3
+                  # - 6
+                  # - 8
+                  - 12
+              v_r:
+                # distribution: q_uniform
+                # min: 2
+                # max: 11
+                # q: 2
+                values:
+                  # - 2
+                  # - 4
+                  # - 6
+                  # - 10
+                  - 15
+##########################################################################################################
+          # temporal_subsampling:
+          #   parameters:
+          #     transform:
+          #       value: True
+          #     subsampling_ratio:
+          #       values:
+          #         # - 4
+          #         # - 12
+          #         # - 36
+          #         # - 80
+          #         - 180
+          #     window_size:
+          #       value: 10
+###########################################################################################################
+          # random_ratio_subsampling:
+          #   distribution: q_uniform
+          #   min: 0.05
+          #   max: 0.5
+          #   q: 0.05
+  # train:
+  #   parameters:
+  #     batch_size:
+  #       values:
+          # - 1
+          # - 8
+          # - 16
+          # - 32
+          # - 64
+          # - 100
