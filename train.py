@@ -167,6 +167,22 @@ def main(cfg_path: str = None):
     cfg = OmegaConf.merge(cfg, cmd_cfg)
     cfg_bare = OmegaConf.load("config_bare.yaml")
     cfg = OmegaConf.merge(cfg_bare,cfg)
+    
+    # Set cache dir to W&B logging directory
+    os.environ["WANDB_CACHE_DIR"] = os.path.join(cfg.wandb.dir, 'cache')
+    wandb_logger = WandbLogger(
+        save_dir=cfg.wandb.dir,
+        project=cfg.wandb.project,
+        id=cfg.wandb.id if hasattr(cfg.wandb, 'id') and cfg.wandb.id is not None else None,
+        name=cfg.wandb.experiment_name,
+        log_model=cfg.wandb.log,
+        offline=cfg.wandb.offline if hasattr(cfg.wandb, 'offline') and 
+                                         cfg.wandb.offline is not None else not cfg.wandb.log,
+        # Keyword args passed to wandb.init()
+        entity=cfg.wandb.entity,
+        config=OmegaConf.to_object(cfg),
+    )
+    
     print(OmegaConf.to_yaml(cfg), flush=True)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -182,21 +198,6 @@ def main(cfg_path: str = None):
     gdm = GraphDataModule(cfg)
     print(f"Time to create GraphDataModule: {time.time()-start}", flush=True)
     cfg.dataset.num_classes = gdm.num_classes
-
-    # Set cache dir to W&B logging directory
-    os.environ["WANDB_CACHE_DIR"] = os.path.join(cfg.wandb.dir, 'cache')
-    wandb_logger = WandbLogger(
-        save_dir=cfg.wandb.dir,
-        project=cfg.wandb.project,
-        id=cfg.wandb.id if hasattr(cfg.wandb, 'id') and cfg.wandb.id is not None else None,
-        name=cfg.wandb.experiment_name,
-        log_model=cfg.wandb.log,
-        offline=cfg.wandb.offline if hasattr(cfg.wandb, 'offline') and 
-                                         cfg.wandb.offline is not None else not cfg.wandb.log,
-        # Keyword args passed to wandb.init()
-        entity=cfg.wandb.entity,
-        config=OmegaConf.to_object(cfg),
-    )
     
     # Create model using factory pattern
     model = model_factory.factory(cfg)
