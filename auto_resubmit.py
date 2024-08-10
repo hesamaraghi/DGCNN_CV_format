@@ -72,36 +72,42 @@ def main():
             tags = args.tags.split(",")
             runs = [r for r in runs if all(t in r.tags for t in tags)]
         for run in runs:
-            if "resume_config" in run.config:
-                if 'test/acc_mean' not in run.summary:
-                    if os.path.exists(os.path.join('pl_default_dir',args.project_name,run.name,'config.yml')):
-                        if run.state == "running" or run.state == "finished" or run.state == "failed" or run.state == "crashed":
-                            if run.name not in run_names_dict['running'].values() and run.name not in run_names_dict['pending'].values():
-                                python_command = f"{args.sbatch_file} python train.py cfg_path={run.config['resume_config']['cfg_path']}"
-                                if args.num_repeat > 0:
-                                    sbatch_command = f"bash {args.autoresume_file} \"{python_command}\" {args.num_repeat}"
-                                else:   
-                                    sbatch_command = f"sbatch {python_command}"
-                                print("no test acc.: ",run.name, sbatch_command)
-                                # Submit the job using subprocess
-                                if not args.dry_run:
-                                    subprocess.call(sbatch_command, shell=True)
-                else:
-                    if os.path.exists(run.config['train']['default_root_dir']):
-                        hpc_ckpts_list = glob(os.path.join(run.config['train']['default_root_dir'], 'hpc_ckpt_*.ckpt'))
-                        if hpc_ckpts_list:
-                            hpc_ckpt_max = max([h.split('_')[-1].split('.')[0] for h in hpc_ckpts_list])
-                            if run.name not in run_names_dict['running'].values() and run.name not in run_names_dict['pending'].values():
-                                python_command = f"{args.sbatch_file} python train.py cfg_path={run.config['resume_config']['cfg_path']}"
-                                if args.num_repeat > 0:
-                                    sbatch_command = f"bash {args.autoresume_file} \"{python_command}\" {args.num_repeat}"
-                                else:   
-                                    sbatch_command = f"sbatch {python_command}"
-                                print(f"resume from hpc_ckpt_{hpc_ckpt_max}", run.name, sbatch_command)
-                                # Submit the job using subprocess
-                                if not args.dry_run:
-                                    subprocess.call(sbatch_command, shell=True)
-        
+            if 'resume_config' in run.config and 'cfg_path' in run.config['resume_config']:
+                saved_cfg_path = run.config['resume_config']['cfg_path']
+            else:
+                saved_cfg_path = os.path.join('pl_default_dir',args.project_name,run.name,'config.yml')
+                if not os.path.exists(saved_cfg_path):
+                    continue
+                
+            if 'test/acc_mean' not in run.summary or args.force_resubmit:
+                if (run.name not in run_names_dict['running'].values() and run.name not in run_names_dict['pending'].values()) or args.force_resubmit:
+                    python_command = f"{args.sbatch_file} python {args.program} cfg_path={saved_cfg_path}"
+                    if args.num_repeat > 0:
+                        sbatch_command = f"bash {args.autoresume_file} \"{python_command}\" {args.num_repeat}"
+                    else:   
+                        sbatch_command = f"sbatch {python_command}"
+                    if 'test/acc_mean' not in run.summary:
+                        print("no test acc.: ",run.name, sbatch_command)
+                    else:
+                        print("force resubmit: ",run.name, sbatch_command)
+                    # Submit the job using subprocess
+                    if not args.dry_run:
+                        subprocess.call(sbatch_command, shell=True)
+            else:
+                if os.path.exists(run.config['train']['default_root_dir']):
+                    hpc_ckpts_list = glob(os.path.join(run.config['train']['default_root_dir'], 'hpc_ckpt_*.ckpt'))
+                    if hpc_ckpts_list:
+                        hpc_ckpt_max = max([h.split('_')[-1].split('.')[0] for h in hpc_ckpts_list])
+                        if run.name not in run_names_dict['running'].values() and run.name not in run_names_dict['pending'].values():
+                            python_command = f"{args.sbatch_file} python {args.program} cfg_path={saved_cfg_path}"
+                            if args.num_repeat > 0:
+                                sbatch_command = f"bash {args.autoresume_file} \"{python_command}\" {args.num_repeat}"
+                            else:   
+                                sbatch_command = f"sbatch {python_command}"
+                            print(f"resume from hpc_ckpt_{hpc_ckpt_max}", run.name, sbatch_command)
+                            # Submit the job using subprocess
+                            if not args.dry_run:
+                                subprocess.call(sbatch_command, shell=True)              
         
         dt = datetime.now() + timedelta(hours=1)
         dt = dt.replace(minute=12,second=34)
@@ -131,7 +137,9 @@ if __name__ == "__main__":
     parser.add_argument("--sbatch-file", type=str, default="sbatch_folder/run_train.sbatch")
     parser.add_argument("--sweep-name", type=str)
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("tags", nargs="?", help="List of tags separated by commas")
+    parser.add_argument("--program", type=str, default="train.py")
+    parser.add_argument("--force-resubmit", action="store_true")
+    parser.add_argument("--tags", nargs="?", help="List of tags separated by commas")
 
     
     args = parser.parse_args()
