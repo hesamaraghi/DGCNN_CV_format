@@ -126,9 +126,10 @@ class ProcessBatch(FilterDataRecursive):
         
         is_all_processed = True
         for sample_file in self.sample_files:    
-            output_file = osp.join(self.filter_value_dir, "filter_values_" + osp.basename(sample_file))
+            class_name = os.path.basename(os.path.dirname(sample_file))   
+            output_file = osp.join(self.filter_value_dir, class_name, "filter_values_" + osp.basename(sample_file))
             if not osp.exists(output_file):
-                print(f"Missing {sample_file}")
+                print(f"Missing {output_file}")
                 is_all_processed = False
         
         if is_all_processed:

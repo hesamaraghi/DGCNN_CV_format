@@ -9,6 +9,7 @@ num_jobs = 100
 image_size = 128,128
 filter_size = 7
 tau = 30 * 1000
+tau = int(tau)
 
 dataset_name = 'DVSGESTURE_TONIC'
 
