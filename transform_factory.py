@@ -13,10 +13,14 @@ def factory(cfg_all, transform_type = None, dataset_type = None):
       cfg_dict = OmegaConf.to_object(cfg)
       if 'transform' in cfg_dict and cfg.transform:
             transform_list = []
+            if 'spatiotemporal_filtering_subsampling' in cfg_dict and cfg.spatiotemporal_filtering_subsampling.transform:
+                  transform_list.append(SpatioTemporalFilteringSubsampling(cfg_all, cfg_dict))
+            if 'thresh_quantile' in cfg_dict and cfg.thresh_quantile is not None:
+                  if 'spatiotemporal_filtering_subsampling' in cfg_dict:
+                        assert not cfg.spatiotemporal_filtering_subsampling.transform, "thresh_quantile and spatiotemporal_filtering_subsampling cannot be used together"
+                  transform_list.append(RemoveOutliers(cfg))
             if 'filter_nodes' in cfg_dict and cfg.filter_nodes is not None:
                   transform_list.append(FilterNodes(cfg))
-            if 'thresh_quantile' in cfg_dict and cfg.thresh_quantile is not None:
-                  transform_list.append(RemoveOutliers(cfg))
             if 'shift_and_flip' in cfg_dict and cfg.shift_and_flip.transform:
                   transform_list.append(ShiftAndFlip(cfg.shift_and_flip))
             if 'temporal_scale' in cfg_dict and cfg.temporal_scale is not None:

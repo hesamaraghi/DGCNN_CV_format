@@ -1,10 +1,11 @@
-from typing import Union
+from typing import Union, Iterable, List, Tuple
 import os.path as osp
 import scipy.io as sio
 import re
 import random
 import math
 import numpy as np
+from scipy.ndimage import gaussian_filter
 import torch
 from torch_geometric.transforms import BaseTransform
 from torch_geometric.data import Data, HeteroData
@@ -16,6 +17,60 @@ try:
 except ModuleNotFoundError:
     from event_filters import *
 
+class FilterDataRecursive():
+
+    def __init__(self, tau: float, filter_size: int, image_size: Tuple[int,int]):
+        
+        assert filter_size % 2 == 1, "Filter size must be odd"
+        self.tau = tau
+        self.filter_size = filter_size
+        self.image_size = image_size
+        self.K = filter_size // 2
+        self.H, self.W = image_size
+        
+        sigma = filter_size / 5.0
+        kernel = np.zeros((filter_size, filter_size))
+        kernel[filter_size // 2, filter_size // 2] = 1
+        self.gaussian_kernel = gaussian_filter(kernel, sigma)
+        self.gaussian_kernel = self.gaussian_kernel / np.sum(self.gaussian_kernel)
+
+    def __call__(self, data):
+        
+        self.last_time_tensor = np.full((2,self.H,self.W), float('0') , dtype=np.float32)
+        self.temporal_accumulation_tensor = np.full((2,self.image_size[0],self.image_size[1]), float('0') , dtype=np.float32)
+
+        filter_value_recursive = np.zeros(data.pos.shape[0], dtype=np.float32)
+
+        for i ,ts in enumerate(data.pos):
+    
+            pp = 0 if data.x[i] < 0 else 1
+    
+            h = ts[-2].int()
+            w = ts[-3].int()
+            t = ts[-1].numpy() 
+    
+            h_start = max(h - self.K, 0)
+            h_end = min(h + self.K, self.H-1)
+            w_start = max(w - self.K, 0)
+            w_end = min(w + self.K, self.W-1)
+
+            
+            # Compute the temporal lag
+            temporal_lag = np.exp(- (t - self.last_time_tensor[pp,h_start:h_end+1,w_start:w_end+1])/self.tau)
+
+            # update the last time tensor
+            self.last_time_tensor[pp,h_start:h_end+1,w_start:w_end+1] = t
+
+            # update the temporal accumulation tensor
+
+            self.temporal_accumulation_tensor[pp,h_start:h_end+1,w_start:w_end+1] *= temporal_lag
+            self.temporal_accumulation_tensor[pp,h,w] += 1
+
+            # Compute the filter value
+            filter_value_recursive[i] = np.sum(self.temporal_accumulation_tensor[pp,h_start:h_end+1,w_start:w_end+1] * self.gaussian_kernel[h_start - h + self.K:h_end + 1 - h + self.K, w_start - w + self.K:w_end +1 - w + self.K])
+    
+        return filter_value_recursive
+    
 class TemporalScaling(BaseTransform):
     r"""Centers and normalizes node positions to the interval :math:`(-1, 1)`
     (functional name: :obj:`normalize_scale`).
@@ -444,3 +499,112 @@ class DropEventRandomly(BaseTransform):
             indices = torch.where(torch.rand(n_events) < self.p)[0]
             
         return filter_data(data, indices)   
+    
+    
+class SpatioTemporalFilteringSubsampling(BaseTransform, FilterDataRecursive):
+    r"""Subsampling the event video using spatio-temporal filter values."""
+    
+    def __init__(self, cfg_all, cfg_transform):
+        
+        if not isinstance(cfg_all, dict):
+            cfg_all = OmegaConf.to_object(cfg_all)
+        if not isinstance(cfg_transform, dict):
+            cfg_transform = OmegaConf.to_object(cfg_transform)
+        
+        assert "tau" in cfg_transform['spatiotemporal_filtering_subsampling'], "tau must be provided in the transform config"
+        assert "filter_size" in cfg_transform['spatiotemporal_filtering_subsampling'], "filter_size must be provided in the transform config"
+        assert "sampling_threshold" in cfg_transform['spatiotemporal_filtering_subsampling'], "sampling_threshold must be provided in the transform config"
+        assert "normalization_length" in cfg_transform['spatiotemporal_filtering_subsampling'], "normalization_length must be provided in the transform config"
+        
+        tau = cfg_transform['spatiotemporal_filtering_subsampling']['tau']
+        filter_size = cfg_transform['spatiotemporal_filtering_subsampling']['filter_size']
+        sampling_threshold = cfg_transform['spatiotemporal_filtering_subsampling']['sampling_threshold']
+        normalization_length = cfg_transform['spatiotemporal_filtering_subsampling']['normalization_length']
+        
+        assert isinstance(tau, int), "tau must be an integer"
+        assert isinstance(filter_size, int), "filter_size must be an integer"
+        image_size = cfg_all["dataset"]["image_resolution"]
+        assert len(image_size) == 2, "image_resolution must be a tuple of two integers"
+        assert cfg_all["dataset"]["name"] is not None, "dataset name must be provided"
+        assert cfg_all["dataset"]["dataset_path"] is not None, "dataset path must be provided"
+        self.batch_list_dir = osp.join(cfg_all["dataset"]["dataset_path"], "filter_values", f"tau_{tau}_filter_size_{filter_size}")
+        
+        FilterDataRecursive.__init__(self, tau, filter_size, image_size)
+        
+        # filtering parameters
+        self.normalization_length = normalization_length
+        
+        # subsampling parameters
+        if normalization_length:
+            assert isinstance(normalization_length, int), "normalization_length must be an integer"
+        self.sampling_threshold = sampling_threshold
+
+        # fixed subsampling initialization
+        self.fixed_subsampling = False
+        if "fixed_sampling" in cfg_transform and cfg_transform["fixed_sampling"]["transform"] is True:
+            self.fixed_subsampling = True
+            if "seed_str" in cfg_transform["fixed_sampling"] and cfg_transform["fixed_sampling"]["seed_str"] is not None:   
+                self.seed_str = str(cfg_transform["fixed_sampling"]["seed_str"])
+            else:
+                self.seed_str = 'fixed_subsampling' 
+        
+    def __call__(self, data: Data) -> Data:   
+        
+        filter_values = self.get_filter_values(data)
+        assert len(filter_values) == data.num_nodes, "Filter values must have the same length as the number of nodes in the data"
+        if self.normalization_length:
+            filter_values = self.filter_values_normalizing(filter_values)
+        
+        # subsampling  
+        n_events = data.num_nodes
+        if self.fixed_subsampling:
+            seed = create_seed(self.seed_str + '_' + data.label[0] + '_' + data.file_id)
+            torch_rng = torch.Generator().manual_seed(seed % (2**32))
+            indices = torch.where(torch.rand(n_events, generator=torch_rng) < self.sampling_threshold * filter_values)[0]
+        else:
+            indices = torch.where(torch.rand(n_events) < self.sampling_threshold * filter_values)[0]
+            
+        return filter_data(data, indices)   
+  
+    def get_filter_values(self, data):
+        
+        class_name = data.label[0]     
+        filter_value_file = osp.join(self.batch_list_dir, class_name)
+        filter_value_file = osp.join(filter_value_file, "filter_values_" + osp.splitext(data.file_id)[0] + ".pt")
+        
+        if not osp.exists(filter_value_file):
+            print(f"Filter values for {data.file_id} do not exist!")
+            print(f"Creating filter values for {data.file_id}!")
+            
+            sorted_indices = torch.argsort(data.pos[..., -1])
+            data.pos = data.pos[sorted_indices]
+            data.x = data.x[sorted_indices]
+
+            filter_values = FilterDataRecursive.__call__(self, data)
+
+            # To find reverse_indices such that A = B[reverse_indices]
+            reverse_indices = torch.zeros_like(sorted_indices)
+            reverse_indices[sorted_indices] = torch.arange(len(sorted_indices))
+
+            filter_values = filter_values[reverse_indices]
+            filter_values = torch.tensor(filter_values)
+            
+            print(f"Saving filter values for {data.file_id} to {filter_value_file}")
+            torch.save(filter_values, filter_value_file)
+        
+        else:
+            filter_values = torch.load(filter_value_file)
+            # print(f"Loaded filter values from {filter_value_file}")
+        
+        return filter_values
+    
+    def filter_values_normalizing(self, filter_values):
+        
+        filter_values_normalized = torch.zeros_like(filter_values)
+        for i, ev in enumerate(filter_values):
+            start = max(0, i - self.normalization_length)
+            chunk_part = filter_values[start:i+1]
+            chunk_part_normalized = (chunk_part - torch.min(chunk_part)) / (torch.max(chunk_part) - torch.min(chunk_part) + 1e-6)
+            filter_values_normalized[i] = chunk_part_normalized[-1]
+        return filter_values_normalized
+    

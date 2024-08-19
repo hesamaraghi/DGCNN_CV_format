@@ -1,74 +1,11 @@
-import numpy as np
 import os
 import os.path as osp
-from scipy.ndimage import gaussian_filter
-
-from typing import Union, Iterable, List, Tuple
 
 import torch
 import argparse
 
+from datatransforms.event_transforms import FilterDataRecursive
 
-class FilterDataRecursive():
-
-    def __init__(self, tau: float, filter_size: int, image_size: Tuple[int,int]):
-        
-        assert filter_size % 2 == 1, "Filter size must be odd"
-        self.tau = tau
-        self.filter_size = filter_size
-        self.image_size = image_size
-        self.K = filter_size // 2
-        self.H, self.W = image_size
-        
-        sigma = filter_size / 5.0
-        kernel = np.zeros((filter_size, filter_size))
-        kernel[filter_size // 2, filter_size // 2] = 1
-        self.gaussian_kernel = gaussian_filter(kernel, sigma)
-        self.gaussian_kernel = self.gaussian_kernel / np.sum(self.gaussian_kernel)
-
-    def __call__(self, data):
-        
-        self.last_time_tensor = np.full((2,self.H,self.W), float('0') , dtype=np.float32)
-        self.temporal_accumulation_tensor = np.full((2,self.image_size[0],self.image_size[1]), float('0') , dtype=np.float32)
-
-        filter_value_recursive = np.zeros(data.pos.shape[0], dtype=np.float32)
-
-        # sorted_indices = torch.argsort(data.pos[..., -1])
-        # data.pos = data.pos[sorted_indices]
-        # data.x = data.x[sorted_indices]
-
-        for i ,ts in enumerate(data.pos):
-    
-            pp = 0 if data.x[i] < 0 else 1
-    
-            h = ts[-2].int()
-            w = ts[-3].int()
-            t = ts[-1].numpy() 
-    
-            h_start = max(h - self.K, 0)
-            h_end = min(h + self.K, self.H-1)
-            w_start = max(w - self.K, 0)
-            w_end = min(w + self.K, self.W-1)
-
-            
-            # Compute the temporal lag
-            temporal_lag = np.exp(- (t - self.last_time_tensor[pp,h_start:h_end+1,w_start:w_end+1])/self.tau)
-
-            # update the last time tensor
-            self.last_time_tensor[pp,h_start:h_end+1,w_start:w_end+1] = t
-
-            # update the temporal accumulation tensor
-
-            self.temporal_accumulation_tensor[pp,h_start:h_end+1,w_start:w_end+1] *= temporal_lag
-            self.temporal_accumulation_tensor[pp,h,w] += 1
-
-            # Compute the filter value
-            filter_value_recursive[i] = np.sum(self.temporal_accumulation_tensor[pp,h_start:h_end+1,w_start:w_end+1] * self.gaussian_kernel[h_start - h + self.K:h_end + 1 - h + self.K, w_start - w + self.K:w_end +1 - w + self.K])
-    
-        return filter_value_recursive
-    
-    
-    
 class ProcessBatch(FilterDataRecursive):
     
     def __init__(self,batch_file = None, tau = None, filter_size = None, image_size = None) -> None:

@@ -54,9 +54,15 @@ transform:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
       window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds
-      fixed_interval: null #Default:False if True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
+      fixed_interval: null #Default:False. If True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #32
+    spatiotemporal_filtering_subsampling: #Subsampling the events randomly with probability proportional to spatiotemporal filtering values
+      transform: null #True
+      tau: null #30 in milliseconds. Temporal constant for spatiotemporal filtering
+      filter_size: null #7 in pixels. Filter size for spatial Gaussian filter.
+      sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
+      normalization_length: null #null #The length of the filter_values normalization, e.g., 100 (If None, the normalization is not applied)
     fixed_sampling:
       transform: null #True
       seed_str: null #32
@@ -99,6 +105,12 @@ transform:
       fixed_interval: null #Default:False if True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #""
+    spatiotemporal_filtering_subsampling: #Subsampling the events randomly with probability proportional to spatiotemporal filtering values
+      transform: null #True
+      tau: null #30 in milliseconds. Temporal constant for spatiotemporal filtering
+      filter_size: null #7 in pixels. Filter size for spatial Gaussian filter.
+      sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
+      normalization_length: null #null #The length of the filter_values normalization, e.g., 100 (If None, the normalization is not applied)
     fixed_sampling:
       transform: null #True
       seed_str: null #32
@@ -141,6 +153,12 @@ transform:
       fixed_interval: null #Default:False if True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #32
+    spatiotemporal_filtering_subsampling: #Subsampling the events randomly with probability proportional to spatiotemporal filtering values
+      transform: null #True
+      tau: null #30 in milliseconds. Temporal constant for spatiotemporal filtering
+      filter_size: null #7 in pixels. Filter size for spatial Gaussian filter.
+      sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
+      normalization_length: null #null #The length of the filter_values normalization, e.g., 100 (If None, the normalization is not applied)
     fixed_sampling:
       transform: null #True
       seed_str: null #32
