@@ -57,12 +57,18 @@ transform:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
       window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds
-      fixed_interval: True #Default:False if True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
+      fixed_interval: False #Default:False if True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #32
-    fixed_sampling:
+    spatiotemporal_filtering_subsampling: #Subsampling the events randomly with probability proportional to spatiotemporal filtering values
       transform: null #True
-      seed_str: null #${seed}
+      tau: null #30 in milliseconds. Temporal constant for spatiotemporal filtering
+      filter_size: null #7 in pixels. Filter size for spatial Gaussian filter.
+      sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
+      normalization_length: null #null #The length of the filter_values normalization, e.g., 100 (If None, the normalization is not applied)
+    fixed_sampling:
+      transform: True
+      seed_str: ${seed}
     random_num_events_per_sample:
       transform: null #True
       min_num_events: null #8
@@ -102,6 +108,12 @@ transform:
       fixed_interval: ${transform.train.temporal_subsampling.fixed_interval}
     random_ratio_subsampling: ${transform.train.random_ratio_subsampling}   
     num_events_per_sample: ${transform.train.num_events_per_sample}
+    spatiotemporal_filtering_subsampling:
+      transform: ${transform.train.spatiotemporal_filtering_subsampling.transform}
+      tau: ${transform.train.spatiotemporal_filtering_subsampling.tau}
+      filter_size: ${transform.train.spatiotemporal_filtering_subsampling.filter_size}
+      sampling_threshold: ${transform.train.spatiotemporal_filtering_subsampling.sampling_threshold}
+      normalization_length: ${transform.train.spatiotemporal_filtering_subsampling.normalization_length}
     fixed_sampling:
       transform: ${transform.train.fixed_sampling.transform}
       seed_str: ${transform.train.fixed_sampling.seed_str}
@@ -144,6 +156,12 @@ transform:
       fixed_interval: ${transform.train.temporal_subsampling.fixed_interval}
     random_ratio_subsampling: ${transform.train.random_ratio_subsampling}   
     num_events_per_sample: ${transform.train.num_events_per_sample}
+    spatiotemporal_filtering_subsampling:
+      transform: ${transform.train.spatiotemporal_filtering_subsampling.transform}
+      tau: ${transform.train.spatiotemporal_filtering_subsampling.tau}
+      filter_size: ${transform.train.spatiotemporal_filtering_subsampling.filter_size}
+      sampling_threshold: ${transform.train.spatiotemporal_filtering_subsampling.sampling_threshold}
+      normalization_length: ${transform.train.spatiotemporal_filtering_subsampling.normalization_length}
     fixed_sampling:
       transform: ${transform.train.fixed_sampling.transform}
       seed_str: ${transform.train.fixed_sampling.seed_str}

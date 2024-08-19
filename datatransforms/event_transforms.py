@@ -1,4 +1,5 @@
 from typing import Union, Iterable, List, Tuple
+import os
 import os.path as osp
 import scipy.io as sio
 import re
@@ -523,13 +524,14 @@ class SpatioTemporalFilteringSubsampling(BaseTransform, FilterDataRecursive):
         
         assert isinstance(tau, int), "tau must be an integer"
         assert isinstance(filter_size, int), "filter_size must be an integer"
+        tau = int(tau * 1000)
         image_size = cfg_all["dataset"]["image_resolution"]
         assert len(image_size) == 2, "image_resolution must be a tuple of two integers"
         assert cfg_all["dataset"]["name"] is not None, "dataset name must be provided"
         assert cfg_all["dataset"]["dataset_path"] is not None, "dataset path must be provided"
         self.batch_list_dir = osp.join(cfg_all["dataset"]["dataset_path"], "filter_values", f"tau_{tau}_filter_size_{filter_size}")
         
-        tau = int(tau * 1000)
+        
         FilterDataRecursive.__init__(self, tau, filter_size, image_size)
         
         # filtering parameters
@@ -576,6 +578,8 @@ class SpatioTemporalFilteringSubsampling(BaseTransform, FilterDataRecursive):
         if not osp.exists(filter_value_file):
             print(f"Filter values for {data.file_id} do not exist!")
             print(f"Creating filter values for {data.file_id}!")
+            if not osp.exists(osp.dirname(filter_value_file)):
+                os.makedirs(osp.dirname(filter_value_file))
             
             sorted_indices = torch.argsort(data.pos[..., -1])
             data.pos = data.pos[sorted_indices]
