@@ -2,7 +2,14 @@ import torch_geometric.transforms as T
 from datatransforms.event_transforms import *
 from omegaconf import OmegaConf
 
-def factory(cfg):
+def factory(cfg_all, transform_type = None, dataset_type = None):
+      assert transform_type is not None, "transform_type must be provided"
+      assert transform_type in ['transform', 'pre_transform'], f"{transform_type} can only be 'transform' or 'pre_transform'"
+      assert hasattr(cfg_all, transform_type), f"{transform_type} not found in the config file" 
+      assert dataset_type is not None, "dataset_type must be provided"
+      assert dataset_type in ['train', 'validation', 'test'], f"{dataset_type} can only be 'train', 'validation' or 'test'"
+      assert hasattr(getattr(cfg_all, transform_type), dataset_type), f"{dataset_type} not found in cfg.{transform_type}"
+      cfg = getattr(getattr(cfg_all, transform_type), dataset_type)
       cfg_dict = OmegaConf.to_object(cfg)
       if 'transform' in cfg_dict and cfg.transform:
             transform_list = []

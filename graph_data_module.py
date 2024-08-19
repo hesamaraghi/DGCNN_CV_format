@@ -11,24 +11,26 @@ class GraphDataModule(pl.LightningDataModule):
     def __init__(self, cfg):
         super().__init__()
         if cfg.dataset.dataset_path is None:
-            self.dataset_path = osp.join(datasets_path, cfg.dataset.name, 'data')
+            self.dataset_path = osp.join(datasets_path, cfg.dataset.name)
         else:
             self.dataset_path = cfg.dataset.dataset_path
+        cfg.dataset.dataset_path = self.dataset_path
+        self.dataset_path = osp.join(self.dataset_path, 'data')
         self.batch_size = cfg.train.batch_size      
         self.dataset_name = cfg.dataset.name
         self.multi_val_num = cfg.train.multi_val_num
         self.multi_test_num = cfg.train.multi_test_num      
         self.transform_dict = {}
-        self.transform_dict['train'] = transforms(cfg.transform.train)
-        self.transform_dict['validation'] = transforms(cfg.transform.validation)
-        self.transform_dict['test'] = transforms(cfg.transform.test)
+        self.transform_dict['train'] = transforms(cfg, transform_type = 'transform', dataset_type = 'train')
+        self.transform_dict['validation'] = transforms(cfg, transform_type = 'transform', dataset_type = 'validation')
+        self.transform_dict['test'] = transforms(cfg, transform_type = 'transform', dataset_type = 'test')
         self.pre_transform_dict = {'train': None, 'validation': None, 'test': None}
         if cfg.pre_transform.train.transform == True:
-            self.pre_transform_dict['train'] = transforms(cfg.pre_transform.train)
+            self.pre_transform_dict['train'] = transforms(cfg, transform_type = 'pre_transform', dataset_type = 'train')
         if cfg.pre_transform.validation.transform == True:
-            self.pre_transform_dict['validation'] = transforms(cfg.pre_transform.validation)
+            self.pre_transform_dict['validation'] = transforms(cfg, transform_type = 'pre_transform', dataset_type = 'validation')
         if cfg.pre_transform.test.transform == True:
-            self.pre_transform_dict['test'] = transforms(cfg.pre_transform.test)
+            self.pre_transform_dict['test'] = transforms(cfg, transform_type = 'pre_transform', dataset_type = 'test')
         self.num_workers=cfg.dataset.num_workers
         self.in_memory=cfg.dataset.in_memory
         self.training_dataset = create_dataset(
