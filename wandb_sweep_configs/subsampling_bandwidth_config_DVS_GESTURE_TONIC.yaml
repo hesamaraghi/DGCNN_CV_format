@@ -1,7 +1,7 @@
 program: train.py
 # program: bandwidth_calculation.py
 method: grid
-name: spatiotemporal_filtering_subsampling
+name: spatial_12x15_subsampling
 # name: temporal_bandwidth_2
 project: Subsamplimg_methods_DVS_GESTURE_TONIC
 entity: haraghi
@@ -31,32 +31,32 @@ parameters:
       train:
         parameters:
 ############################################################################################################
-          # spatial_subsampling:
-          #   parameters:
-          #     transform:
-          #       value: True
-          #     h_r:
-          #       distribution: q_uniform
-          #       min: 2
-          #       max: 11
-          #       q: 2
-          #       values:
-          #         - 2
-          #         - 3
-          #         - 6
-          #         - 8
-          #         - 12
-          #     v_r:
-          #       distribution: q_uniform
-          #       min: 2
-          #       max: 11
-          #       q: 2
-          #       values:
-          #         - 2
-          #         - 4
-          #         - 6
-          #         - 10
-          #         - 15
+          spatial_subsampling:
+            parameters:
+              transform:
+                value: True
+              h_r:
+                # distribution: q_uniform
+                # min: 2
+                # max: 11
+                # q: 2
+                values:
+                  # - 2
+                  # - 3
+                  # - 6
+                  # - 8
+                  - 12
+              v_r:
+                # distribution: q_uniform
+                # min: 2
+                # max: 11
+                # q: 2
+                values:
+                  # - 2
+                  # - 4
+                  # - 6
+                  # - 10
+                  - 15
 ##########################################################################################################
           # temporal_subsampling:
           #   parameters:
@@ -72,28 +72,11 @@ parameters:
           #     window_size:
           #       value: 10
 ###########################################################################################################
-          random_ratio_subsampling:
-            distribution: q_uniform
-            min: 0.05
-            max: 0.5
-            q: 0.05
-###########################################################################################################
-          spatiotemporal_filtering_subsampling:
-            parameters:
-              transform:
-                value: True
-              tau:
-                value: 30
-              filter_size:
-                value: 7
-              sampling_threshold:
-                values:
-                  - 0.004
-                  - 0.009
-                  - 0.026
-                  - 0.086
-                  - 0.216
-###########################################################################################################       
+          # random_ratio_subsampling:
+          #   distribution: q_uniform
+          #   min: 0.05
+          #   max: 0.5
+          #   q: 0.05
   # train:
   #   parameters:
   #     batch_size:

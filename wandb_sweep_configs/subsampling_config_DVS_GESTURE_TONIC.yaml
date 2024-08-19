@@ -42,15 +42,15 @@ sweep_parameters:
       #     - 10
       #     - 15
   ##########################################################################################################
-      temporal_subsampling:
-        transform: True
-        subsampling_ratio:
-          - 4
-          - 12
-          - 36
-          - 80
-          - 180
-        window_size: 10
+      # temporal_subsampling:
+      #   transform: True
+      #   subsampling_ratio:
+      #     - 4
+      #     - 12
+      #     - 36
+      #     - 80
+      #     - 180
+      #   window_size: 10
   ###########################################################################################################
       # random_ratio_subsampling:
       #   - 0.25
@@ -58,3 +58,16 @@ sweep_parameters:
       #   - 0.0277777
       #   - 0.0125
       #   - 0.0055555
+###########################################################################################################
+      spatiotemporal_filtering_subsampling:
+        transform: True
+        tau: 30
+        filter_size: 7
+        sampling_threshold: 
+          - 0.004
+          - 0.009
+          - 0.026
+          - 0.086
+          - 0.216
+        normalization_length: null
+
