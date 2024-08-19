@@ -99,6 +99,16 @@ if __name__ == '__main__':
             for seed in seeds:
                 main(cfg, seed, tags=["temporal_subsampling", f"temporal_subsampling_ratio_{ratio}"] + tags)
 
+    if hasattr(cfg_parameters['transform']['train'], 'spatiotemporal_filtering_subsampling') and cfg_parameters['transform']['train']['spatiotemporal_filtering_subsampling']['transform']:
+        sampling_threshold = cfg_parameters['transform']['train']['spatiotemporal_filtering_subsampling']['sampling_threshold']
+        cfg.transform = OmegaConf.create()
+        cfg.transform.train = OmegaConf.create()
+        cfg.transform.train.spatiotemporal_filtering_subsampling = cfg_parameters.transform.train.spatiotemporal_filtering_subsampling
+        for threshold in sampling_threshold:
+            cfg.transform.train.spatiotemporal_filtering_subsampling.sampling_threshold = threshold
+            for seed in seeds:
+                main(cfg, seed, tags=["spatiotemporal_filtering_subsampling", f"sampling_threshold_{threshold}"] + tags)
+
     if hasattr(cfg_parameters['transform']['train'], 'random_ratio_subsampling'):
         random_ratio_subsampling = cfg_parameters['transform']['train']['random_ratio_subsampling']
         cfg.transform = OmegaConf.create()
