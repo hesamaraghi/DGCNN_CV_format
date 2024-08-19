@@ -529,6 +529,7 @@ class SpatioTemporalFilteringSubsampling(BaseTransform, FilterDataRecursive):
         assert cfg_all["dataset"]["dataset_path"] is not None, "dataset path must be provided"
         self.batch_list_dir = osp.join(cfg_all["dataset"]["dataset_path"], "filter_values", f"tau_{tau}_filter_size_{filter_size}")
         
+        tau = int(tau * 1000)
         FilterDataRecursive.__init__(self, tau, filter_size, image_size)
         
         # filtering parameters
