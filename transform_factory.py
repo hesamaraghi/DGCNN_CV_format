@@ -4,8 +4,8 @@ from omegaconf import OmegaConf
 
 def factory(cfg_all, transform_type = None, dataset_type = None):
       assert transform_type is not None, "transform_type must be provided"
-      assert transform_type in ['transform', 'pre_transform'], f"{transform_type} can only be 'transform' or 'pre_transform'"
-      assert hasattr(cfg_all, transform_type), f"{transform_type} not found in the config file" 
+      assert transform_type in ['transform', 'pre_transform'], "'transform_type' can only be 'transform' or 'pre_transform'"
+      assert hasattr(cfg_all, transform_type), "'transform_type' not found in the config file" 
       assert dataset_type is not None, "dataset_type must be provided"
       assert dataset_type in ['train', 'validation', 'test'], f"{dataset_type} can only be 'train', 'validation' or 'test'"
       assert hasattr(getattr(cfg_all, transform_type), dataset_type), f"{dataset_type} not found in cfg.{transform_type}"
@@ -30,7 +30,8 @@ def factory(cfg_all, transform_type = None, dataset_type = None):
             if 'spatial_centering' in cfg_dict and cfg.spatial_centering:
                   transform_list.append(SpatialCentering())
             if 'spatial_subsampling' in cfg_dict and cfg.spatial_subsampling.transform:
-                  transform_list.append(SpatialSubsampling((cfg.spatial_subsampling.h_r, cfg.spatial_subsampling.v_r)))
+                  transform_list.append(SpatialSubsampling( subsampling_ratios=(cfg.spatial_subsampling.h_r, cfg.spatial_subsampling.v_r),
+                                                            subsampling_offsets=(cfg.spatial_subsampling.h_r_offset, cfg.spatial_subsampling.v_r_offset)))
             if 'temporal_subsampling' in cfg_dict and cfg.temporal_subsampling.transform:
                   transform_list.append(TemporalSubsampling(cfg.temporal_subsampling.subsampling_ratio, cfg.temporal_subsampling.window_size))
             if 'random_ratio_subsampling' in cfg_dict and cfg.random_ratio_subsampling is not None:
