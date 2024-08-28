@@ -50,6 +50,8 @@ transform:
       transform: null #True
       h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
       v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+      h_r_offset: null # offset for subsampling most be between 0 <= h_r_offset < h_r
+      v_r_offset: null # offset for subsampling most be between 0 <= v_r_offset < v_r
     temporal_subsampling:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
@@ -98,6 +100,8 @@ transform:
       transform: null #True
       h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
       v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+      h_r_offset: null # offset for subsampling most be between 0 <= h_r_offset < h_r
+      v_r_offset: null # offset for subsampling most be between 0 <= v_r_offset < v_r
     temporal_subsampling:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
@@ -146,6 +150,8 @@ transform:
       transform: null #True
       h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
       v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+      h_r_offset: null # offset for subsampling most be between 0 <= h_r_offset < h_r
+      v_r_offset: null # offset for subsampling most be between 0 <= v_r_offset < v_r
     temporal_subsampling:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 

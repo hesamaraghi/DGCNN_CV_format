@@ -186,12 +186,24 @@ class SpatialSubsampling(BaseTransform):
     """
     def __init__(
         self,
-        subsampling_ratios: tuple,
+        subsampling_ratios: tuple[int, int],
+        subsampling_offsets: tuple[int, int] = None
     ):
         assert len(subsampling_ratios) == 2, 'Subsampling ratios must be a tuple of two integers.'
         assert all([isinstance(ratio, int) for ratio in subsampling_ratios]), 'Subsampling ratios must be integers.'
         assert all([ratio > 0 for ratio in subsampling_ratios]), 'Subsampling ratios must be positive integers.'
         self.subsampling_ratios = subsampling_ratios
+        self.subsampling_offsets = (0,0)
+        if subsampling_offsets:
+            assert len(subsampling_offsets) == 2, 'Subsampling offsets must be a tuple of two integers.'
+            if subsampling_offsets[0] and subsampling_offsets[1]:
+                assert all([isinstance(offset, int) for offset in subsampling_offsets]), 'Subsampling offsets must be integers.'
+                assert subsampling_offsets[0] >= 0, 'Subsampling offset 0 must be non negative.'
+                assert subsampling_offsets[1] >= 0, 'Subsampling offset 1 must be non negative.'           
+                assert subsampling_offsets[0] < subsampling_ratios[0], 'Subsampling offset 0 must be smaller than Subsampling ratio 0.'
+                assert subsampling_offsets[1] < subsampling_ratios[1], 'Subsampling offset 1 must be smaller than Subsampling ratio 1.'
+                self.subsampling_offsets = subsampling_offsets
+            
         
     def __call__(self, data: Data) -> Data:
         pos = data.pos
@@ -199,9 +211,9 @@ class SpatialSubsampling(BaseTransform):
         y = pos[..., -2]
         mask = torch.ones_like(x, dtype=torch.bool)
         if self.subsampling_ratios[0] > 1:
-            mask = mask & (x % self.subsampling_ratios[0] == 0)
+            mask = mask & (x % self.subsampling_ratios[0] == self.subsampling_offsets[0])
         if self.subsampling_ratios[1] > 1:
-            mask = mask & (y % self.subsampling_ratios[1] == 0)
+            mask = mask & (y % self.subsampling_ratios[1] == self.subsampling_offsets[1])
         indices = torch.nonzero(mask, as_tuple=True)[0]
         return filter_data(data, indices)
 
