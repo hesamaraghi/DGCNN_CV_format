@@ -55,6 +55,10 @@ transform:
       v_r: null
       h_r_offset: null # offset for subsampling most be between 0 <= h_r_offset < h_r
       v_r_offset: null # offset for subsampling most be between 0 <= v_r_offset < v_r     
+    spatial_subsampling_random:  
+      transform: null #True
+      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
+      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
     temporal_subsampling:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
@@ -105,6 +109,10 @@ transform:
       v_r: ${transform.train.spatial_subsampling.v_r}
       h_r_offset: ${transform.train.spatial_subsampling.h_r_offset}
       v_r_offset: ${transform.train.spatial_subsampling.v_r_offset}
+    spatial_subsampling_random:
+      transform: ${transform.train.spatial_subsampling_random.transform}
+      h_r: ${transform.train.spatial_subsampling_random.h_r}
+      v_r: ${transform.train.spatial_subsampling_random.v_r}
     temporal_subsampling:
       transform: ${transform.train.temporal_subsampling.transform}
       subsampling_ratio: ${transform.train.temporal_subsampling.subsampling_ratio}
@@ -155,6 +163,10 @@ transform:
       v_r: ${transform.train.spatial_subsampling.v_r}
       h_r_offset: ${transform.train.spatial_subsampling.h_r_offset}
       v_r_offset: ${transform.train.spatial_subsampling.v_r_offset}
+    spatial_subsampling_random:
+      transform: ${transform.train.spatial_subsampling_random.transform}
+      h_r: ${transform.train.spatial_subsampling_random.h_r}
+      v_r: ${transform.train.spatial_subsampling_random.v_r}
     temporal_subsampling:
       transform: ${transform.train.temporal_subsampling.transform}
       subsampling_ratio: ${transform.train.temporal_subsampling.subsampling_ratio}

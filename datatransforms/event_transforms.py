@@ -217,6 +217,47 @@ class SpatialSubsampling(BaseTransform):
         indices = torch.nonzero(mask, as_tuple=True)[0]
         return filter_data(data, indices)
 
+class SpatialSubsamplingRandomOffset(BaseTransform):
+    r"""Subsamples events horizontally and vertically, with random offset.
+    """
+    def __init__(
+        self,
+        cfg_transform,
+        subsampling_ratios: tuple[int, int]
+    ):
+        assert len(subsampling_ratios) == 2, 'Subsampling ratios must be a tuple of two integers.'
+        assert all([isinstance(ratio, int) for ratio in subsampling_ratios]), 'Subsampling ratios must be integers.'
+        assert all([ratio > 0 for ratio in subsampling_ratios]), 'Subsampling ratios must be positive integers.'
+        self.subsampling_ratios = subsampling_ratios
+        
+                # fixed subsampling initialization
+        self.fixed_subsampling = False
+        if "fixed_sampling" in cfg_transform and cfg_transform["fixed_sampling"]["transform"] is True:
+            self.fixed_subsampling = True
+            if "seed_str" in cfg_transform["fixed_sampling"] and cfg_transform["fixed_sampling"]["seed_str"] is not None:   
+                self.seed_str = str(cfg_transform["fixed_sampling"]["seed_str"])
+            else:
+                self.seed_str = 'fixed_subsampling' 
+        
+        
+    def __call__(self, data: Data) -> Data:
+        pos = data.pos
+        x = pos[..., -3]
+        y = pos[..., -2]
+        mask = torch.ones_like(x, dtype=torch.bool)
+        if self.fixed_subsampling:
+            seed = create_seed(self.seed_str + '_' + data.label[0] + '_' + data.file_id)
+            torch_rng = torch.Generator().manual_seed(seed % (2**32))
+            self.subsampling_offsets = [torch.randint(ratio, (1,), generator=torch_rng)[0] for ratio in self.subsampling_ratios]
+        else:
+            self.subsampling_offsets = [torch.randint(ratio, (1,))[0] for ratio in self.subsampling_ratios]
+        if self.subsampling_ratios[0] > 1:
+            mask = mask & (x % self.subsampling_ratios[0] == self.subsampling_offsets[0])
+        if self.subsampling_ratios[1] > 1:
+            mask = mask & (y % self.subsampling_ratios[1] == self.subsampling_offsets[1])
+        indices = torch.nonzero(mask, as_tuple=True)[0]
+        return filter_data(data, indices)
+
 class TemporalSubsampling(BaseTransform):
     r"""Subsamples events temporally.
     """

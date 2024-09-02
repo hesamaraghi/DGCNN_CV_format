@@ -32,6 +32,8 @@ def factory(cfg_all, transform_type = None, dataset_type = None):
             if 'spatial_subsampling' in cfg_dict and cfg.spatial_subsampling.transform:
                   transform_list.append(SpatialSubsampling( subsampling_ratios=(cfg.spatial_subsampling.h_r, cfg.spatial_subsampling.v_r),
                                                             subsampling_offsets=(cfg.spatial_subsampling.h_r_offset, cfg.spatial_subsampling.v_r_offset)))
+            if 'spatial_subsampling_random' in cfg_dict and cfg.spatial_subsampling_random.transform:
+                  transform_list.append(SpatialSubsamplingRandomOffset( cfg_transform=cfg_dict, subsampling_ratios=(cfg.spatial_subsampling_random.h_r, cfg.spatial_subsampling_random.v_r)))   
             if 'temporal_subsampling' in cfg_dict and cfg.temporal_subsampling.transform:
                   transform_list.append(TemporalSubsampling(cfg.temporal_subsampling.subsampling_ratio, cfg.temporal_subsampling.window_size))
             if 'random_ratio_subsampling' in cfg_dict and cfg.random_ratio_subsampling is not None:

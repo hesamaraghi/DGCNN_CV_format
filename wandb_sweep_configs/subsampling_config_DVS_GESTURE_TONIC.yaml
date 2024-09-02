@@ -1,5 +1,5 @@
 name: subsampling
-project: Spatial_with_offset_DVS_GESTURE_TONIC
+project: Spatial_with_random_offsets_DVS_GESTURE_TONIC
 entity: haraghi
 description: |
   Spatial, temporal, and random subsampling bandwidth calculation for DVS-GESTURE TONIC dataset.
@@ -18,12 +18,12 @@ sweep_parameters:
       - 12000
       - 120000
       - 1200000
-      # - 24
-      # - 240
-      # - 2400
-      # - 24000
-      # - 240000
-      # - 2400000
+      - 24
+      - 240
+      - 2400
+      - 24000
+      - 240000
+      - 2400000
       # - 5001
       # - 5002
       # - 5003
@@ -77,30 +77,47 @@ sweep_parameters:
   transform:
     train:
   ############################################################################################################
-      spatial_subsampling:
+      # spatial_subsampling:
+      #   transform: True
+      #   h_r:
+      #     # - 2
+      #     # - 3
+      #     # - 6
+      #     - 8
+      #     # - 12
+      #   v_r:
+      #     # - 2
+      #     # - 4
+      #     # - 6
+      #     - 10
+      #     # - 15
+      #   h_r_offset:
+      #     - 1
+      #     - 3
+      #     - 4
+      #     - 6
+      #   v_r_offset:
+      #     - 2
+      #     - 5
+      #     - 6
+      #     - 9
+############################################################################################################
+      spatial_subsampling_random:
         transform: True
         h_r:
-          # - 2
-          # - 3
-          # - 6
-          - 8
-          # - 12
-        v_r:
-          # - 2
-          # - 4
-          # - 6
-          - 10
-          # - 15
-        h_r_offset:
-          - 1
+          - 2
           - 3
+          - 6
+          - 8
+          - 12
+          - 16
+        v_r:
+          - 2
           - 4
           - 6
-        v_r_offset:
-          - 2
-          - 5
-          - 6
-          - 9
+          - 10
+          - 15
+          - 25
   ##########################################################################################################
       # temporal_subsampling:
       #   transform: True

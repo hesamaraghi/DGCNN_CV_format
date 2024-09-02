@@ -98,6 +98,21 @@ if __name__ == '__main__':
                     cfg.transform.train.spatial_subsampling.v_r = hr_vr[1]
                     for seed in seeds:
                         main(cfg, seed, tags = ["spatial_subsampling", f"hr_{hr_vr[0]}_vr_{hr_vr[1]}"] + tags)
+
+    if hasattr(cfg_parameters['transform']['train'], 'spatial_subsampling_random') and cfg_parameters['transform']['train']['spatial_subsampling_random']['transform']:
+        spatial_subsampling_hr = cfg_parameters['transform']['train']['spatial_subsampling_random']['h_r']
+        spatial_subsampling_vr = cfg_parameters['transform']['train']['spatial_subsampling_random']['v_r']
+       
+        spatial_subsampling_combinations = list(zip(spatial_subsampling_hr, spatial_subsampling_vr))
+        cfg.transform = OmegaConf.create()
+        cfg.transform.train = OmegaConf.create()
+        cfg.transform.train.spatial_subsampling_random = cfg_parameters.transform.train.spatial_subsampling_random
+        for hr_vr in spatial_subsampling_combinations:
+            cfg.transform.train.spatial_subsampling_random.h_r = hr_vr[0]
+            cfg.transform.train.spatial_subsampling_random.v_r = hr_vr[1]
+            for seed in seeds:
+                main(cfg, seed, tags = ["spatial_subsampling_random", f"hr_{hr_vr[0]}_vr_{hr_vr[1]}"] + tags)
+
                 
     if hasattr(cfg_parameters['transform']['train'], 'temporal_subsampling') and cfg_parameters['transform']['train']['temporal_subsampling']['transform']:
         temporal_subsampling_ratio = cfg_parameters['transform']['train']['temporal_subsampling']['subsampling_ratio']
