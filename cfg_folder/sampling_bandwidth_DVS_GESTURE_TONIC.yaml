@@ -103,8 +103,8 @@ transform:
       transform: ${transform.train.spatial_subsampling.transform}
       h_r: ${transform.train.spatial_subsampling.h_r}
       v_r: ${transform.train.spatial_subsampling.v_r}
-      h_r_offset: null ${transform.train.spatial_subsampling.h_r_offset}
-      v_r_offset: null ${transform.train.spatial_subsampling.v_r_offset}
+      h_r_offset: ${transform.train.spatial_subsampling.h_r_offset}
+      v_r_offset: ${transform.train.spatial_subsampling.v_r_offset}
     temporal_subsampling:
       transform: ${transform.train.temporal_subsampling.transform}
       subsampling_ratio: ${transform.train.temporal_subsampling.subsampling_ratio}
@@ -153,8 +153,8 @@ transform:
       transform: ${transform.train.spatial_subsampling.transform}
       h_r: ${transform.train.spatial_subsampling.h_r}
       v_r: ${transform.train.spatial_subsampling.v_r}
-      h_r_offset: null ${transform.train.spatial_subsampling.h_r_offset}
-      v_r_offset: null ${transform.train.spatial_subsampling.v_r_offset}
+      h_r_offset: ${transform.train.spatial_subsampling.h_r_offset}
+      v_r_offset: ${transform.train.spatial_subsampling.v_r_offset}
     temporal_subsampling:
       transform: ${transform.train.temporal_subsampling.transform}
       subsampling_ratio: ${transform.train.temporal_subsampling.subsampling_ratio}
