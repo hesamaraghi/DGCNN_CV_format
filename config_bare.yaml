@@ -52,6 +52,7 @@ transform:
       v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
       h_r_offset: null # offset for subsampling most be between 0 <= h_r_offset < h_r
       v_r_offset: null # offset for subsampling most be between 0 <= v_r_offset < v_r
+      dataset_wide_random_offsets: null #Default:False. If True, the above offsets are selected randomly for the whole dataset.
     spatial_subsampling_random:  
       transform: null #True
       h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
@@ -61,6 +62,8 @@ transform:
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
       window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds
       fixed_interval: null #Default:False. If True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
+      time_offset_coefficient: null #Default:0. A float number that should be between 0 and 1. The offset is calculated as `time_offset_coefficient * (subsampling_period - interval_length)`
+      dataset_wide_random_time_offset: null #Default:False. If True, the above time offset is selected randomly for the whole dataset.
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #32
     spatiotemporal_filtering_subsampling: #Subsampling the events randomly with probability proportional to spatiotemporal filtering values
@@ -106,6 +109,7 @@ transform:
       v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
       h_r_offset: null # offset for subsampling most be between 0 <= h_r_offset < h_r
       v_r_offset: null # offset for subsampling most be between 0 <= v_r_offset < v_r
+      dataset_wide_random_offsets: null #Default:False. If True, the above offsets are selected randomly for the whole dataset.
     spatial_subsampling_random:  
       transform: null #True
       h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
@@ -115,6 +119,8 @@ transform:
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
       window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds
       fixed_interval: null #Default:False if True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
+      time_offset_coefficient: null #Default:0. A float number that should be between 0 and 1. The offset is calculated as `time_offset_coefficient * (subsampling_period - interval_length)`
+      dataset_wide_random_time_offset: null #Default:False. If True, the above time offset is selected randomly for the whole dataset.
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #""
     spatiotemporal_filtering_subsampling: #Subsampling the events randomly with probability proportional to spatiotemporal filtering values
@@ -160,6 +166,7 @@ transform:
       v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
       h_r_offset: null # offset for subsampling most be between 0 <= h_r_offset < h_r
       v_r_offset: null # offset for subsampling most be between 0 <= v_r_offset < v_r
+      dataset_wide_random_offsets: null #Default:False. If True, the above offsets are selected randomly for the whole dataset.
     spatial_subsampling_random:  
       transform: null #True
       h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
@@ -169,6 +176,8 @@ transform:
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
       window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds 
       fixed_interval: null #Default:False if True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
+      time_offset_coefficient: null #Default:0. A float number that should be between 0 and 1. The offset is calculated as `time_offset_coefficient * (subsampling_period - interval_length)`
+      dataset_wide_random_time_offset: null #Default:False. If True, the above time offset is selected randomly for the whole dataset.
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #32
     spatiotemporal_filtering_subsampling: #Subsampling the events randomly with probability proportional to spatiotemporal filtering values

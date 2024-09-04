@@ -4,6 +4,7 @@ import random
 import wandb
 from utils.config_utils import show_cfg
 import yaml
+import numpy as np
 
 def main(config = None, seed = None, tags = None):
 
@@ -77,26 +78,40 @@ if __name__ == '__main__':
 
 
     if hasattr(cfg_parameters['transform']['train'], 'spatial_subsampling') and cfg_parameters['transform']['train']['spatial_subsampling']['transform']:
+          
         spatial_subsampling_hr = cfg_parameters['transform']['train']['spatial_subsampling']['h_r']
         spatial_subsampling_vr = cfg_parameters['transform']['train']['spatial_subsampling']['v_r']
-        spatial_subsampling_hr_offset = 0
-        spatial_subsampling_vr_offset = 0
-        if ('h_r_offset' in cfg_parameters['transform']['train']['spatial_subsampling']) and cfg_parameters['transform']['train']['spatial_subsampling']['h_r_offset']:
-            spatial_subsampling_hr_offset = cfg_parameters['transform']['train']['spatial_subsampling']['h_r_offset']
-        if ('v_r_offset' in cfg_parameters['transform']['train']['spatial_subsampling']) and cfg_parameters['transform']['train']['spatial_subsampling']['v_r_offset']:
-            spatial_subsampling_vr_offset = cfg_parameters['transform']['train']['spatial_subsampling']['v_r_offset']
         spatial_subsampling_combinations = list(zip(spatial_subsampling_hr, spatial_subsampling_vr))
-        cfg.transform = OmegaConf.create()
-        cfg.transform.train = OmegaConf.create()
-        cfg.transform.train.spatial_subsampling = cfg_parameters.transform.train.spatial_subsampling
-        for hr_offset in spatial_subsampling_hr_offset:
-            for vr_offset in spatial_subsampling_vr_offset:
-                for hr_vr in spatial_subsampling_combinations:
-                    cfg.transform.train.spatial_subsampling.h_r_offset = hr_offset
-                    cfg.transform.train.spatial_subsampling.v_r_offset = vr_offset
-                    cfg.transform.train.spatial_subsampling.h_r = hr_vr[0]
-                    cfg.transform.train.spatial_subsampling.v_r = hr_vr[1]
-                    for seed in seeds:
+        
+        for hr_vr in spatial_subsampling_combinations:
+            for seed in seeds:
+                if "dataset_wide_random_offsets" in cfg_parameters['transform']['train']['spatial_subsampling'] and cfg_parameters['transform']['train']['spatial_subsampling']['dataset_wide_random_offsets']:
+                    rng = np.random.default_rng(seed)
+                    spatial_subsampling_hr_offset = [rng.integers(hr_vr[0], dtype=int)]
+                    spatial_subsampling_vr_offset = [rng.integers(hr_vr[1], dtype=int)]
+                else:
+                    spatial_subsampling_hr_offset = [0]
+                    spatial_subsampling_vr_offset = [0]
+                    if ('h_r_offset' in cfg_parameters['transform']['train']['spatial_subsampling']) and cfg_parameters['transform']['train']['spatial_subsampling']['h_r_offset']:
+                        spatial_subsampling_hr_offset = cfg_parameters['transform']['train']['spatial_subsampling']['h_r_offset']
+                    if ('v_r_offset' in cfg_parameters['transform']['train']['spatial_subsampling']) and cfg_parameters['transform']['train']['spatial_subsampling']['v_r_offset']:
+                        spatial_subsampling_vr_offset = cfg_parameters['transform']['train']['spatial_subsampling']['v_r_offset']
+
+                for hr_offset in spatial_subsampling_hr_offset:
+                    for vr_offset in spatial_subsampling_vr_offset:
+                        cfg.transform = OmegaConf.create()
+                        cfg.transform.train = OmegaConf.create()
+                        cfg.transform.train.spatial_subsampling = OmegaConf.create()
+                        cfg.transform.train.spatial_subsampling.transform = cfg_parameters.transform.train.spatial_subsampling.transform
+                        cfg.transform.train.spatial_subsampling.dataset_wide_random_offsets = cfg_parameters.transform.train.spatial_subsampling.dataset_wide_random_offsets
+                        print(cfg.transform.train.spatial_subsampling)
+                        print(hr_offset, vr_offset)
+                        cfg.transform.train.spatial_subsampling.h_r_offset = hr_offset
+                        cfg.transform.train.spatial_subsampling.v_r_offset = vr_offset
+                        cfg.transform.train.spatial_subsampling.h_r = hr_vr[0]
+                        cfg.transform.train.spatial_subsampling.v_r = hr_vr[1]
+                        print(cfg.transform.train.spatial_subsampling)
+                    
                         main(cfg, seed, tags = ["spatial_subsampling", f"hr_{hr_vr[0]}_vr_{hr_vr[1]}"] + tags)
 
     if hasattr(cfg_parameters['transform']['train'], 'spatial_subsampling_random') and cfg_parameters['transform']['train']['spatial_subsampling_random']['transform']:
@@ -116,13 +131,30 @@ if __name__ == '__main__':
                 
     if hasattr(cfg_parameters['transform']['train'], 'temporal_subsampling') and cfg_parameters['transform']['train']['temporal_subsampling']['transform']:
         temporal_subsampling_ratio = cfg_parameters['transform']['train']['temporal_subsampling']['subsampling_ratio']
-        cfg.transform = OmegaConf.create()
-        cfg.transform.train = OmegaConf.create()
-        cfg.transform.train.temporal_subsampling = cfg_parameters.transform.train.temporal_subsampling
+        
         for ratio in temporal_subsampling_ratio:
-            cfg.transform.train.temporal_subsampling.subsampling_ratio = ratio
             for seed in seeds:
-                main(cfg, seed, tags=["temporal_subsampling", f"temporal_subsampling_ratio_{ratio}"] + tags)
+                if "dataset_wide_random_time_offset" in cfg_parameters['transform']['train']['temporal_subsampling'] and cfg_parameters['transform']['train']['temporal_subsampling']['dataset_wide_random_time_offset']:
+                    rng = np.random.default_rng(seed)
+                    temporal_subsampling_time_offset_coefficient = [rng.random()]
+                else:
+                    temporal_subsampling_time_offset_coefficient = [0]
+                    if ('time_offset_coefficient' in cfg_parameters['transform']['train']['temporal_subsampling']) and cfg_parameters['transform']['train']['temporal_subsampling']['time_offset_coefficient']:
+                        temporal_subsampling_time_offset_coefficient = cfg_parameters['transform']['train']['temporal_subsampling']['time_offset_coefficient']
+                for time_offset_coefficient in temporal_subsampling_time_offset_coefficient:
+                    cfg.transform = OmegaConf.create()
+                    cfg.transform.train = OmegaConf.create()
+                    cfg.transform.train.temporal_subsampling = OmegaConf.create()
+                    cfg.transform.train.temporal_subsampling.transform = cfg_parameters.transform.train.temporal_subsampling.transform
+                    cfg.transform.train.temporal_subsampling.dataset_wide_random_time_offset = cfg_parameters.transform.train.temporal_subsampling.dataset_wide_random_time_offset
+                    cfg.transform.train.temporal_subsampling.window_size = cfg_parameters.transform.train.temporal_subsampling.window_size
+                    print(cfg.transform.train.temporal_subsampling)
+                    print(time_offset_coefficient)
+                    cfg.transform.train.temporal_subsampling.time_offset_coefficient = time_offset_coefficient
+                    cfg.transform.train.temporal_subsampling.subsampling_ratio = ratio
+                    print(cfg.transform.train.temporal_subsampling)
+                  
+                    main(cfg, seed, tags=["temporal_subsampling", f"temporal_subsampling_ratio_{ratio}"] + tags)
 
     if hasattr(cfg_parameters['transform']['train'], 'spatiotemporal_filtering_subsampling') and cfg_parameters['transform']['train']['spatiotemporal_filtering_subsampling']['transform']:
         sampling_threshold = cfg_parameters['transform']['train']['spatiotemporal_filtering_subsampling']['sampling_threshold']
