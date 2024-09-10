@@ -67,6 +67,11 @@ transform:
       fixed_interval: False #Default:False. If True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
       time_offset_coefficient: null #Default:0. A float number that should be between 0 and 1. The offset is calculated as `time_offset_coefficient * (subsampling_period - interval_length)`
       dataset_wide_random_time_offset: null #Default:False. If True, the above time offset is selected randomly for the whole dataset.
+    temporal_subsampling_random:
+      transform: null #True
+      subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
+      window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds
+      fixed_interval: null #Default:False. If True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #32
     spatiotemporal_filtering_subsampling: #Subsampling the events randomly with probability proportional to spatiotemporal filtering values
@@ -124,6 +129,11 @@ transform:
       fixed_interval: ${transform.train.temporal_subsampling.fixed_interval}
       time_offset_coefficient: ${transform.train.temporal_subsampling.time_offset_coefficient}
       dataset_wide_random_time_offset: ${transform.train.temporal_subsampling.dataset_wide_random_time_offset}
+    temporal_subsampling_random:
+      transform: ${transform.train.temporal_subsampling_random.transform}
+      subsampling_ratio: ${transform.train.temporal_subsampling_random.subsampling_ratio}
+      window_size: ${transform.train.temporal_subsampling_random.window_size}
+      fixed_interval: ${transform.train.temporal_subsampling_random.fixed_interval}
     random_ratio_subsampling: ${transform.train.random_ratio_subsampling}   
     num_events_per_sample: ${transform.train.num_events_per_sample}
     spatiotemporal_filtering_subsampling:
@@ -181,6 +191,11 @@ transform:
       fixed_interval: ${transform.train.temporal_subsampling.fixed_interval}
       time_offset_coefficient: ${transform.train.temporal_subsampling.time_offset_coefficient}
       dataset_wide_random_time_offset: ${transform.train.temporal_subsampling.dataset_wide_random_time_offset}
+    temporal_subsampling_random:
+      transform: ${transform.train.temporal_subsampling_random.transform}
+      subsampling_ratio: ${transform.train.temporal_subsampling_random.subsampling_ratio}
+      window_size: ${transform.train.temporal_subsampling_random.window_size}
+      fixed_interval: ${transform.train.temporal_subsampling_random.fixed_interval}
     random_ratio_subsampling: ${transform.train.random_ratio_subsampling}   
     num_events_per_sample: ${transform.train.num_events_per_sample}
     spatiotemporal_filtering_subsampling:

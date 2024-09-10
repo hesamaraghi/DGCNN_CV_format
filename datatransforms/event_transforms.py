@@ -258,6 +258,39 @@ class TemporalSubsampling(BaseTransform):
         indices = torch.cat([torch.arange(start, end) for start, end in zip(indices_start, indices_end)])
         return filter_data(data, indices)
     
+class TemporalSubsamplingRandomOffset(TemporalSubsampling):
+    r"""Subsamples events horizontally and vertically, with random offset.
+    """
+    def __init__(
+        self,
+        cfg_transform,
+        subsampling_ratio: int,
+        window_size: int,
+        fixed_interval: bool = False,
+        ):
+        super().__init__(
+                    subsampling_ratio = subsampling_ratio,
+                    window_size = window_size,
+                    fixed_interval = fixed_interval
+                )
+        # fixed subsampling initialization
+        self.fixed_subsampling = False
+        if "fixed_sampling" in cfg_transform and cfg_transform["fixed_sampling"]["transform"] is True:
+            self.fixed_subsampling = True
+            if "seed_str" in cfg_transform["fixed_sampling"] and cfg_transform["fixed_sampling"]["seed_str"] is not None:   
+                self.seed_str = str(cfg_transform["fixed_sampling"]["seed_str"])
+            else:
+                self.seed_str = 'fixed_subsampling' 
+    
+    def __call__(self, data: Data) -> Data:
+        if self.fixed_subsampling:
+            seed = create_seed(self.seed_str + '_' + data.label[0] + '_' + data.file_id)
+            torch_rng = torch.Generator().manual_seed(seed % (2**32))
+            self.time_offset_coefficient = torch.rand(1, generator=torch_rng)[0]
+        else:
+            self.time_offset_coefficient = torch.rand(1)[0]
+        return super().__call__(data)
+
 class FixedSubsampling(BaseTransform):
     r"""Fixed num subsampling of nodes.
     """

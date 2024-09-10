@@ -156,6 +156,20 @@ if __name__ == '__main__':
                   
                     main(cfg, seed, tags=["temporal_subsampling", f"temporal_subsampling_ratio_{ratio}"] + tags)
 
+    if hasattr(cfg_parameters['transform']['train'], 'temporal_subsampling_random') and cfg_parameters['transform']['train']['temporal_subsampling_random']['transform']:
+        temporal_subsampling_ratio = cfg_parameters['transform']['train']['temporal_subsampling_random']['subsampling_ratio']
+       
+        cfg.transform = OmegaConf.create()
+        cfg.transform.train = OmegaConf.create()
+        cfg.transform.train.temporal_subsampling_random = OmegaConf.create()
+        cfg.transform.train.temporal_subsampling_random.transform = cfg_parameters.transform.train.temporal_subsampling_random.transform
+        cfg.transform.train.temporal_subsampling_random.window_size = cfg_parameters.transform.train.temporal_subsampling_random.window_size
+        cfg.transform.train.temporal_subsampling_random.fixed_interval = cfg_parameters.transform.train.temporal_subsampling_random.fixed_interval
+        for ratio in temporal_subsampling_ratio:
+            cfg.transform.train.temporal_subsampling_random.subsampling_ratio = ratio
+            for seed in seeds:
+                main(cfg, seed, tags = ["temporal_subsampling_random", f"temporal_subsampling_ratio_{ratio}"] + tags)
+
     if hasattr(cfg_parameters['transform']['train'], 'spatiotemporal_filtering_subsampling') and cfg_parameters['transform']['train']['spatiotemporal_filtering_subsampling']['transform']:
         sampling_threshold = cfg_parameters['transform']['train']['spatiotemporal_filtering_subsampling']['sampling_threshold']
         cfg.transform = OmegaConf.create()
