@@ -255,7 +255,11 @@ class TemporalSubsampling(BaseTransform):
         window_end_times = window_start_times + self.interval_length
         indices_start = torch.searchsorted(t, window_start_times)
         indices_end = torch.searchsorted(t, window_end_times)
-        indices = torch.cat([torch.arange(start, end) for start, end in zip(indices_start, indices_end)])
+        indices_list = [torch.arange(start, end) for start, end in zip(indices_start, indices_end)]        
+        if indices_list:
+            indices = torch.cat(indices_list)
+        else:
+            indices = torch.empty(0, dtype = torch.int64)  # Return an empty tensor
         return filter_data(data, indices)
     
 class TemporalSubsamplingRandomOffset(TemporalSubsampling):
