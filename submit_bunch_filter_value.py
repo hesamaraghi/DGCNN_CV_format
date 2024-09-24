@@ -4,13 +4,12 @@ from os import path as osp
 # Define the values for num_events and method
 
 
-image_size = 128,128
 
 filter_size = 7
 tau = 30 * 1000
 tau = int(tau)
 
-dataset_name = 'NASL'
+dataset_name = 'NCARS'
 
 batch_list_dir = osp.join("datasets_torch_geometric", dataset_name, "filter_values", f"tau_{tau}_filter_size_{filter_size}_batch_list")
 batch_files = glob(osp.join(batch_list_dir, '*.txt'))
