@@ -119,8 +119,11 @@ class QuantizationLayer(nn.Module):
         
         # normalizing timestamps
         for bi in range(B):
-            ind_batch = b == bi
-            t[ind_batch] /= t[ind_batch].max()
+            start = events.ptr[bi]
+            end = events.ptr[bi+1]
+            if start < end:
+                t[start:end] /= t[start:end].max()
+            
 
         p = (p+1)/2  # maps polarity to 0, 1
 
