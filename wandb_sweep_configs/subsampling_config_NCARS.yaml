@@ -1,9 +1,9 @@
 name: subsampling
-project: Spatial_dataset_wide_random_offsets_NCALTECH101
+project: Spatial_dataset_wide_random_offsets_NCARS_42s
 entity: haraghi
 description: |
-  Spatial, temporal, and random subsampling bandwidth calculation for NCALTECH101 dataset.
-cfg_path: "cfg_folder/sampling_bandwidth_NCALTECH101.yaml"
+  Spatial, temporal, and random subsampling bandwidth calculation for NCARS dataset.
+cfg_path: "cfg_folder/sampling_bandwidth_NCARS.yaml"
 sweep_parameters:
   seed:
       - 42
@@ -12,18 +12,18 @@ sweep_parameters:
       - 42000
       - 420000
       - 4200000
-      - 12
-      - 120
-      - 1200
-      - 12000
-      - 120000
-      - 1200000
-      - 24
-      - 240
-      - 2400
-      - 24000
-      - 240000
-      - 2400000
+      # - 12
+      # - 120
+      # - 1200
+      # - 12000
+      # - 120000
+      # - 1200000
+      # - 24
+      # - 240
+      # - 2400
+      # - 24000
+      # - 240000
+      # - 2400000
       # - 5001
       # - 5002
       # - 5003
@@ -122,24 +122,24 @@ sweep_parameters:
       #     - 15
       #     - 25
   ##########################################################################################################
-      #temporal_subsampling:
-      #  transform: True
-      #  subsampling_ratio:
-      #    - 4
-      #    - 12
-      #    - 36
-      #    - 80
-      #    - 180
-      #    - 400
-      #  window_size: 10
-      #  fixed_interval: False
-      #  # time_offset_coefficient:
-      #  #   - 0.1
-      #  #   - 0.2
-      #  #   - 0.3
-      #  #   - 0.4
-      #  #   - 0.5
-      #  dataset_wide_random_time_offset: True
+      # temporal_subsampling:
+      #   transform: True
+      #   subsampling_ratio:
+      #     - 4
+      #     - 12
+      #     - 36
+      #     - 80
+      #     - 180
+      #     - 400
+      #   window_size: 10
+      #   fixed_interval: False
+      #   # time_offset_coefficient:
+      #   #   - 0.1
+      #   #   - 0.2
+      #   #   - 0.3
+      #   #   - 0.4
+      #   #   - 0.5
+      #   dataset_wide_random_time_offset: True
     ##########################################################################################################
       # temporal_subsampling_random:
       #   transform: True

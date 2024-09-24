@@ -5,30 +5,30 @@ with respect to the parameters of different subsampling methods \
 seed: 0
 optimize:
   optimizer: Adam
-  lr: null #0.001
-  lr_scheduler: null #ReduceLROnPlateau
-  mode: null #min 
-  factor: null #0.5
-  patience: null #10
-  weight_decay: null #0.0001
+  lr: 1e-5
+  lr_scheduler: ReduceLROnPlateau
+  mode: min 
+  factor: 0.5
+  patience: 50
+  weight_decay: 0
 model:
-  name: null #DGCNN2
-  k: null #50
+  name: EST
+  k: null #20
   aggr: null #max
-  num_bins: null #9
-  cnn_type: null #""
-  resnet_crop_dimension: null # [224, 224]  # dimension of crop before it goes into classifier
-  est_mlp_layers: null # [1, 30, 30, 1] # kernel layers for EST
-  est_activation: null # nn.LeakyReLU(negative_slope=0.1)
-  resnet_pretrained: null #True
+  num_bins: 9
+  cnn_type: resnet34
+  resnet_crop_dimension: [224, 224]  # dimension of crop before it goes into classifier
+  est_mlp_layers: [1, 30, 30, 1] # kernel layers for EST
+  est_activation: nn.LeakyReLU(negative_slope=0.1)
+  resnet_pretrained: True
 train:
-  epochs: null #200
-  batch_size: 8
-  loss_fn: null #nn.NLLLoss()
+  epochs: 250
+  batch_size: 100
+  loss_fn: nn.CrossEntropyLoss()
   profiler: null #simple
   ckpt_path: null
   multi_val_num: 1
-  multi_test_num: 1
+  multi_test_num: 3
   default_root_dir: null
 auto_resume:
   sbatch_folder: null
@@ -41,7 +41,8 @@ dataset:
   num_samples_per_class: null
   num_classes: null
   dataset_path: null
-  num_workers: 8
+  num_workers: 7
+  in_memory: False
 transform:
   train:
     transform: True
@@ -52,15 +53,36 @@ transform:
       transform: null
       h_r: null
       v_r: null
+      h_r_offset: null # offset for subsampling most be between 0 <= h_r_offset < h_r
+      v_r_offset: null # offset for subsampling most be between 0 <= v_r_offset < v_r     
+      dataset_wide_random_offsets: null #Default:False. If True, the above offsets are selected randomly for the whole dataset.
+    spatial_subsampling_random:  
+      transform: null #True
+      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
+      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
     temporal_subsampling:
       transform: null #True
       subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
       window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds
+      fixed_interval: False #Default:False. If True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
+      time_offset_coefficient: null #Default:0. A float number that should be between 0 and 1. The offset is calculated as `time_offset_coefficient * (subsampling_period - interval_length)`
+      dataset_wide_random_time_offset: null #Default:False. If True, the above time offset is selected randomly for the whole dataset.
+    temporal_subsampling_random:
+      transform: null #True
+      subsampling_ratio: null #t_r where t_r is the subsampling rate in temporal direction, e.g., 2 
+      window_size: null # The window size that are devided into t_r parts and the first part is selected, the uint is in milliseconds
+      fixed_interval: null #Default:False. If True, the `sampling_period` == `window_size`, otherwise, the `sampling_period` == `window_size`/`subsampling_ratio`
     random_ratio_subsampling: null #p where p is the probability of random subsampling. e.g., 0.5
     num_events_per_sample: null #32
-    fixed_sampling:
+    spatiotemporal_filtering_subsampling: #Subsampling the events randomly with probability proportional to spatiotemporal filtering values
       transform: null #True
-      seed_str: null #32
+      tau: null #30 in milliseconds. Temporal constant for spatiotemporal filtering
+      filter_size: null #7 in pixels. Filter size for spatial Gaussian filter.
+      sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
+      normalization_length: null #null #The length of the filter_values normalization, e.g., 100 (If None, the normalization is not applied)
+    fixed_sampling:
+      transform: True
+      seed_str: ${seed}
     random_num_events_per_sample:
       transform: null #True
       min_num_events: null #8
@@ -81,7 +103,7 @@ transform:
         cat: null #True
     shift_and_flip:
       transform: null #True
-      resolution: null #[180,240]
+      resolution: ${dataset.image_resolution}
       max_shift: null #20
       p: null #0.5
   validation:
@@ -93,20 +115,41 @@ transform:
       transform: ${transform.train.spatial_subsampling.transform}
       h_r: ${transform.train.spatial_subsampling.h_r}
       v_r: ${transform.train.spatial_subsampling.v_r}
+      h_r_offset: ${transform.train.spatial_subsampling.h_r_offset}
+      v_r_offset: ${transform.train.spatial_subsampling.v_r_offset}
+      dataset_wide_random_offsets: ${transform.train.spatial_subsampling.dataset_wide_random_offsets}
+    spatial_subsampling_random:
+      transform: ${transform.train.spatial_subsampling_random.transform}
+      h_r: ${transform.train.spatial_subsampling_random.h_r}
+      v_r: ${transform.train.spatial_subsampling_random.v_r}
     temporal_subsampling:
       transform: ${transform.train.temporal_subsampling.transform}
       subsampling_ratio: ${transform.train.temporal_subsampling.subsampling_ratio}
       window_size: ${transform.train.temporal_subsampling.window_size}
+      fixed_interval: ${transform.train.temporal_subsampling.fixed_interval}
+      time_offset_coefficient: ${transform.train.temporal_subsampling.time_offset_coefficient}
+      dataset_wide_random_time_offset: ${transform.train.temporal_subsampling.dataset_wide_random_time_offset}
+    temporal_subsampling_random:
+      transform: ${transform.train.temporal_subsampling_random.transform}
+      subsampling_ratio: ${transform.train.temporal_subsampling_random.subsampling_ratio}
+      window_size: ${transform.train.temporal_subsampling_random.window_size}
+      fixed_interval: ${transform.train.temporal_subsampling_random.fixed_interval}
     random_ratio_subsampling: ${transform.train.random_ratio_subsampling}   
     num_events_per_sample: ${transform.train.num_events_per_sample}
+    spatiotemporal_filtering_subsampling:
+      transform: ${transform.train.spatiotemporal_filtering_subsampling.transform}
+      tau: ${transform.train.spatiotemporal_filtering_subsampling.tau}
+      filter_size: ${transform.train.spatiotemporal_filtering_subsampling.filter_size}
+      sampling_threshold: ${transform.train.spatiotemporal_filtering_subsampling.sampling_threshold}
+      normalization_length: ${transform.train.spatiotemporal_filtering_subsampling.normalization_length}
     fixed_sampling:
       transform: ${transform.train.fixed_sampling.transform}
       seed_str: ${transform.train.fixed_sampling.seed_str}
     random_num_events_per_sample:
-      transform: null #True
-      min_num_events: null #8
-      max_num_events: null #2048
-      inverse_sampling: null #False
+      transform: ${transform.train.random_num_events_per_sample.transform}
+      min_num_events: ${transform.train.random_num_events_per_sample.min_num_events}
+      max_num_events: ${transform.train.random_num_events_per_sample.max_num_events}
+      inverse_sampling: ${transform.train.random_num_events_per_sample.inverse_sampling}
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -134,20 +177,41 @@ transform:
       transform: ${transform.train.spatial_subsampling.transform}
       h_r: ${transform.train.spatial_subsampling.h_r}
       v_r: ${transform.train.spatial_subsampling.v_r}
+      h_r_offset: ${transform.train.spatial_subsampling.h_r_offset}
+      v_r_offset: ${transform.train.spatial_subsampling.v_r_offset}
+      dataset_wide_random_offsets: ${transform.train.spatial_subsampling.dataset_wide_random_offsets}
+    spatial_subsampling_random:
+      transform: ${transform.train.spatial_subsampling_random.transform}
+      h_r: ${transform.train.spatial_subsampling_random.h_r}
+      v_r: ${transform.train.spatial_subsampling_random.v_r}
     temporal_subsampling:
       transform: ${transform.train.temporal_subsampling.transform}
       subsampling_ratio: ${transform.train.temporal_subsampling.subsampling_ratio}
       window_size: ${transform.train.temporal_subsampling.window_size}
+      fixed_interval: ${transform.train.temporal_subsampling.fixed_interval}
+      time_offset_coefficient: ${transform.train.temporal_subsampling.time_offset_coefficient}
+      dataset_wide_random_time_offset: ${transform.train.temporal_subsampling.dataset_wide_random_time_offset}
+    temporal_subsampling_random:
+      transform: ${transform.train.temporal_subsampling_random.transform}
+      subsampling_ratio: ${transform.train.temporal_subsampling_random.subsampling_ratio}
+      window_size: ${transform.train.temporal_subsampling_random.window_size}
+      fixed_interval: ${transform.train.temporal_subsampling_random.fixed_interval}
     random_ratio_subsampling: ${transform.train.random_ratio_subsampling}   
     num_events_per_sample: ${transform.train.num_events_per_sample}
+    spatiotemporal_filtering_subsampling:
+      transform: ${transform.train.spatiotemporal_filtering_subsampling.transform}
+      tau: ${transform.train.spatiotemporal_filtering_subsampling.tau}
+      filter_size: ${transform.train.spatiotemporal_filtering_subsampling.filter_size}
+      sampling_threshold: ${transform.train.spatiotemporal_filtering_subsampling.sampling_threshold}
+      normalization_length: ${transform.train.spatiotemporal_filtering_subsampling.normalization_length}
     fixed_sampling:
       transform: ${transform.train.fixed_sampling.transform}
       seed_str: ${transform.train.fixed_sampling.seed_str}
     random_num_events_per_sample:
-      transform: null #True
-      min_num_events: null #8
-      max_num_events: null #2048
-      inverse_sampling: null #False
+      transform: ${transform.train.random_num_events_per_sample.transform}
+      min_num_events: ${transform.train.random_num_events_per_sample.min_num_events}
+      max_num_events: ${transform.train.random_num_events_per_sample.max_num_events}
+      inverse_sampling: ${transform.train.random_num_events_per_sample.inverse_sampling}
     random_flip: null
     scale_limits: null
     degree_limit: null
@@ -188,8 +252,8 @@ pre_transform:
 wandb:
   log: False
   offline: False
-  dir: "."
-  id: null 
-  experiment_name: null #""
-  entity: 'haraghi'
-  project: delete-me
+  dir: "log_folder"
+  id: null
+  experiment_name: ""
+  entity: ""
+  project: ""
