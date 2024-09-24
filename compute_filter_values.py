@@ -22,7 +22,7 @@ class ProcessBatch(FilterDataRecursive):
             self.sample_files = f.read().splitlines()
 
         dataset_name = batch_file.split(osp.sep)[-4]
-        self.filter_value_dir = osp.join("datasets_torch_geometric", dataset_name, "filter_values", f"tau_{tau}_filter_size_{filter_size}")
+        self.filter_value_dir = osp.join("datasets_torch_geometric", dataset_name, "filter_values", f"tau_{int(tau)}_filter_size_{filter_size}")
         if not os.path.exists(self.filter_value_dir):
             os.makedirs(self.filter_value_dir)
 
