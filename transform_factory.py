@@ -14,7 +14,10 @@ def factory(cfg_all, transform_type = None, dataset_type = None):
       if 'transform' in cfg_dict and cfg.transform:
             transform_list = []
             if 'spatiotemporal_filtering_subsampling' in cfg_dict and cfg.spatiotemporal_filtering_subsampling.transform:
-                  transform_list.append(SpatioTemporalFilteringSubsampling(cfg_all, cfg_dict))
+                  if 'mean_normalized' in cfg.spatiotemporal_filtering_subsampling and cfg.spatiotemporal_filtering_subsampling.mean_normalized:
+                        transform_list.append(SpatioTemporalFilteringSubsamplingNormalized(cfg_all, cfg_dict)) 
+                  else:
+                        transform_list.append(SpatioTemporalFilteringSubsampling(cfg_all, cfg_dict))
             if 'thresh_quantile' in cfg_dict and cfg.thresh_quantile is not None:
                   if 'spatiotemporal_filtering_subsampling' in cfg_dict:
                         assert not cfg.spatiotemporal_filtering_subsampling.transform, "thresh_quantile and spatiotemporal_filtering_subsampling cannot be used together"

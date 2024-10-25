@@ -37,7 +37,7 @@ dataset:
   name: NCARS
   train_percentage: 0.75 # not applicable
   validation_percentage: 0.10 # not applicable
-  image_resolution: [120,100]  # dimension of spatial grid  (H x W)
+  image_resolution: [100,120]  # dimension of spatial grid  (H x W)
   num_samples_per_class: null
   num_classes: null
   dataset_path: null
@@ -80,6 +80,7 @@ transform:
       filter_size: null #7 in pixels. Filter size for spatial Gaussian filter.
       sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
       normalization_length: null #null #The length of the filter_values normalization, e.g., 100 (If None, the normalization is not applied)
+      mean_normalized: null #False If True, the filter values are normalized by dividiing them by their mean
     fixed_sampling:
       transform: True
       seed_str: ${seed}
@@ -142,6 +143,7 @@ transform:
       filter_size: ${transform.train.spatiotemporal_filtering_subsampling.filter_size}
       sampling_threshold: ${transform.train.spatiotemporal_filtering_subsampling.sampling_threshold}
       normalization_length: ${transform.train.spatiotemporal_filtering_subsampling.normalization_length}
+      mean_normalized: ${transform.train.spatiotemporal_filtering_subsampling.mean_normalized}
     fixed_sampling:
       transform: ${transform.train.fixed_sampling.transform}
       seed_str: ${transform.train.fixed_sampling.seed_str}
@@ -204,6 +206,7 @@ transform:
       filter_size: ${transform.train.spatiotemporal_filtering_subsampling.filter_size}
       sampling_threshold: ${transform.train.spatiotemporal_filtering_subsampling.sampling_threshold}
       normalization_length: ${transform.train.spatiotemporal_filtering_subsampling.normalization_length}
+      mean_normalized: ${transform.train.spatiotemporal_filtering_subsampling.mean_normalized}
     fixed_sampling:
       transform: ${transform.train.fixed_sampling.transform}
       seed_str: ${transform.train.fixed_sampling.seed_str}
@@ -250,7 +253,7 @@ pre_transform:
     filter_nodes:  null #remove_NASL_failed_pixels 
     conv_vec_path: null #'datasets/NCALTECH101/conv_scores'  
 wandb:
-  log: False
+  log: True
   offline: False
   dir: "log_folder"
   id: null

@@ -665,3 +665,18 @@ class SpatioTemporalFilteringSubsampling(BaseTransform, FilterDataRecursive):
             filter_values_normalized[i] = chunk_part_normalized[-1]
         return filter_values_normalized
     
+    
+class SpatioTemporalFilteringSubsamplingNormalized(SpatioTemporalFilteringSubsampling):
+    r"""Subsampling the event video using spatio-temporal filter values."""
+    
+    def __init__(self, cfg_all, cfg_transform):
+        super().__init__(cfg_all, cfg_transform)
+        
+    def get_filter_values(self, data):
+        filter_values = super().get_filter_values(data)
+        normalized_filter_values = filter_values / torch.mean(filter_values)
+        return normalized_filter_values
+        
+    
+        
+        
