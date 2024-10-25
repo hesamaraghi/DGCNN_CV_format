@@ -43,14 +43,21 @@ def recursive_dict_compare(all_cfg, other_cfg):
 
     return diff
 
-def get_checkpoint_file(entity,project,run_id):
+def get_checkpoint_file(entity,project,run_id,remote_root = None):
     """
     Load the checkpoint from the specified run_id
     """
-    checkpoint_file = glob(osp.join('log_folder', project, run_id, "checkpoints","*"))
+    if remote_root is  None:
+        checkpoint_file = glob(osp.join('log_folder', project, run_id, "checkpoints","*"))
+    elif osp.exists(remote_root):
+        checkpoint_file = glob(osp.join(remote_root, 'log_folder', project, run_id, "checkpoints","*"))
+    else:
+        raise ValueError("remote_root does not exist!")
     if checkpoint_file:
         # assert len(checkpoint_file) == 1
-        checkpoint_file = checkpoint_file[-1]
+        if len(checkpoint_file) > 1:
+            print("Multiple checkpoints found, loading the latest one!")
+        checkpoint_file = sorted(checkpoint_file, key = lambda x: int(x.split("=")[-1].split(".")[0]), reverse = True)[0]
         print("loading checkpoint from", checkpoint_file)
     else:    
         checkpoint_file = glob(osp.join(project, run_id, "checkpoints","*"))

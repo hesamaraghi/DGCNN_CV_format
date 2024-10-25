@@ -15,6 +15,18 @@ class BaseSubsamplingType():
         self.data_dict = self.create_data_dict()
         assert set(self.zipped_parameters()) < set(self.set_parameter_loader().keys()), "Some parameters are not in the parameter loader"
     
+    def get_color(self):
+        if self.color:
+            return self.color
+        else:
+            raise NotImplementedError
+
+    def get_marker(self):
+        if self.marker:
+            return self.marker
+        else:
+            raise NotImplementedError
+        
     def get_name(self):
         raise NotImplementedError
     
