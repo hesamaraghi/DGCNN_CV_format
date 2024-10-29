@@ -5,8 +5,8 @@ from os import path as osp
 
 
 
-filter_size = 7
-tau = 30 * 1000
+filter_size = 9
+tau = 100 * 1000
 tau = int(tau)
 
 dataset_name = 'NCARS'
