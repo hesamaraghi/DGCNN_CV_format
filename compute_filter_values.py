@@ -89,7 +89,7 @@ if __name__ == '__main__':
     
     assert dataset_name in dataset_names, f"Invalid dataset name: {dataset_name}"
     
-    image_size_dict = {'DVSGESTURE_TONIC': (128, 128), 'NCARS': (128, 128), 'NASL': (180, 240), 'NCALTECH101': (180, 240)}
+    image_size_dict = {'DVSGESTURE_TONIC': (128, 128), 'NCARS': (100, 120), 'NASL': (180, 240), 'NCALTECH101': (180, 240)}
     
     process_batch = ProcessBatch(batch_file=args.batch_file, tau=args.tau, filter_size=args.filter_size, image_size=image_size_dict[dataset_name])
     process_batch()
