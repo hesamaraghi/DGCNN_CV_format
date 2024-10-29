@@ -32,6 +32,12 @@ def main(cfg_path: str = None):
     cfg_bare = OmegaConf.load("config_bare.yaml")
     cfg = OmegaConf.merge(cfg_bare,cfg)
     print(OmegaConf.to_yaml(cfg), flush=True)
+    
+    runs_list_in_project = wandb.Api().runs(f"{cfg.wandb.entity}/{cfg.wandb.project}")
+    for r in runs_list_in_project:
+        if r.name == cfg.wandb.experiment_name + '_bandwidth':
+            print(f"Experiment {cfg.wandb.experiment_name + '_bandwidth'} already exists in project {cfg.wandb.project}.")
+            return
 
     # Create datasets using factory pattern
     
@@ -48,7 +54,8 @@ def main(cfg_path: str = None):
     # torch.set_num_threads(1)
     print(f"Number of threads: {torch.get_num_threads()}")
     if cfg.dataset.num_workers > 0:
-        torch.set_num_threads(cfg.dataset.num_workers)
+        num_to_set = min(cfg.dataset.num_workers, torch.get_num_threads() - 1)
+        torch.set_num_threads(num_to_set)
         print(f"Number of threads is set to: {torch.get_num_threads()}")
 
     if hasattr(cfg.wandb, 'offline') and cfg.wandb.offline:

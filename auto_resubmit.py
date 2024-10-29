@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import time
 import signal
 from glob import glob
+from omegaconf import OmegaConf
 
 def extract_cfg_path(job_id):
     try:
@@ -77,6 +78,18 @@ def main():
             else:
                 saved_cfg_path = os.path.join('pl_default_dir',args.project_name,run.name,'config.yml')
                 if not os.path.exists(saved_cfg_path):
+                    continue
+                
+            if args.program == "bandwidth_calculation.py":
+                cfg = OmegaConf.load(saved_cfg_path)
+                runs_list_in_project = wandb.Api().runs(f"{cfg.wandb.entity}/{cfg.wandb.project}")
+                contiue_flag = True
+                for r in runs_list_in_project:
+                    if r.name == cfg.wandb.experiment_name + '_bandwidth':
+                        print(f"Experiment {cfg.wandb.experiment_name + '_bandwidth'} already exists in project {cfg.wandb.project}.")
+                        contiue_flag = False
+                        break
+                if not contiue_flag:
                     continue
                 
             if 'test/acc_mean' not in run.summary or args.force_resubmit:
