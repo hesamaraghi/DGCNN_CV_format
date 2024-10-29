@@ -210,7 +210,7 @@ def main(cfg_path: str = None):
     callback_list = []
     callback_list.append(LearningRateMonitor(logging_interval='step'))
     callback_list.append(TQDMProgressBar(refresh_rate=50))
-    callback_list.append(ModelCheckpoint(monitor="val/acc/mean", mode="max"))
+    callback_list.append(ModelCheckpoint())
     
     if hasattr(cfg.train, 'default_root_dir') and cfg.train.default_root_dir is not None:
         default_root_dir = cfg.train.default_root_dir
@@ -235,7 +235,8 @@ def main(cfg_path: str = None):
     # torch.set_num_threads(1)
     print(f"Number of threads: {torch.get_num_threads()}")
     if cfg.dataset.num_workers > 0:
-        torch.set_num_threads(cfg.dataset.num_workers)
+        num_to_set = min(cfg.dataset.num_workers, torch.get_num_threads() - 1)
+        torch.set_num_threads(num_to_set)
         print(f"Number of threads is set to: {torch.get_num_threads()}")
 
     # Train + validate (if validation dataset is implemented)
@@ -243,7 +244,7 @@ def main(cfg_path: str = None):
 
     # Test (if test dataset is implemented)
     if gdm.test_dataloader is not None:
-        trainer.test(datamodule=gdm)
+        trainer.test(datamodule=gdm, ckpt_path='last')
 
     # delete the default_root_dir checkpoints
     if os.path.exists(default_root_dir):
