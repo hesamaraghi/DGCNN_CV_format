@@ -1,5 +1,5 @@
 name: subsampling
-project: Spatiotemporal_fixed_NCARS_100x120_42s_tau30_7x7_mean_normalized
+project: Baseline_EventCount_NCARS_100x120_42s
 entity: haraghi
 description: |
   Spatial, temporal, and random subsampling bandwidth calculation for NCARS dataset.
@@ -161,23 +161,48 @@ sweep_parameters:
       #   - 0.0055555
       #   - 0.0025
 ###########################################################################################################
-      spatiotemporal_filtering_subsampling:
+      # spatiotemporal_filtering_subsampling:
+      #   transform: True
+      #   tau: 30
+      #   filter_size: 7
+      #   sampling_threshold: 
+      #     # - 0.0025
+      #     # - 0.006
+      #     # - 0.015
+      #     # - 0.033
+      #     # - 0.1
+      #     # - 0.3
+      #     - 0.25
+      #     # - 0.0833333
+      #     # - 0.0277777
+      #     # - 0.0125
+      #     # - 0.0055555
+      #     # - 0.00255
+      #   normalization_length: null
+      #   mean_normalized: True
+  ###########################################################################################################
+  pre_transform:
+    train:
+      baseline_event_count:
         transform: True
-        tau: 30
-        filter_size: 7
-        sampling_threshold: 
-          # - 0.0025
-          # - 0.006
-          # - 0.015
-          # - 0.033
-          # - 0.1
-          # - 0.3
-          - 0.25
-          # - 0.0833333
-          # - 0.0277777
-          # - 0.0125
-          # - 0.0055555
-          # - 0.00255
-        normalization_length: null
-        mean_normalized: True
-
+        threshold: 
+          - 0.750
+          - 0.750
+          - 1.000
+          - 1.000
+          # - 1.000
+          # - 1.000
+        h_r:
+          - 2
+          - 3
+          - 6
+          - 8
+          # - 12
+          # - 16
+        v_r:
+          - 2
+          - 4
+          - 6
+          - 10
+          # - 15
+          # - 25

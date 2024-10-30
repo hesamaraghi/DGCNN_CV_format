@@ -78,6 +78,11 @@ transform:
       sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
       normalization_length: null #null #The length of the filter_values normalization, e.g., 100 (If None, the normalization is not applied)
       mean_normalized: null #False If True, the filter values are normalized by dividiing them by their mean
+    baseline_event_count:
+      transform: null #True
+      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
+      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+      threshold: null # Default: 1.0
     fixed_sampling:
       transform: null #True
       seed_str: null #32
@@ -141,6 +146,11 @@ transform:
       sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
       normalization_length: null #null #The length of the filter_values normalization, e.g., 100 (If None, the normalization is not applied)
       mean_normalized: null #False If True, the filter values are normalized by dividiing them by their mean
+    baseline_event_count:
+      transform: null #True
+      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
+      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+      threshold: null # Default: 1.0
     fixed_sampling:
       transform: null #True
       seed_str: null #32
@@ -204,6 +214,11 @@ transform:
       sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
       normalization_length: null #null #The length of the filter_values normalization, e.g., 100 (If None, the normalization is not applied)
       mean_normalized: null #False If True, the filter values are normalized by dividiing them by their mean
+    baseline_event_count:
+      transform: null #True
+      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
+      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+      threshold: null # Default: 1.0
     fixed_sampling:
       transform: null #True
       seed_str: null #32
@@ -237,18 +252,33 @@ pre_transform:
     thresh_quantile: null #0.3
     filter_nodes: null #remove_NASL_failed_pixels
     conv_vec_path: null #'datasets/NCALTECH101/conv_scores'
+    baseline_event_count:
+      transform: null #True
+      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
+      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+      threshold: null # Default: 1.0
   validation:
     transform: null #True
     num_events_per_sample: null #32
     thresh_quantile: null #0.3
     filter_nodes: null #remove_NASL_failed_pixels 
     conv_vec_path: null #'datasets/NCALTECH101/conv_scores'
+    baseline_event_count:
+      transform: null #True
+      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
+      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+      threshold: null # Default: 1.0
   test:
     transform: null #True
     num_events_per_sample: null #32
     thresh_quantile: null #0.3
     filter_nodes:  null #remove_NASL_failed_pixels 
     conv_vec_path: null #'datasets/NCALTECH101/conv_scores'  
+    baseline_event_count:
+      transform: null #True
+      h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
+      v_r: null # v_r is the subsampling rates in vertical directions, e.g., 2
+      threshold: null # Default: 1.0
 wandb:
   log: null #True
   offline: null #False
