@@ -15,7 +15,7 @@ def animate_events(events, transform, fig_size=None):
         fig, ax = plt.subplots(1,1)
     else:
         fig, ax = plt.subplots(1,1, figsize=fig_size)
- 
+    fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
     if frames.shape[1] == 2:
         rgb = np.zeros((frames.shape[0], 3, *frames.shape[2:]))
         rgb[:, 0, ...] = frames[:, 0, ...] > 0

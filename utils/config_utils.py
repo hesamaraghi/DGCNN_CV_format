@@ -52,12 +52,12 @@ def get_checkpoint_file(entity,project,run_id,remote_root = None):
     elif osp.exists(remote_root):
         checkpoint_file = glob(osp.join(remote_root, 'log_folder', project, run_id, "checkpoints","*"))
     else:
-        raise ValueError("remote_root does not exist!")
+        raise Warning("remote_root does not exist!")
     if checkpoint_file:
         # assert len(checkpoint_file) == 1
         if len(checkpoint_file) > 1:
             print("Multiple checkpoints found, loading the latest one!")
-        checkpoint_file = sorted(checkpoint_file, key = lambda x: int(x.split("=")[-1].split(".")[0]), reverse = True)[0]
+        checkpoint_file = sorted(checkpoint_file, key = lambda x: x.split(os.sep)[-1].split(".")[0], reverse = True)[0]
         print("loading checkpoint from", checkpoint_file)
     else:    
         checkpoint_file = glob(osp.join(project, run_id, "checkpoints","*"))
@@ -79,7 +79,7 @@ def get_checkpoint_file(entity,project,run_id,remote_root = None):
                     print("loading checkpoint from", checkpoint_file)
                 else:
                     print("loading checkpoint from wandb server:")
-                    checkpoint_folder = WandbLogger.download_artifact(artifact=osp.join(entity, project, f"model-{run_id}:best"))
+                    checkpoint_folder = WandbLogger.download_artifact(artifact=osp.join(entity, project, f"model-{run_id}:latest"))
                     checkpoint_file = glob(osp.join(checkpoint_folder,"*.ckpt"))
                     if checkpoint_file:
                         assert len(checkpoint_file) == 1
