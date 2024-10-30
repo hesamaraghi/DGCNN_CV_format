@@ -11,11 +11,9 @@ class GraphDataModule(pl.LightningDataModule):
     def __init__(self, cfg):
         super().__init__()
         if cfg.dataset.dataset_path is None:
-            self.dataset_path = osp.join(datasets_path, cfg.dataset.name)
+            cfg.dataset.dataset_path = osp.join(datasets_path, cfg.dataset.name, 'data')
         else:
-            self.dataset_path = cfg.dataset.dataset_path
-        cfg.dataset.dataset_path = self.dataset_path
-        self.dataset_path = osp.join(self.dataset_path, 'data')
+            cfg.dataset.dataset_path = cfg.dataset.dataset_path
         self.batch_size = cfg.train.batch_size      
         self.dataset_name = cfg.dataset.name
         self.multi_val_num = cfg.train.multi_val_num
@@ -34,7 +32,7 @@ class GraphDataModule(pl.LightningDataModule):
         self.num_workers=cfg.dataset.num_workers
         self.in_memory=cfg.dataset.in_memory
         self.training_dataset = create_dataset(
-                dataset_path = self.dataset_path,
+                dataset_path = cfg.dataset.dataset_path,
                 dataset_name  = self.dataset_name,
                 dataset_type = 'training',
                 transform = self.transform_dict['train'],
@@ -45,7 +43,7 @@ class GraphDataModule(pl.LightningDataModule):
         self.num_classes = self.training_dataset.num_classes
         print(f"Number of classes: {self.num_classes}", flush=True)
         self.validation_dataset = create_dataset(
-                dataset_path = self.dataset_path,
+                dataset_path = cfg.dataset.dataset_path,
                 dataset_name  = self.dataset_name,
                 dataset_type = 'validation',
                 transform = self.transform_dict['validation'],
@@ -54,7 +52,7 @@ class GraphDataModule(pl.LightningDataModule):
                 num_workers=self.num_workers
             )
         self.test_dataset = create_dataset(
-                dataset_path = self.dataset_path,
+                dataset_path = cfg.dataset.dataset_path,
                 dataset_name  = self.dataset_name,
                 dataset_type = 'test',
                 transform = self.transform_dict['test'],
