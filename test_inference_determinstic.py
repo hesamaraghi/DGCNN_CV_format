@@ -12,7 +12,7 @@ def main():
     api = wandb.Api()
     run = api.run(args.run)
     cfg,_ = get_config_file(*args.run.split("/"), verbose = True)
-    cfg.dataset.dataset_path = f'datasets_torch_geometric/{cfg.dataset.name}'
+    cfg.dataset.dataset_path = f'datasets_torch_geometric/{cfg.dataset.name}/data'
     cfg.dataset.in_memory = False
     cfg.train.multi_test_num = 1
     ckpt = get_checkpoint_file(*args.run.split("/"), remote_root = args.root)
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Arguments for testing inference deterministic.")
     
     parser.add_argument("--run", type=str, help="The experiments to test.")
-    parser.add_argument("--root", type=str, required=True, help="The remote root path.")
+    parser.add_argument("--root", type=str, default=None, help="The remote root path.")
     
     args = parser.parse_args()
     
