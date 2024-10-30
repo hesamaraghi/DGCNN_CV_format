@@ -7,3 +7,6 @@
 [submodule "loss-landscape"]
 	path = loss-landscape
 	url = git@github.com:hesamaraghi/loss-landscape.git
+[submodule "EvVisu"]
+	path = EvVisu
+	url = git@github.com:hesamaraghi/EvVisu.git
