@@ -12,6 +12,7 @@ from torch_geometric.transforms import BaseTransform
 from torch_geometric.data import Data, HeteroData
 import hashlib
 from omegaconf import OmegaConf
+from EvVisu.reduceEvents import EventCount 
 
 try:
     from .event_filters import *
@@ -676,7 +677,43 @@ class SpatioTemporalFilteringSubsamplingNormalized(SpatioTemporalFilteringSubsam
         filter_values = super().get_filter_values(data)
         normalized_filter_values = filter_values / torch.mean(filter_values)
         return normalized_filter_values
-        
+
+class BaselineEventCount(BaseTransform):
+    r"""Subsampling the event video using spatio-temporal filter values."""
     
+    def __init__(self, cfg_all, cfg_transform):
+        self.div = (cfg_transform["baseline_event_count"]["h_r"], cfg_transform["baseline_event_count"]["v_r"])
+        self.threshold = cfg_transform["baseline_event_count"]["threshold"]
+        assert len(self.div) == 2, 'Subsampling ratios must be a tuple of two integers.'
+        assert all([isinstance(ratio, int) for ratio in self.div]), 'Subsampling ratios must be integers.'
+        assert all([ratio > 0 for ratio in self.div]), 'Subsampling ratios must be positive integers.' 
+        # cfg_all.dataset.image_resolution = (cfg_all.dataset.image_resolution[0] // self.div[1], cfg_all.dataset.image_resolution[1] // self.div[0])
+        folder_name = f"data_EventCount_{self.div[0]}_{self.div[1]}_threshold_{int(self.threshold * 100)}_seed_{cfg_all.seed}"
+        assert cfg_all.dataset.dataset_path is not None, "dataset path must be provided."
+        assert cfg_all.dataset.name in cfg_all.dataset.dataset_path.split(os.sep), "dataset name must be in the dataset path."
+        base_index = cfg_all.dataset.dataset_path.split(os.sep).index(cfg_all.dataset.name) + 1
+        if cfg_all.dataset.dataset_path.split(os.sep)[base_index] == folder_name:
+            pass
+        elif cfg_all.dataset.dataset_path.split(os.sep)[base_index] == 'data':
+            cfg_all.dataset.dataset_path = os.path.join(*cfg_all.dataset.dataset_path.split(os.sep)[:base_index],folder_name)   
+        else:
+            raise ValueError(f"The dataset path must be in the format '.../{cfg_all.dataset.name}/{folder_name}'.")
         
+    def __call__(self, data: Data) -> Data:
         
+        converted_array = np.array([
+            data.pos[:,0],
+            data.pos[:,1],
+            data.pos[:,-1],
+            (data.x[:,0].squeeze() + 1 ) / 2], dtype=int).transpose()
+        
+        ev_count =  EventCount(sim_time=-1, input_ev=converted_array, coord_t=2, div=self.div, width=-1, height=-1, threshold=self.threshold, plot=False)
+        ev_count.reduce()
+        
+        pos = torch.from_numpy(ev_count.events[:,:3].astype(np.float32))
+        data_p = ev_count.events[:,3:4].astype(np.float32) * 2 - 1.0
+        data_p = torch.from_numpy(data_p)
+        data.x = data_p
+        data.pos = pos
+        assert data.num_nodes == pos.size(0) == data_p.size(0), "Number of nodes must be equal to the number of events."
+        return data

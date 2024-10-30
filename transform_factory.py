@@ -22,6 +22,8 @@ def factory(cfg_all, transform_type = None, dataset_type = None):
                   if 'spatiotemporal_filtering_subsampling' in cfg_dict:
                         assert not cfg.spatiotemporal_filtering_subsampling.transform, "thresh_quantile and spatiotemporal_filtering_subsampling cannot be used together"
                   transform_list.append(RemoveOutliers(cfg))
+            if 'baseline_event_count' in cfg_dict and cfg.baseline_event_count.transform:
+                  transform_list.append(BaselineEventCount(cfg_all, cfg_dict)) 
             if 'filter_nodes' in cfg_dict and cfg.filter_nodes is not None:
                   transform_list.append(FilterNodes(cfg))
             if 'shift_and_flip' in cfg_dict and cfg.shift_and_flip.transform:

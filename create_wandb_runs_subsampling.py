@@ -101,6 +101,7 @@ if __name__ == '__main__':
                     for vr_offset in spatial_subsampling_vr_offset:
                         cfg.transform = OmegaConf.create()
                         cfg.transform.train = OmegaConf.create()
+                        cfg.transform.train.transform = True
                         cfg.transform.train.spatial_subsampling = OmegaConf.create()
                         cfg.transform.train.spatial_subsampling.transform = cfg_parameters.transform.train.spatial_subsampling.transform
                         cfg.transform.train.spatial_subsampling.dataset_wide_random_offsets = cfg_parameters.transform.train.spatial_subsampling.dataset_wide_random_offsets
@@ -121,6 +122,7 @@ if __name__ == '__main__':
         spatial_subsampling_combinations = list(zip(spatial_subsampling_hr, spatial_subsampling_vr))
         cfg.transform = OmegaConf.create()
         cfg.transform.train = OmegaConf.create()
+        cfg.transform.train.transform = True
         cfg.transform.train.spatial_subsampling_random = cfg_parameters.transform.train.spatial_subsampling_random
         for hr_vr in spatial_subsampling_combinations:
             cfg.transform.train.spatial_subsampling_random.h_r = hr_vr[0]
@@ -144,6 +146,7 @@ if __name__ == '__main__':
                 for time_offset_coefficient in temporal_subsampling_time_offset_coefficient:
                     cfg.transform = OmegaConf.create()
                     cfg.transform.train = OmegaConf.create()
+                    cfg.transform.train.transform = True
                     cfg.transform.train.temporal_subsampling = OmegaConf.create()
                     cfg.transform.train.temporal_subsampling.transform = cfg_parameters.transform.train.temporal_subsampling.transform
                     cfg.transform.train.temporal_subsampling.dataset_wide_random_time_offset = cfg_parameters.transform.train.temporal_subsampling.dataset_wide_random_time_offset
@@ -161,6 +164,7 @@ if __name__ == '__main__':
        
         cfg.transform = OmegaConf.create()
         cfg.transform.train = OmegaConf.create()
+        cfg.transform.train.transform = True
         cfg.transform.train.temporal_subsampling_random = OmegaConf.create()
         cfg.transform.train.temporal_subsampling_random.transform = cfg_parameters.transform.train.temporal_subsampling_random.transform
         cfg.transform.train.temporal_subsampling_random.window_size = cfg_parameters.transform.train.temporal_subsampling_random.window_size
@@ -174,6 +178,7 @@ if __name__ == '__main__':
         sampling_threshold = cfg_parameters['transform']['train']['spatiotemporal_filtering_subsampling']['sampling_threshold']
         cfg.transform = OmegaConf.create()
         cfg.transform.train = OmegaConf.create()
+        cfg.transform.train.transform = True
         cfg.transform.train.spatiotemporal_filtering_subsampling = cfg_parameters.transform.train.spatiotemporal_filtering_subsampling
         for threshold in sampling_threshold:
             cfg.transform.train.spatiotemporal_filtering_subsampling.sampling_threshold = threshold
@@ -184,7 +189,31 @@ if __name__ == '__main__':
         random_ratio_subsampling = cfg_parameters['transform']['train']['random_ratio_subsampling']
         cfg.transform = OmegaConf.create()
         cfg.transform.train = OmegaConf.create()
+        cfg.transform.train.transform = True
         for ratio in random_ratio_subsampling:
             cfg.transform.train.random_ratio_subsampling = ratio
             for seed in seeds:
                 main(cfg, seed, tags=["random_subsampling", f"random_ratio_subsampling_{ratio}"] + tags)
+                
+                
+    if hasattr(cfg_parameters['pre_transform']['train'], 'baseline_event_count') and cfg_parameters['pre_transform']['train']['baseline_event_count']['transform']:
+          
+        baseline_event_count_hr = cfg_parameters['pre_transform']['train']['baseline_event_count']['h_r']
+        baseline_event_count_vr = cfg_parameters['pre_transform']['train']['baseline_event_count']['v_r']
+        baseline_event_count_threshold = cfg_parameters['pre_transform']['train']['baseline_event_count']['threshold']
+        baseline_event_count_combinations = list(zip(baseline_event_count_hr, 
+                                                     baseline_event_count_vr,
+                                                     baseline_event_count_threshold))
+        
+        for hr_vr_thrsh in baseline_event_count_combinations:
+            for seed in seeds:
+                cfg.pre_transform = OmegaConf.create()
+                cfg.pre_transform.train = OmegaConf.create()
+                cfg.pre_transform.train.transform = True
+                cfg.pre_transform.train.baseline_event_count = OmegaConf.create()
+                cfg.pre_transform.train.baseline_event_count.transform = cfg_parameters.pre_transform.train.baseline_event_count.transform
+                cfg.pre_transform.train.baseline_event_count.h_r = hr_vr_thrsh[0]
+                cfg.pre_transform.train.baseline_event_count.v_r = hr_vr_thrsh[1]
+                cfg.pre_transform.train.baseline_event_count.threshold = hr_vr_thrsh[2]
+                print(cfg.pre_transform.train.baseline_event_count)
+                main(cfg, seed, tags = ["baseline_event_count", f"hr_{hr_vr_thrsh[0]}_vr_{hr_vr_thrsh[1]}", f"thrsh_{hr_vr_thrsh[2]}"] + tags)
