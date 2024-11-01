@@ -41,7 +41,7 @@ def main(cfg_path: str = None):
 
     # Create datasets using factory pattern
     
-    cfg.dataset.in_memory = False
+    # cfg.dataset.in_memory = False
     start = time.time()
     gdm = GraphDataModule(cfg)
     print(f"Time to create GraphDataModule: {time.time()-start}", flush=True)
