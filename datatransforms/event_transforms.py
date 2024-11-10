@@ -687,8 +687,8 @@ class BaselineEventCount(BaseTransform):
         assert len(self.div) == 2, 'Subsampling ratios must be a tuple of two integers.'
         assert all([isinstance(ratio, int) for ratio in self.div]), 'Subsampling ratios must be integers.'
         assert all([ratio > 0 for ratio in self.div]), 'Subsampling ratios must be positive integers.' 
-        cfg_all.dataset.image_resolution = (cfg_all.dataset.image_resolution[0] // self.div[1] + 1, cfg_all.dataset.image_resolution[1] // self.div[0] + 1)
-        folder_name = f"data_EventCount_{self.div[0]}_{self.div[1]}_threshold_{int(self.threshold * 100)}_seed_{cfg_all.seed}"
+        # cfg_all.dataset.image_resolution = (cfg_all.dataset.image_resolution[0] // self.div[1] + 1, cfg_all.dataset.image_resolution[1] // self.div[0] + 1)
+        folder_name = f"data_EventCount_{self.div[0]}_{self.div[1]}_threshold_{int(self.threshold * 100)}_seed_{cfg_all.seed}_spatial_upsampled"
         assert cfg_all.dataset.dataset_path is not None, "dataset path must be provided."
         assert cfg_all.dataset.name in cfg_all.dataset.dataset_path.split(os.sep), "dataset name must be in the dataset path."
         base_index = cfg_all.dataset.dataset_path.split(os.sep).index(cfg_all.dataset.name) + 1
