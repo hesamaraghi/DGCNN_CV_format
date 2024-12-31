@@ -81,6 +81,15 @@ transform:
       sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
       normalization_length: null #null #The length of the filter_values normalization, e.g., 100 (If None, the normalization is not applied)
       mean_normalized: null #False If True, the filter values are normalized by dividiing them by their mean
+    tos_2DHarris_subsampling: #Subsampling the events randomly with probability proportional to the 2D luv-Harris corner detection values
+      transform: null #True
+      filter_size: null #7 in pixels. Filter size for spatial Gaussian filter.
+      TOS_T: null # 14 in pixels. Two times the size of the filter_size
+      Harris_block_size: null # 2 in pixels. Block size for Harris corner detection
+      Harris_ksize: null # 3 in pixels. Aperture parameter of the Sobel derivative used.
+      Harris_k: null # 0.04. Harris corner detection free parameter
+      sampling_threshold: null #0.1 The smaller te threshold, the smaller number of events
+      mean_normalized: null #False If True, the filter values are normalized by dividiing them by their mean
     baseline_event_count:
       transform: null #True
       h_r: null # h_r is the subsampling rates in horizontal directions, e.g., 2
@@ -149,6 +158,15 @@ transform:
       sampling_threshold: ${transform.train.spatiotemporal_filtering_subsampling.sampling_threshold}
       normalization_length: ${transform.train.spatiotemporal_filtering_subsampling.normalization_length}
       mean_normalized: ${transform.train.spatiotemporal_filtering_subsampling.mean_normalized}
+    tos_2DHarris_subsampling: #Subsampling the events randomly with probability proportional to the 2D luv-Harris corner detection values
+      transform: ${transform.train.tos_2DHarris_subsampling.transform}
+      filter_size: ${transform.train.tos_2DHarris_subsampling.filter_size}
+      TOS_T: ${transform.train.tos_2DHarris_subsampling.TOS_T}
+      Harris_block_size: ${transform.train.tos_2DHarris_subsampling.Harris_block_size}
+      Harris_ksize: ${transform.train.tos_2DHarris_subsampling.Harris_ksize}
+      Harris_k: ${transform.train.tos_2DHarris_subsampling.Harris_k}
+      sampling_threshold: ${transform.train.tos_2DHarris_subsampling.sampling_threshold}
+      mean_normalized: ${transform.train.tos_2DHarris_subsampling.mean_normalized}
     baseline_event_count:
       transform: ${transform.train.baseline_event_count.transform}
       h_r: ${transform.train.baseline_event_count.h_r}
@@ -217,6 +235,15 @@ transform:
       sampling_threshold: ${transform.train.spatiotemporal_filtering_subsampling.sampling_threshold}
       normalization_length: ${transform.train.spatiotemporal_filtering_subsampling.normalization_length}
       mean_normalized: ${transform.train.spatiotemporal_filtering_subsampling.mean_normalized}
+    tos_2DHarris_subsampling: #Subsampling the events randomly with probability proportional to the 2D luv-Harris corner detection values
+      transform: ${transform.train.tos_2DHarris_subsampling.transform}
+      filter_size: ${transform.train.tos_2DHarris_subsampling.filter_size}
+      TOS_T: ${transform.train.tos_2DHarris_subsampling.TOS_T}
+      Harris_block_size: ${transform.train.tos_2DHarris_subsampling.Harris_block_size}
+      Harris_ksize: ${transform.train.tos_2DHarris_subsampling.Harris_ksize}
+      Harris_k: ${transform.train.tos_2DHarris_subsampling.Harris_k}
+      sampling_threshold: ${transform.train.tos_2DHarris_subsampling.sampling_threshold}
+      mean_normalized: ${transform.train.tos_2DHarris_subsampling.mean_normalized}
     baseline_event_count:
       transform: ${transform.train.baseline_event_count.transform}
       h_r: ${transform.train.baseline_event_count.h_r}

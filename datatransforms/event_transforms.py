@@ -13,6 +13,7 @@ from torch_geometric.data import Data, HeteroData
 import hashlib
 from omegaconf import OmegaConf
 from EvVisu.reduceEvents import EventCount 
+import cv2
 
 try:
     from .event_filters import *
@@ -72,7 +73,49 @@ class FilterDataRecursive():
             filter_value_recursive[i] = np.sum(self.temporal_accumulation_tensor[pp,h_start:h_end+1,w_start:w_end+1] * self.gaussian_kernel[h_start - h + self.K:h_end + 1 - h + self.K, w_start - w + self.K:w_end +1 - w + self.K])
     
         return filter_value_recursive
+
+class FilterDataTOS2DHarris():
+
+    def __init__(self, filter_size: int, TOS_T: int, Harris_block_size: int, Harris_ksize: int, Harris_k: float, image_size: Tuple[int,int]):
+        
+        assert filter_size % 2 == 1, "Filter size must be odd"
+        self.T = TOS_T
+        self.filter_size = filter_size
+        self.image_size = image_size
+        self.K = filter_size // 2
+        self.H, self.W = image_size
+        self.Harris_block_size = Harris_block_size
+        self.Harris_ksize = Harris_ksize
+        self.Harris_k = Harris_k
+
+    def __call__(self, data: Data) -> np.ndarray:
+        
+        self.TOS = np.full((self.H + 2 * self.K + 2, self.W + 2 * self.K + 2), float('0'), dtype=np.float32) 
+        self.TOS_Harris = np.zeros(data.pos.shape[0], dtype=np.float32)
+
+        for i ,ts in enumerate(data.pos):
     
+            h = ts[-2].int() + self.K + 1
+            w = ts[-3].int() + self.K + 1
+            # t = ts[-1].numpy() 
+    
+            h_start = h - self.K
+            h_end = h + self.K
+            w_start = w - self.K
+            w_end = w + self.K
+            
+            # Compute TOS
+            window_patch = self.TOS[h_start:h_end+1, w_start:w_end+1]
+            window_patch -= 1
+            window_patch[window_patch < 255 - self.T] = 0
+            # self.TOS[h_start:h_end+1,w_start:w_end+1] = window_patch
+            self.TOS[h,w] = 255
+            
+            # Compute Harris
+            self.TOS_Harris[i] = cv2.cornerHarris(window_patch.astype(np.uint8),self.Harris_block_size,self.Harris_ksize,self.Harris_k)[self.K,self.K]
+            
+        return self.TOS_Harris
+
 class TemporalScaling(BaseTransform):
     r"""Centers and normalizes node positions to the interval :math:`(-1, 1)`
     (functional name: :obj:`normalize_scale`).
@@ -667,6 +710,106 @@ class SpatioTemporalFilteringSubsampling(BaseTransform, FilterDataRecursive):
         return filter_values_normalized
     
     
+class TOS2DHarrisSubsampling(BaseTransform, FilterDataTOS2DHarris):
+    r"""Subsampling the event video using luv-Harris corner detector."""
+    
+    def __init__(self, cfg_all, cfg_transform):
+        
+        if not isinstance(cfg_all, dict):
+            cfg_all = OmegaConf.to_object(cfg_all)
+        if not isinstance(cfg_transform, dict):
+            cfg_transform = OmegaConf.to_object(cfg_transform)
+        
+        assert "TOS_T" in cfg_transform['tos_2DHarris_subsampling'], "TOS_T must be provided in the transform config"
+        assert "filter_size" in cfg_transform['tos_2DHarris_subsampling'], "filter_size must be provided in the transform config"
+        assert "Harris_block_size" in cfg_transform['tos_2DHarris_subsampling'], "Harris_block_size must be provided in the transform config"
+        assert "Harris_ksize" in cfg_transform['tos_2DHarris_subsampling'], "Harris_ksize must be provided in the transform config"
+        assert "Harris_k" in cfg_transform['tos_2DHarris_subsampling'], "Harris_k must be provided in the transform config"
+        assert "sampling_threshold" in cfg_transform['tos_2DHarris_subsampling'], "sampling_threshold must be provided in the transform config"
+        
+        TOS_T = cfg_transform['tos_2DHarris_subsampling']['TOS_T']
+        filter_size = cfg_transform['tos_2DHarris_subsampling']['filter_size']
+        Harris_block_size = cfg_transform['tos_2DHarris_subsampling']['Harris_block_size']
+        Harris_ksize = cfg_transform['tos_2DHarris_subsampling']['Harris_ksize']
+        Harris_k = cfg_transform['tos_2DHarris_subsampling']['Harris_k']
+        self.sampling_threshold = cfg_transform['tos_2DHarris_subsampling']['sampling_threshold']
+        
+        assert isinstance(TOS_T, int), "tau must be an integer"
+        assert isinstance(filter_size, int), "filter_size must be an integer"
+        assert isinstance(Harris_block_size, int), "Harris_block_size must be an integer"
+        assert isinstance(Harris_ksize, int), "Harris_ksize must be an integer"
+        assert isinstance(Harris_k, float), "Harris_k must be a float"
+        assert isinstance(self.sampling_threshold, float), "sampling_threshold must be a float"
+        image_size = cfg_all["dataset"]["image_resolution"]
+        assert len(image_size) == 2, "image_resolution must be a tuple of two integers"
+        assert cfg_all["dataset"]["name"] is not None, "dataset name must be provided"
+        assert cfg_all["dataset"]["dataset_path"] is not None, "dataset path must be provided"
+        k_vale_in_file = f"{Harris_k:.2e}".replace('.', '_').replace('+', '').replace('-', 'm')
+        self.batch_list_dir = osp.join(cfg_all["dataset"]["dataset_path"], "TOS_Harris_values", f"T_{TOS_T}_filter_size_{filter_size}_Harris_{Harris_block_size}_{Harris_ksize}_{k_vale_in_file}")
+        
+        
+        FilterDataTOS2DHarris.__init__(self, filter_size, TOS_T, Harris_block_size, Harris_ksize, Harris_k, image_size)
+        
+
+        # fixed subsampling initialization
+        self.fixed_subsampling = False
+        if "fixed_sampling" in cfg_transform and cfg_transform["fixed_sampling"]["transform"] is True:
+            self.fixed_subsampling = True
+            if "seed_str" in cfg_transform["fixed_sampling"] and cfg_transform["fixed_sampling"]["seed_str"] is not None:   
+                self.seed_str = str(cfg_transform["fixed_sampling"]["seed_str"])
+            else:
+                self.seed_str = 'fixed_subsampling' 
+        
+    def __call__(self, data: Data) -> np.ndarray:   
+        
+        tos_harris_values = self.get_TOS_Harris_values(data)
+        assert len(tos_harris_values) == data.num_nodes, "TOS-Harris values must have the same length as the number of nodes in the data"
+        
+        # subsampling  
+        n_events = data.num_nodes
+        if self.fixed_subsampling:
+            seed = create_seed(self.seed_str + '_' + data.label[0] + '_' + data.file_id)
+            torch_rng = torch.Generator().manual_seed(seed % (2**32))
+            indices = torch.where(torch.rand(n_events, generator=torch_rng) < self.sampling_threshold * tos_harris_values)[0]
+        else:
+            indices = torch.where(torch.rand(n_events) < self.sampling_threshold * tos_harris_values)[0]
+            
+        return filter_data(data, indices)   
+  
+    def get_TOS_Harris_values(self, data: Data) -> torch.Tensor:
+        
+        class_name = data.label[0]     
+        tos_harris_file = osp.join(self.batch_list_dir, class_name)
+        tos_harris_file = osp.join(tos_harris_file, "tos_harris_values_" + osp.splitext(data.file_id)[0] + ".pt")
+        
+        if not osp.exists(tos_harris_file):
+            print(f"TOS-Harris values for {data.file_id} do not exist!")
+            print(f"Creating TOS-Harris values for {data.file_id}!")
+            if not osp.exists(osp.dirname(tos_harris_file)):
+                os.makedirs(osp.dirname(tos_harris_file))
+            
+            sorted_indices = torch.argsort(data.pos[..., -1])
+            data.pos = data.pos[sorted_indices]
+            data.x = data.x[sorted_indices]
+
+            tos_harris_values = FilterDataTOS2DHarris.__call__(self, data)
+
+            # To find reverse_indices such that A = B[reverse_indices]
+            reverse_indices = torch.zeros_like(sorted_indices)
+            reverse_indices[sorted_indices] = torch.arange(len(sorted_indices))
+
+            tos_harris_values = tos_harris_values[reverse_indices]
+            tos_harris_values = torch.tensor(tos_harris_values)
+            
+            print(f"Saving TOS-Harris values for {data.file_id} to {tos_harris_file}")
+            torch.save(tos_harris_values, tos_harris_file)
+        
+        else:
+            tos_harris_values = torch.load(tos_harris_file)
+            # print(f"Loaded filter values from {filter_value_file}")
+        
+        return tos_harris_values
+    
 class SpatioTemporalFilteringSubsamplingNormalized(SpatioTemporalFilteringSubsampling):
     r"""Subsampling the event video using spatio-temporal filter values."""
     
@@ -677,6 +820,17 @@ class SpatioTemporalFilteringSubsamplingNormalized(SpatioTemporalFilteringSubsam
         filter_values = super().get_filter_values(data)
         normalized_filter_values = filter_values / torch.mean(filter_values)
         return normalized_filter_values
+
+class TOS2DHarrisSubsamplingNormalized(TOS2DHarrisSubsampling):
+    r"""Subsampling the event video using luv-Harris corner detector."""
+    
+    def __init__(self, cfg_all, cfg_transform):
+        super().__init__(cfg_all, cfg_transform)
+        
+    def get_TOS_Harris_values(self, data: Data) -> torch.Tensor:
+        tos_harris_values = super().get_TOS_Harris_values(data)
+        normalized_tos_harris_values = tos_harris_values / torch.mean(tos_harris_values)
+        return normalized_tos_harris_values
 
 class BaselineEventCount(BaseTransform):
     r"""Subsampling the event video using spatio-temporal filter values."""

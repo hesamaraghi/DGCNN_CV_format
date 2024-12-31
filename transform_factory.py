@@ -18,6 +18,11 @@ def factory(cfg_all, transform_type = None, dataset_type = None):
                         transform_list.append(SpatioTemporalFilteringSubsamplingNormalized(cfg_all, cfg_dict)) 
                   else:
                         transform_list.append(SpatioTemporalFilteringSubsampling(cfg_all, cfg_dict))
+            if 'tos_2DHarris_subsampling' in cfg_dict and cfg.tos_2DHarris_subsampling.transform:
+                  if 'mean_normalized' in cfg.tos_2DHarris_subsampling and cfg.tos_2DHarris_subsampling.mean_normalized:
+                        transform_list.append(TOS2DHarrisSubsamplingNormalized(cfg_all, cfg_dict)) 
+                  else:
+                        transform_list.append(TOS2DHarrisSubsampling(cfg_all, cfg_dict))
             if 'thresh_quantile' in cfg_dict and cfg.thresh_quantile is not None:
                   if 'spatiotemporal_filtering_subsampling' in cfg_dict:
                         assert not cfg.spatiotemporal_filtering_subsampling.transform, "thresh_quantile and spatiotemporal_filtering_subsampling cannot be used together"
