@@ -21,7 +21,9 @@ batch_files = glob(osp.join(batch_list_dir, '*.txt'))
 
 # Define the paths
 sbatch_folder = "sbatch_folder"
-sbath_file = "small_cpu.sbatch"
+sbath_file = "small_cpu_apptainer.sbatch"
+
+
 
 # Loop over num_events and method
 for batch_file in batch_files:   
