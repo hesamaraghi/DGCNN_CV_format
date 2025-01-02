@@ -11,7 +11,7 @@ Harris_block_size = 2
 Harris_ksize = 3 
 Harris_k = 0.04
     
-dataset_name = 'DVSGESTURE_TONIC'
+dataset_name = 'NCALTECH101'
 
 k_vale_in_file = f"{Harris_k:.2e}".replace('.', '_').replace('+', '').replace('-', 'm')
 batch_list_dir = osp.join(  "datasets_torch_geometric", dataset_name, 

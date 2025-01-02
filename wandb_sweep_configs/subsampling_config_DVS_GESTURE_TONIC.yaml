@@ -198,8 +198,8 @@ sweep_parameters:
         normalization_length: null
         mean_normalized: null
 ###########################################################################################################
-  # pre_transform:
-  #   train:
+  pre_transform:
+    train:
   #     baseline_event_count:
   #       transform: True
   #       threshold: 

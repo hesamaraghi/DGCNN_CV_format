@@ -624,9 +624,11 @@ class SpatioTemporalFilteringSubsampling(BaseTransform, FilterDataRecursive):
         image_size = cfg_all["dataset"]["image_resolution"]
         assert len(image_size) == 2, "image_resolution must be a tuple of two integers"
         assert cfg_all["dataset"]["name"] is not None, "dataset name must be provided"
-        assert cfg_all["dataset"]["dataset_path"] is not None, "dataset path must be provided"
-        self.batch_list_dir = osp.join(cfg_all["dataset"]["dataset_path"], "filter_values", f"tau_{tau}_filter_size_{filter_size}")
-        
+        assert cfg_all["dataset"]["dataset_path"] is not None, "dataset path must be provided."
+        assert cfg_all["dataset"]["name"]  in cfg_all["dataset"]["dataset_path"] .split(os.sep), "dataset name must be in the dataset path."
+        base_index = cfg_all["dataset"]["dataset_path"] .split(os.sep).index(cfg_all["dataset"]["name"]) + 1
+        parent_path = os.path.join(*cfg_all["dataset"]["dataset_path"].split(os.sep)[:base_index])   
+        self.batch_list_dir = osp.join(parent_path, "filter_values", f"tau_{tau}_filter_size_{filter_size}")
         
         FilterDataRecursive.__init__(self, tau, filter_size, image_size)
         
@@ -743,9 +745,12 @@ class TOS2DHarrisSubsampling(BaseTransform, FilterDataTOS2DHarris):
         image_size = cfg_all["dataset"]["image_resolution"]
         assert len(image_size) == 2, "image_resolution must be a tuple of two integers"
         assert cfg_all["dataset"]["name"] is not None, "dataset name must be provided"
-        assert cfg_all["dataset"]["dataset_path"] is not None, "dataset path must be provided"
+        assert cfg_all["dataset"]["dataset_path"] is not None, "dataset path must be provided."
+        assert cfg_all["dataset"]["name"]  in cfg_all["dataset"]["dataset_path"] .split(os.sep), "dataset name must be in the dataset path."
+        base_index = cfg_all["dataset"]["dataset_path"] .split(os.sep).index(cfg_all["dataset"]["name"]) + 1
+        parent_path = os.path.join(*cfg_all["dataset"]["dataset_path"].split(os.sep)[:base_index])    
         k_vale_in_file = f"{Harris_k:.2e}".replace('.', '_').replace('+', '').replace('-', 'm')
-        self.batch_list_dir = osp.join(cfg_all["dataset"]["dataset_path"], "TOS_Harris_values", f"T_{TOS_T}_filter_size_{filter_size}_Harris_{Harris_block_size}_{Harris_ksize}_{k_vale_in_file}")
+        self.batch_list_dir = osp.join(parent_path, "TOS_Harris_values", f"T_{TOS_T}_filter_size_{filter_size}_Harris_{Harris_block_size}_{Harris_ksize}_{k_vale_in_file}")
         
         
         FilterDataTOS2DHarris.__init__(self, filter_size, TOS_T, Harris_block_size, Harris_ksize, Harris_k, image_size)
@@ -784,6 +789,7 @@ class TOS2DHarrisSubsampling(BaseTransform, FilterDataTOS2DHarris):
         
         if not osp.exists(tos_harris_file):
             print(f"TOS-Harris values for {data.file_id} do not exist!")
+            print(f"Missing file: {tos_harris_file}")
             print(f"Creating TOS-Harris values for {data.file_id}!")
             if not osp.exists(osp.dirname(tos_harris_file)):
                 os.makedirs(osp.dirname(tos_harris_file))

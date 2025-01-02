@@ -12,8 +12,6 @@ class GraphDataModule(pl.LightningDataModule):
         super().__init__()
         if cfg.dataset.dataset_path is None:
             cfg.dataset.dataset_path = osp.join(datasets_path, cfg.dataset.name, 'data')
-        else:
-            cfg.dataset.dataset_path = cfg.dataset.dataset_path
         self.batch_size = cfg.train.batch_size      
         self.dataset_name = cfg.dataset.name
         self.multi_val_num = cfg.train.multi_val_num
