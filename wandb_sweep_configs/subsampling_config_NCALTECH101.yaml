@@ -1,5 +1,5 @@
 name: subsampling
-project: Baseline_EventCount_NCALTECH101_spatial_upsampled
+project: TOS_2D_Harris_NCALTECH101
 entity: haraghi
 description: |
   Spatial, temporal, and random subsampling bandwidth calculation for NCALTECH101 dataset.
@@ -181,28 +181,45 @@ sweep_parameters:
       #   normalization_length: null
       #   mean_normalized: True
 ###########################################################################################################
+      tos_2DHarris_subsampling:
+        transform: True
+        filter_size: 7
+        TOS_T: 14
+        Harris_block_size: 2
+        Harris_ksize: 3
+        Harris_k: 0.04
+        sampling_threshold: 
+          - 15.0
+          - 4.4
+          - 1.46
+          - 0.66
+          - 0.26
+          - 0.11
+        normalization_length: null
+        mean_normalized: null
+###########################################################################################################
   pre_transform:
     train:
-      baseline_event_count:
-        transform: True
-        threshold: 
-          - 0.750
-          - 0.750
-          - 1.000
-          - 1.000
-          - 1.000
-          - 1.000
-        h_r:
-          - 2
-          - 3
-          - 6
-          - 8
-          - 12
-          - 16
-        v_r:
-          - 2
-          - 4
-          - 6
-          - 10
-          - 15
-          - 25
+  #     baseline_event_count:
+  #       transform: True
+  #       threshold: 
+  #         - 0.750
+  #         - 0.750
+  #         - 1.000
+  #         - 1.000
+  #         - 1.000
+  #         - 1.000
+  #       h_r:
+  #         - 2
+  #         - 3
+  #         - 6
+  #         - 8
+  #         - 12
+  #         - 16
+  #       v_r:
+  #         - 2
+  #         - 4
+  #         - 6
+  #         - 10
+  #         - 15
+  #         - 25
