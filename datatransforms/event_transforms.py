@@ -240,19 +240,18 @@ class SpatialSubsampling(BaseTransform):
         self.subsampling_offsets = (0,0)
         if subsampling_offsets:
             assert len(subsampling_offsets) == 2, 'Subsampling offsets must be a tuple of two integers.'
-            if subsampling_offsets[0] and subsampling_offsets[1]:
-                assert all([isinstance(offset, int) for offset in subsampling_offsets]), 'Subsampling offsets must be integers.'
-                assert subsampling_offsets[0] >= 0, 'Subsampling offset 0 must be non negative.'
-                assert subsampling_offsets[1] >= 0, 'Subsampling offset 1 must be non negative.'           
-                assert subsampling_offsets[0] < subsampling_ratios[0], 'Subsampling offset 0 must be smaller than Subsampling ratio 0.'
-                assert subsampling_offsets[1] < subsampling_ratios[1], 'Subsampling offset 1 must be smaller than Subsampling ratio 1.'
-                self.subsampling_offsets = subsampling_offsets
+            assert all([isinstance(offset, int) for offset in subsampling_offsets]), 'Subsampling offsets must be integers.'
+            assert subsampling_offsets[0] >= 0, 'Subsampling offset 0 must be non negative.'
+            assert subsampling_offsets[1] >= 0, 'Subsampling offset 1 must be non negative.'           
+            assert subsampling_offsets[0] < subsampling_ratios[0], 'Subsampling offset 0 must be smaller than Subsampling ratio 0.'
+            assert subsampling_offsets[1] < subsampling_ratios[1], 'Subsampling offset 1 must be smaller than Subsampling ratio 1.'
+            self.subsampling_offsets = subsampling_offsets
             
         
     def __call__(self, data: Data) -> Data:
         pos = data.pos
-        x = pos[..., -3]
-        y = pos[..., -2]
+        x = pos[..., -3].int()
+        y = pos[..., -2].int()
         mask = torch.ones_like(x, dtype=torch.bool)
         if self.subsampling_ratios[0] > 1:
             mask = mask & (x % self.subsampling_ratios[0] == self.subsampling_offsets[0])
