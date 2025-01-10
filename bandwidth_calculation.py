@@ -31,7 +31,6 @@ def main(cfg_path: str = None):
     cfg = OmegaConf.merge(cfg, cmd_cfg)
     cfg_bare = OmegaConf.load("config_bare.yaml")
     cfg = OmegaConf.merge(cfg_bare,cfg)
-    print(OmegaConf.to_yaml(cfg), flush=True)
     
     runs_list_in_project = wandb.Api().runs(f"{cfg.wandb.entity}/{cfg.wandb.project}")
     for r in runs_list_in_project:
@@ -70,6 +69,8 @@ def main(cfg_path: str = None):
         dir=cfg.wandb.dir,
         mode=wandb_mode,
         name=cfg.wandb.experiment_name + '_bandwidth')
+    
+    print(OmegaConf.to_yaml(cfg), flush=True)
     
     dataloader_split = {
         'train':gdm.train_dataloader(),
