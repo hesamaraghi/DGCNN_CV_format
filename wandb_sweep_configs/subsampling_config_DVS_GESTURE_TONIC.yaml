@@ -1,5 +1,5 @@
 name: subsampling
-project: Spatial_DVSGESTURE_TONIC_CORRECTED_OFFSET
+project: Spatial_DVSGESTURE_TONIC_ZERO_OFFSET
 entity: haraghi
 description: |
   Spatial, temporal, and random subsampling bandwidth calculation for DVS-GESTURE TONIC dataset.
@@ -103,7 +103,7 @@ sweep_parameters:
         #   - 5
         #   - 6
         #   - 9
-        dataset_wide_random_offsets: True
+        dataset_wide_random_offsets: False
 ###########################################################################################################
       # spatial_subsampling_random:
       #   transform: True
@@ -166,20 +166,14 @@ sweep_parameters:
       #   tau: 30
       #   filter_size: 7
       #   sampling_threshold: 
-      #     - 0.0025
-      #     - 0.006
-      #     - 0.015
-      #     - 0.033
-      #     - 0.1
-      #     - 0.3
-      #     # - 0.25
-      #     # - 0.0833333
-      #     # - 0.0277777
-      #     # - 0.0125
-      #     # - 0.0055555
-      #     # - 0.0025
+      #     - 0.0018
+      #     # - 0.0040
+      #     # - 0.0090
+      #     # - 0.0260
+      #     # - 0.0860
+      #     # - 0.2160
       #   normalization_length: null
-      #   mean_normalized: True
+      #   mean_normalized: False
 ###########################################################################################################
       # tos_2DHarris_subsampling:
       #   transform: True
