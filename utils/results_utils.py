@@ -27,6 +27,12 @@ class BaseSubsamplingType():
         else:
             raise NotImplementedError
         
+    def get_label(self):
+        if self.label:
+            return self.label
+        else:
+            raise NotImplementedError
+            
     def get_name(self):
         raise NotImplementedError
     
@@ -151,6 +157,14 @@ class BaseSubsamplingType():
             dropna=False,
             as_index=False)['bandwidth'].transform(lambda x: x.fillna(x.mean()))
         
+    def to_dict(self):
+        return {
+            'name': self.get_name(),
+            'dataset_name': self.dataset_name,
+            'df': self.df.to_json(),
+            'df_zipped': self.df_zipped.to_json(),
+        }
+              
 def find_val_and_test_acc_keys(run):
     val_acc_key = []
     test_acc_key = []
