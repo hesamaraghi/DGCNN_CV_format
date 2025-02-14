@@ -695,7 +695,7 @@ class SpatioTemporalFilteringSubsampling(BaseTransform, FilterDataRecursive):
             torch.save(filter_values, filter_value_file)
         
         else:
-            filter_values = torch.load(filter_value_file)
+            filter_values = torch.load(filter_value_file, weights_only=True)
             # print(f"Loaded filter values from {filter_value_file}")
         
         return filter_values
@@ -810,7 +810,7 @@ class TOS2DHarrisSubsampling(BaseTransform, FilterDataTOS2DHarris):
             torch.save(tos_harris_values, tos_harris_file)
         
         else:
-            tos_harris_values = torch.load(tos_harris_file)
+            tos_harris_values = torch.load(tos_harris_file, weights_only=True)
             # print(f"Loaded filter values from {filter_value_file}")
         
         return tos_harris_values
