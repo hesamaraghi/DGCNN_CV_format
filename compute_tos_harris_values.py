@@ -52,7 +52,7 @@ class ProcessBatch(FilterDataTOS2DHarris):
                 if not osp.exists(output_folder):
                     os.makedirs(output_folder)
                 print(f"Processing {sample_file}", flush=True)
-                data = torch.load(sample_file) 
+                data = torch.load(sample_file, weights_only=True) 
                 sorted_indices = torch.argsort(data.pos[..., -1])
                 data.pos = data.pos[sorted_indices]
                 data.x = data.x[sorted_indices]
