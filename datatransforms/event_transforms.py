@@ -1,6 +1,7 @@
 from typing import Union, Iterable, List, Tuple
 import os
 import os.path as osp
+from pathlib import Path
 import scipy.io as sio
 import re
 import random
@@ -151,7 +152,15 @@ def create_seed(seed_str: str) -> int:
     seed = int(hex_dig, 16)
     return seed
 
+def get_path_until_folder(path: str, folder_name: str):
+    path_obj = Path(path)
 
+    path_parts = Path(path).parts  # Get tuple of path parts
+    if folder_name not in path_parts:
+        raise ValueError(f"'{folder_name}' not found in the path")
+    
+    index = path_parts.index(folder_name)  # Find the index of the folder
+    return Path(*path_parts[:index + 1])  # Return the subpath
 class TemporalQuantization(BaseTransform):
     def __init__(self,cfg):
         self.temporal_num_bins = cfg.temporal_quantization
@@ -624,10 +633,8 @@ class SpatioTemporalFilteringSubsampling(BaseTransform, FilterDataRecursive):
         assert len(image_size) == 2, "image_resolution must be a tuple of two integers"
         assert cfg_all["dataset"]["name"] is not None, "dataset name must be provided"
         assert cfg_all["dataset"]["dataset_path"] is not None, "dataset path must be provided."
-        assert cfg_all["dataset"]["name"]  in cfg_all["dataset"]["dataset_path"] .split(os.sep), "dataset name must be in the dataset path."
-        base_index = cfg_all["dataset"]["dataset_path"] .split(os.sep).index(cfg_all["dataset"]["name"]) + 1
-        parent_path = os.path.join(*cfg_all["dataset"]["dataset_path"].split(os.sep)[:base_index])   
-        self.batch_list_dir = osp.join(parent_path, "filter_values", f"tau_{tau}_filter_size_{filter_size}")
+        parent_path = get_path_until_folder(cfg_all["dataset"]["dataset_path"], cfg_all["dataset"]["name"]) 
+        self.batch_list_dir = str(parent_path / "filter_values" / f"tau_{tau}_filter_size_{filter_size}")
         
         FilterDataRecursive.__init__(self, tau, filter_size, image_size)
         
