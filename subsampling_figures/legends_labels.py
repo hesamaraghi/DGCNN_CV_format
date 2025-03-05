@@ -1,3 +1,11 @@
+datasets_name_and_num_classes = {
+    "NCARS": {"name": "N-Cars", "num_classes": 2},
+    "NASL": {"name": "N-ASL", "num_classes": 24},
+    "NCALTECH101": {"name": "N-Caltech101", "num_classes": 101},
+    "DVSGESTURE_TONIC": {"name": "DVS-Gesture", "num_classes": 11},
+    "FAN1VS3": {"name": "Fan1vs3", "num_classes": 2}
+}
+
 legend_labels = {
                     'spatial_zero_offsets':     'Spatial (zero offsets)', 
                     'spatial_dataset_wide_random_offsets': 'Spatial (dataset wide random offsets)',
@@ -24,7 +32,7 @@ legend_labels_main_short = {
                     'spatiotemporal_fixed_30_7x7': 'Causal Density-based',
                     'spatiotemporal_fixed_normalized_mean': 'Density-based (mean normalized)',
                     'baseline_event_count': 'Event Count',
-                    'tos2dharris_fixed': 'TOS 2D Harris',
+                    'tos2dharris_fixed': 'Corner-based w/ 2D Harris',
                     # 'tos2dharris_fixed': 'Harris Corner Detector', 
 }
 legend_labels_main_short = legend_labels | legend_labels_main_short

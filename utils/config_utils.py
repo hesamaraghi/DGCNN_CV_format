@@ -90,13 +90,14 @@ def get_checkpoint_file(entity,project,run_id,remote_root = None):
     
     return checkpoint_file
 
-def get_config_file(entity,project,run_id, verbose = True):
+def get_config_file(entity,project,run_id, verbose = True, cfg_bare = None):
     """
     Load the config from the specified run_id
     """
     
     api = wandb.Api()
-    cfg_bare = OmegaConf.load("config_bare.yaml")
+    if cfg_bare is None:
+        cfg_bare = OmegaConf.load("config_bare.yaml")
     config = api.run(osp.join(entity, project, run_id)).config
     cfg = OmegaConf.create(config) 
 

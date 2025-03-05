@@ -18,6 +18,7 @@ def plot_all(result_list,
              marker_dict_ = marker_dict,
              x_axis = 'num_events',
              label_dict = legend_labels_main_short,
+             figsize = (10, 6),
              ):
     assert x_axis in ['num_events', 'bandwidth'], "x_axis must be either 'num_events' or 'bandwidth'"
     assert isinstance(scatter_range, tuple) and len(scatter_range) == 2, "scatter_range must be a tuple of length 2"
@@ -30,8 +31,8 @@ def plot_all(result_list,
     # Generate a color for each unique tuple
     # line_colors_list = [colormaps[colormap_list[i]](0.5) for i in range(len(result_list))]  
 
-    
-    plt.subplots(figsize=(10, 6))
+    color_dict_ = {**color_dict, **color_dict_}
+    plt.subplots(figsize=figsize)
     for result in result_list:
         unique_tuples = result.df.sort_values(by=x_axis)[result._zipped_parameters_label].unique()
         colors_list = colormaps[colormap_dict_[result.get_name()]](np.linspace(scatter_range[0], scatter_range[1], len(unique_tuples)))
