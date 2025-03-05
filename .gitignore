@@ -19,3 +19,6 @@ log_folder
 pl_default_dir
 grad_diversity
 grad_analysis_FAN1VS3
+subsampling_figures/*
+!subsampling_figures/*.ipynb
+!subsampling_figures/*.py     
